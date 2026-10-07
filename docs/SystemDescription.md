@@ -1,0 +1,5 @@
+La idea es hacer un Eccomerce para un cliente que vende Inyectores Diesel, quiere hacer una Landing la cual muestre el trabajo que hace y despues el catalogo del eccomerce, el quiere que en la landing se incluya un mapa que muestra la ubicacion de su local.
+Tambien le crearemos un panel de admin el cual deberá tener un login seguro, dentro de ese panel de admin se podrán crear/editar y eliminar categorias, productos crear/editar y eliminar, el stock no se gestiona directamente de este sistema.
+No tiene logos ni colores en especial, el quiere que coloquemos laboratorio diesel, la pasarela de pagos será basicamente un carrito el cual se aprete comprar lleve un mensaje pre hecho con lo del carrito y se arreglará manualmente desde el whatsapp, que esa parte no nos encargaremos nosotros.
+obviamente debemos hacer las politicas, el tema de las garantias y demás, va a haber un boton de garantia el cual tambien llevará el wsp.
+Cada producto en el catalogo será unico, tiene que haber un filtrado de productos por marcas.

@@ -1,32 +1,37 @@
-# Logs
-logs
-*.log
+# Dependencias
+node_modules/
+
+# Compilados y Caches de Build
+dist/
+.output/
+.vinxi/
+.nitro/
+.vite/
+.tanstack/
+
+# Generador de Rutas TanStack
+src/routeTree.gen.ts
+
+# Residuos y Metadatos de Lovable
+.lovable/
+
+# Variables de Entorno y Secretos
+.env
+.env*.local
+*.local
+
+# Archivos de Entorno de Pruebas y Cobertura
+coverage/
+
+# Logs y Caches de OS / IDE
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-.output
-.vinxi
-.tanstack/**
-.nitro
-*.local
-
-# Wrangler / Cloudflare
-.wrangler/
-.dev.vars
-
-# Editor directories and files
+.DS_Store
+Thumbs.db
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+!.vscode/settings.json
+.idea/
+
+# IMPORTANTE: docs/ y specs/ NUNCA se ignoran (Permanecen versionados en Git)

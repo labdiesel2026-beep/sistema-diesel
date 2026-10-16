@@ -1,35 +1,316 @@
-import { useState, type FormEvent } from 'react';
-import { Image, Pencil, Plus, Trash2, Package, Search, Check, Eye, EyeOff } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { useAdminProducts, type AdminProduct } from '@/components/admin-data';
-import { formatPrice } from '@/lib/catalog-data';
+import { useState, type FormEvent } from "react";
+import { Image, Pencil, Plus, Trash2, Package, Search, Check, Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { useAdminProducts, type AdminProduct } from "@/components/admin-data";
+import { formatPrice } from "@/lib/catalog-data";
 
-const emptyProduct: AdminProduct = { id: '', name: '', oem: '', brand: 'Bosch', condition: 'Nuevo', category: 'Inyectores Common Rail', price: null, detail: '', visible: true };
-const selectClass = 'h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
+const emptyProduct: AdminProduct = {
+  id: "",
+  name: "",
+  oem: "",
+  brand: "Bosch",
+  condition: "Nuevo",
+  category: "Inyectores Common Rail",
+  price: null,
+  detail: "",
+  visible: true,
+};
+const selectClass =
+  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
 
 export function AdminProducts() {
   const { products, save, remove } = useAdminProducts();
   const [draft, setDraft] = useState<AdminProduct | null>(null);
   const [deleting, setDeleting] = useState<AdminProduct | null>(null);
-  const [search, setSearch] = useState('');
-  const [notice, setNotice] = useState('');
-  const filtered = products.filter(product => `${product.name} ${product.oem}`.toLowerCase().includes(search.toLowerCase()));
+  const [search, setSearch] = useState("");
+  const [notice, setNotice] = useState("");
+  const filtered = products.filter((product) =>
+    `${product.name} ${product.oem}`.toLowerCase().includes(search.toLowerCase()),
+  );
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!draft) return;
-    save({ ...draft, id: draft.id || crypto.randomUUID(), name: draft.name.trim(), oem: draft.oem.trim() });
-    setNotice(draft.id ? 'Producto actualizado' : 'Producto creado');
+    save({
+      ...draft,
+      id: draft.id || crypto.randomUUID(),
+      name: draft.name.trim(),
+      oem: draft.oem.trim(),
+    });
+    setNotice(draft.id ? "Producto actualizado" : "Producto creado");
     setDraft(null);
   };
-  return <>
-    <div className="mb-7 flex flex-wrap items-end justify-between gap-4"><div><p className="eyebrow mb-2 text-muted-foreground">Administración / Catálogo</p><h1 className="font-display text-3xl font-bold">Productos</h1><p className="mt-2 text-sm text-muted-foreground">{products.length} productos · {products.filter(product => product.visible).length} visibles</p></div><Button variant="industrial" className="h-11" onClick={() => setDraft({ ...emptyProduct })}><Plus />Nuevo Producto</Button></div>
-    <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><label className="flex h-11 w-full max-w-sm items-center gap-3 rounded-lg border border-border bg-card px-3"><Search className="size-4 shrink-0 text-muted-foreground" /><input aria-label="Buscar productos en Admin" placeholder="Buscar producto o código OEM..." value={search} onChange={event => setSearch(event.target.value)} className="w-full min-w-0 bg-transparent text-sm outline-none" /></label><p aria-live="polite" className="flex items-center gap-2 text-xs text-primary">{notice && <Check className="size-4" />}{notice}</p></div>
-    <div className="overflow-x-auto rounded-lg border border-border bg-card"><table className="w-full min-w-[860px] text-left text-sm"><thead className="border-b border-border bg-secondary/70"><tr>{['Foto', 'Nombre', 'Código OEM', 'Categoría', 'Precio', 'Estado', 'Acciones'].map(column => <th key={column} scope="col" className="px-4 py-4 text-[11px] font-bold uppercase text-muted-foreground">{column}</th>)}</tr></thead><tbody>{filtered.map(product => <tr key={product.id} className="border-b border-border last:border-0 hover:bg-secondary/40"><td className="px-4 py-5"><span role="img" aria-label={`Foto de muestra de ${product.name}`} className="flex size-12 items-center justify-center rounded-lg border border-border bg-muted text-muted-foreground"><Image className="size-5 stroke-1" /></span></td><td className="px-4 py-5"><p className="font-semibold">{product.name}</p><p className="mt-1 text-xs text-muted-foreground">{product.brand} · {product.condition}</p></td><td className="px-4 py-5 font-mono text-xs">{product.oem}</td><td className="max-w-40 px-4 py-5 text-xs leading-5 text-muted-foreground">{product.category}</td><td className="whitespace-nowrap px-4 py-5 text-xs font-semibold">{product.price === null ? <span className="rounded-md bg-muted px-2 py-1 text-muted-foreground">A cotizar</span> : formatPrice(product.price)}</td><td className="px-4 py-5"><span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold ${product.visible ? 'bg-whatsapp/15 text-success-foreground' : 'bg-muted text-muted-foreground'}`}>{product.visible ? <Eye className="size-3" /> : <EyeOff className="size-3" />}{product.visible ? 'Visible' : 'Oculto'}</span></td><td className="px-4 py-5"><div className="flex gap-1"><Button variant="ghost" size="icon" title="Editar producto" aria-label={`Editar ${product.name}`} onClick={() => setDraft({ ...product })}><Pencil className="text-primary" /></Button><Button variant="ghost" size="icon" title="Eliminar producto" aria-label={`Eliminar ${product.name}`} onClick={() => setDeleting(product)}><Trash2 className="text-muted-foreground" /></Button></div></td></tr>)}</tbody></table>{!filtered.length && <div className="py-16 text-center"><Package className="mx-auto mb-3 size-8 text-muted-foreground" /><p className="text-sm text-muted-foreground">No hay productos para mostrar.</p></div>}</div>
-    <p className="mt-4 text-xs text-muted-foreground">{filtered.length} de {products.length} productos</p>
-    <Dialog open={!!draft} onOpenChange={open => { if (!open) setDraft(null); }}><DialogContent className="max-h-[90dvh] w-[calc(100%-32px)] overflow-y-auto rounded-xl"><DialogHeader><DialogTitle>{draft?.id ? 'Editar producto' : 'Nuevo Producto'}</DialogTitle><DialogDescription>Catálogo de Laboratorio Diésel · Demo</DialogDescription></DialogHeader>{draft && <form onSubmit={submit} className="space-y-4"><label className="block space-y-2 text-sm font-semibold"><span>Nombre</span><Input autoFocus required value={draft.name} onChange={event => setDraft({ ...draft, name: event.target.value })} /></label><label className="block space-y-2 text-sm font-semibold"><span>Código OEM</span><Input required value={draft.oem} onChange={event => setDraft({ ...draft, oem: event.target.value })} /></label><div className="grid grid-cols-2 gap-4"><label className="space-y-2 text-sm font-semibold"><span>Marca</span><select className={selectClass} value={draft.brand} onChange={event => setDraft({ ...draft, brand: event.target.value })}>{['Bosch', 'Delphi', 'Denso'].map(brand => <option key={brand}>{brand}</option>)}</select></label><label className="space-y-2 text-sm font-semibold"><span>Condición</span><select className={selectClass} value={draft.condition} onChange={event => setDraft({ ...draft, condition: event.target.value === 'Nuevo' ? 'Nuevo' : 'Recambio' })}><option>Nuevo</option><option>Recambio</option></select></label></div><label className="block space-y-2 text-sm font-semibold"><span>Categoría</span><select className={selectClass} value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })}><option>Inyectores Common Rail</option><option>Inyectores piezoeléctricos</option></select></label><label className="block space-y-2 text-sm font-semibold"><span>Precio (ARS) · Vacío: A cotizar</span><Input type="number" min="0" step="1" value={draft.price ?? ''} onChange={event => setDraft({ ...draft, price: event.target.value === '' ? null : Number(event.target.value) })} /></label><label className="flex items-center gap-3 text-sm"><Checkbox checked={draft.visible} onCheckedChange={checked => setDraft({ ...draft, visible: checked === true })} />Visible</label><div className="flex justify-end gap-2 border-t border-border pt-4"><Button type="button" variant="outline" onClick={() => setDraft(null)}>Cancelar</Button><Button type="submit" variant="industrial"><Check />Guardar producto</Button></div></form>}</DialogContent></Dialog>
-    <Dialog open={!!deleting} onOpenChange={open => { if (!open) setDeleting(null); }}><DialogContent className="w-[calc(100%-32px)] rounded-xl"><DialogHeader><DialogTitle>Eliminar producto</DialogTitle><DialogDescription>¿Eliminar {deleting?.name} del listado?</DialogDescription></DialogHeader><div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setDeleting(null)}>Cancelar</Button><Button variant="destructive" onClick={() => { if (!deleting) return; remove(deleting.id); setDeleting(null); setNotice('Producto eliminado'); }}><Trash2 />Eliminar producto</Button></div></DialogContent></Dialog>
-  </>;
+  return (
+    <>
+      <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow mb-2 text-muted-foreground">Administración / Catálogo</p>
+          <h1 className="font-display text-3xl font-bold">Productos</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {products.length} productos · {products.filter((product) => product.visible).length}{" "}
+            visibles
+          </p>
+        </div>
+        <Button variant="industrial" className="h-11" onClick={() => setDraft({ ...emptyProduct })}>
+          <Plus />
+          Nuevo Producto
+        </Button>
+      </div>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <label className="flex h-11 w-full max-w-sm items-center gap-3 rounded-lg border border-border bg-card px-3">
+          <Search className="size-4 shrink-0 text-muted-foreground" />
+          <input
+            aria-label="Buscar productos en Admin"
+            placeholder="Buscar producto o código OEM..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className="w-full min-w-0 bg-transparent text-sm outline-none"
+          />
+        </label>
+        <p aria-live="polite" className="flex items-center gap-2 text-xs text-primary">
+          {notice && <Check className="size-4" />}
+          {notice}
+        </p>
+      </div>
+      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+        <table className="w-full min-w-[860px] text-left text-sm">
+          <thead className="border-b border-border bg-secondary/70">
+            <tr>
+              {["Foto", "Nombre", "Código OEM", "Categoría", "Precio", "Estado", "Acciones"].map(
+                (column) => (
+                  <th
+                    key={column}
+                    scope="col"
+                    className="px-4 py-4 text-[11px] font-bold uppercase text-muted-foreground"
+                  >
+                    {column}
+                  </th>
+                ),
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((product) => (
+              <tr
+                key={product.id}
+                className="border-b border-border last:border-0 hover:bg-secondary/40"
+              >
+                <td className="px-4 py-5">
+                  <span
+                    role="img"
+                    aria-label={`Foto de muestra de ${product.name}`}
+                    className="flex size-12 items-center justify-center rounded-lg border border-border bg-muted text-muted-foreground"
+                  >
+                    <Image className="size-5 stroke-1" />
+                  </span>
+                </td>
+                <td className="px-4 py-5">
+                  <p className="font-semibold">{product.name}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {product.brand} · {product.condition}
+                  </p>
+                </td>
+                <td className="px-4 py-5 font-mono text-xs">{product.oem}</td>
+                <td className="max-w-40 px-4 py-5 text-xs leading-5 text-muted-foreground">
+                  {product.category}
+                </td>
+                <td className="whitespace-nowrap px-4 py-5 text-xs font-semibold">
+                  {product.price === null ? (
+                    <span className="rounded-md bg-muted px-2 py-1 text-muted-foreground">
+                      A cotizar
+                    </span>
+                  ) : (
+                    formatPrice(product.price)
+                  )}
+                </td>
+                <td className="px-4 py-5">
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold ${product.visible ? "bg-whatsapp/15 text-success-foreground" : "bg-muted text-muted-foreground"}`}
+                  >
+                    {product.visible ? <Eye className="size-3" /> : <EyeOff className="size-3" />}
+                    {product.visible ? "Visible" : "Oculto"}
+                  </span>
+                </td>
+                <td className="px-4 py-5">
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="Editar producto"
+                      aria-label={`Editar ${product.name}`}
+                      onClick={() => setDraft({ ...product })}
+                    >
+                      <Pencil className="text-primary" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="Eliminar producto"
+                      aria-label={`Eliminar ${product.name}`}
+                      onClick={() => setDeleting(product)}
+                    >
+                      <Trash2 className="text-muted-foreground" />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {!filtered.length && (
+          <div className="py-16 text-center">
+            <Package className="mx-auto mb-3 size-8 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">No hay productos para mostrar.</p>
+          </div>
+        )}
+      </div>
+      <p className="mt-4 text-xs text-muted-foreground">
+        {filtered.length} de {products.length} productos
+      </p>
+      <Dialog
+        open={!!draft}
+        onOpenChange={(open) => {
+          if (!open) setDraft(null);
+        }}
+      >
+        <DialogContent className="max-h-[90dvh] w-[calc(100%-32px)] overflow-y-auto rounded-xl">
+          <DialogHeader>
+            <DialogTitle>{draft?.id ? "Editar producto" : "Nuevo Producto"}</DialogTitle>
+            <DialogDescription>Catálogo de Laboratorio Diésel · Demo</DialogDescription>
+          </DialogHeader>
+          {draft && (
+            <form onSubmit={submit} className="space-y-4">
+              <label className="block space-y-2 text-sm font-semibold">
+                <span>Nombre</span>
+                <Input
+                  autoFocus
+                  required
+                  value={draft.name}
+                  onChange={(event) => setDraft({ ...draft, name: event.target.value })}
+                />
+              </label>
+              <label className="block space-y-2 text-sm font-semibold">
+                <span>Código OEM</span>
+                <Input
+                  required
+                  value={draft.oem}
+                  onChange={(event) => setDraft({ ...draft, oem: event.target.value })}
+                />
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <label className="space-y-2 text-sm font-semibold">
+                  <span>Marca</span>
+                  <select
+                    className={selectClass}
+                    value={draft.brand}
+                    onChange={(event) => setDraft({ ...draft, brand: event.target.value })}
+                  >
+                    {["Bosch", "Delphi", "Denso"].map((brand) => (
+                      <option key={brand}>{brand}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="space-y-2 text-sm font-semibold">
+                  <span>Condición</span>
+                  <select
+                    className={selectClass}
+                    value={draft.condition}
+                    onChange={(event) =>
+                      setDraft({
+                        ...draft,
+                        condition: event.target.value === "Nuevo" ? "Nuevo" : "Recambio",
+                      })
+                    }
+                  >
+                    <option>Nuevo</option>
+                    <option>Recambio</option>
+                  </select>
+                </label>
+              </div>
+              <label className="block space-y-2 text-sm font-semibold">
+                <span>Categoría</span>
+                <select
+                  className={selectClass}
+                  value={draft.category}
+                  onChange={(event) => setDraft({ ...draft, category: event.target.value })}
+                >
+                  <option>Inyectores Common Rail</option>
+                  <option>Inyectores piezoeléctricos</option>
+                </select>
+              </label>
+              <label className="block space-y-2 text-sm font-semibold">
+                <span>Precio (ARS) · Vacío: A cotizar</span>
+                <Input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={draft.price ?? ""}
+                  onChange={(event) =>
+                    setDraft({
+                      ...draft,
+                      price: event.target.value === "" ? null : Number(event.target.value),
+                    })
+                  }
+                />
+              </label>
+              <label className="flex items-center gap-3 text-sm">
+                <Checkbox
+                  checked={draft.visible}
+                  onCheckedChange={(checked) => setDraft({ ...draft, visible: checked === true })}
+                />
+                Visible
+              </label>
+              <div className="flex justify-end gap-2 border-t border-border pt-4">
+                <Button type="button" variant="outline" onClick={() => setDraft(null)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" variant="industrial">
+                  <Check />
+                  Guardar producto
+                </Button>
+              </div>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={!!deleting}
+        onOpenChange={(open) => {
+          if (!open) setDeleting(null);
+        }}
+      >
+        <DialogContent className="w-[calc(100%-32px)] rounded-xl">
+          <DialogHeader>
+            <DialogTitle>Eliminar producto</DialogTitle>
+            <DialogDescription>¿Eliminar {deleting?.name} del listado?</DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setDeleting(null)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (!deleting) return;
+                remove(deleting.id);
+                setDeleting(null);
+                setNotice("Producto eliminado");
+              }}
+            >
+              <Trash2 />
+              Eliminar producto
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }

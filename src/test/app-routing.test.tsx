@@ -9,7 +9,11 @@ import { routeTree } from "@/routeTree.gen";
 describe("App routing", () => {
   it("matches every admin content route", () => {
     const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
-    for (const [path, id] of [["/admin", "/admin/"], ["/admin/dashboard", "/admin/dashboard"], ["/admin/categorias", "/admin/categorias"]] as const) {
+    for (const [path, id] of [
+      ["/admin", "/admin/"],
+      ["/admin/dashboard", "/admin/dashboard"],
+      ["/admin/categorias", "/admin/categorias"],
+    ] as const) {
       expect(router.matchRoutes(path).at(-1)?.routeId).toBe(id);
     }
   });

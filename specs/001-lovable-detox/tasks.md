@@ -14,7 +14,7 @@
 
 ## Bloque 1: Preparación y Snapshot
 
-- [ ] **Tarea 1.1 — Snapshot y comprobación de estado de Git** `(RF-01, RF-02)`
+- [x] **Tarea 1.1 — Snapshot y comprobación de estado de Git** `(RF-01, RF-02)`
   - **Objetivo:** Verificar que el árbol de trabajo se encuentre en un estado limpio y controlado antes de realizar cualquier movimiento de archivos en disco.
   - **Archivos:** N/A (Árbol de Git).
   - **Hecho cuando:** `git status --porcelain` no muestre modificaciones no controladas fuera del directorio `specs/`.

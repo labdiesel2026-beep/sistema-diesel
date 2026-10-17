@@ -134,7 +134,7 @@
   - **Comando:** Iniciar `npm run dev` y validar generación de rutas.
   - **Hecho cuando:** En PowerShell, `Test-Path ./src/routeTree.gen.ts` devuelva `True` y el servidor dev responda sin arrojar excepciones en consola.
 
-- [ ] **Tarea 6.7 — Auditoría final de cero residuos de Lovable** `(RF-05, RF-06, RF-10, RF-11)`
+- [x] **Tarea 6.7 — Auditoría final de cero residuos de Lovable** `(RF-05, RF-06, RF-10, RF-11)`
   - **Objetivo:** Búsqueda recursiva global en todos los archivos de código fuente, configuraciones y assets para certificar la erradicación total de referencias a Lovable.
-  - **Comando:** `grep -ri "lovable" src/ public/ package.json vite.config.ts .gitignore`
-  - **Hecho cuando:** El comando `grep -ri "lovable" src/ public/ package.json vite.config.ts .gitignore` devuelva exactamente 0 coincidencias (exit code 1).
+  - **Comando:** `grep -ri "lovable" src/ public/ package.json vite.config.ts` (en `.gitignore` se conserva la regla preventiva `.lovable/` estipulada en RF-01b).
+  - **Hecho cuando:** El comando `grep -ri "lovable" src/ public/ package.json vite.config.ts` devuelva exactamente 0 coincidencias (exit code 1).

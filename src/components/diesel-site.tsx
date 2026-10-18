@@ -90,9 +90,9 @@ export function Header() {
             >
               Inicio
             </Link>
-            <Link to="/servicios" activeProps={{ className: "text-primary" }}>
+            <a href="/#servicios" className="hover:text-primary transition-colors">
               Servicios
-            </Link>
+            </a>
             <Link to="/catalogo" activeProps={{ className: "text-primary" }}>
               Catálogo
             </Link>
@@ -166,9 +166,9 @@ export function Header() {
             <Link to="/" onClick={() => setMenu(false)}>
               Inicio
             </Link>
-            <Link to="/servicios" onClick={() => setMenu(false)}>
+            <a href="/#servicios" onClick={() => setMenu(false)}>
               Servicios
-            </Link>
+            </a>
             <Link to="/catalogo" onClick={() => setMenu(false)}>
               Catálogo
             </Link>

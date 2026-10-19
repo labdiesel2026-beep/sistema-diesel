@@ -63,6 +63,7 @@ export interface AdminAuthState {
  */
 export interface IntegrityCheckResult {
   allowed: boolean;
+  blocked?: boolean | undefined;
   reason?: string | undefined;
   affectedProducts?: string[] | undefined;
 }

@@ -94,7 +94,7 @@
   - **Archivos involucrados:** `src/context/admin-context.tsx`.
   - **Hecho cuando:** `npx tsc --noEmit` compile sin errores y las funciones de categoría manejen el bloqueo retornando un objeto `{ success: boolean, reason?: string, affectedProducts?: string[] }`.
 
-- [ ] **Tarea 4.3 — Lógica de Integridad de Marcas y Productos en `AdminProvider`** `(RF-05, RF-06, RF-07, RF-12, CA-12.3, CA-12.4, CL-06, CL-09)`
+- [x] **Tarea 4.3 — Lógica de Integridad de Marcas y Productos en `AdminProvider`** `(RF-05, RF-06, RF-07, RF-12, CA-12.3, CA-12.4, CL-06, CL-09)`
   - **Objetivo:** Completar `src/context/admin-context.tsx` con `brands` y `products`. Implementar: 1) CRUD de marcas con bloqueo estricto de borrado si `brandId` está en uso, 2) renombrado de marcas por UUID sin desnormalizar productos, 3) CRUD de productos, y 4) conmutación reactiva de visibilidad (`toggleVisibility`). Crear `src/test/admin/admin-context.test.tsx`.
   - **Archivos involucrados:** `src/context/admin-context.tsx`, `src/test/admin/admin-context.test.tsx`.
   - **Hecho cuando:** `npx vitest run src/test/admin/admin-context.test.tsx` termine con código de salida 0 comprobando: 1) bloqueo de eliminación de categoría con productos, 2) bloqueo de eliminación de marca con productos, 3) renombrado de marca reflejado relacionalmente, y 4) toggle de visibilidad.
@@ -103,17 +103,17 @@
 
 ## Bloque 5: Layout Administrativo y Dashboard
 
-- [ ] **Tarea 5.1 — Layout Administrativo con Navegación y Logout (`src/routes/admin.tsx`)** `(RF-02, RNF-P4-03)`
+- [x] **Tarea 5.1 — Layout Administrativo con Navegación y Logout (`src/routes/admin.tsx`)** `(RF-02, RNF-P4-03)`
   - **Objetivo:** Refactorizar `src/routes/admin.tsx` integrando `AdminGuard` y `AdminProvider`. Implementar layout responsivo con sidebar colapsable, enlaces de navegación hacia `/admin` (Productos), `/admin/dashboard`, `/admin/categorias`, `/admin/marcas`, enlace externo a `/catalogo`, y botón "Cerrar Sesión" conectado a `logout()`.
   - **Archivos involucrados:** `src/routes/admin.tsx`, `src/components/admin/layout/AdminSidebar.tsx`, `src/components/admin/layout/AdminHeader.tsx`.
   - **Hecho cuando:** `npx tsc --noEmit` termine con código de salida 0 y el layout renderice el contenedor principal de administración.
 
-- [ ] **Tarea 5.2 — Componente de Métricas del Dashboard (`DashboardMetrics.tsx`)** `(RF-04, CA-04.1, CA-04.2)`
+- [x] **Tarea 5.2 — Componente de Métricas del Dashboard (`DashboardMetrics.tsx`)** `(RF-04, CA-04.1, CA-04.2)`
   - **Objetivo:** Crear `src/components/admin/dashboard/DashboardMetrics.tsx` consumiendo `useAdmin` para calcular y mostrar reactivamente: 1) total de productos, 2) productos visibles, 3) productos ocultos, 4) total de categorías y 5) total de marcas. Incluir tarjetas interactivas y accesos directos hacia los 3 submódulos ABM. Crear `src/test/admin/DashboardMetrics.test.tsx`.
   - **Archivos involucrados:** `src/components/admin/dashboard/DashboardMetrics.tsx`, `src/test/admin/DashboardMetrics.test.tsx`.
   - **Hecho cuando:** `npx vitest run src/test/admin/DashboardMetrics.test.tsx` termine con código de salida 0 verificando el renderizado correcto de los 5 contadores y su reactividad ante cambios en el contexto.
 
-- [ ] **Tarea 5.3 — Vista de Dashboard en TanStack Router (`src/routes/admin.dashboard.tsx`)** `(RF-04)`
+- [x] **Tarea 5.3 — Vista de Dashboard en TanStack Router (`src/routes/admin.dashboard.tsx`)** `(RF-04)`
   - **Objetivo:** Refactorizar `src/routes/admin.dashboard.tsx` integrando `DashboardMetrics` con título accesible y metadatos de página.
   - **Archivos involucrados:** `src/routes/admin.dashboard.tsx`.
   - **Hecho cuando:** `npx tsc --noEmit` termine con código de salida 0.
@@ -122,22 +122,22 @@
 
 ## Bloque 6: Módulo de Marcas (ABM Mínimo)
 
-- [ ] **Tarea 6.1 — Tabla de Listado de Marcas con Conteo Relacional (`BrandList.tsx`)** `(RF-12, CA-12.1, CL-09)`
+- [x] **Tarea 6.1 — Tabla de Listado de Marcas con Conteo Relacional (`BrandList.tsx`)** `(RF-12, CA-12.1, CL-09)`
   - **Objetivo:** Crear `src/components/admin/brands/BrandList.tsx` mostrando el listado de marcas, calculando en tiempo real la cantidad de productos asociados a cada `brand.id`, y proveyendo botones de acción para editar y eliminar.
   - **Archivos involucrados:** `src/components/admin/brands/BrandList.tsx`.
   - **Hecho cuando:** `npx tsc --noEmit` termine con código de salida 0 y el componente liste marcas y su conteo de repuestos asociados.
 
-- [ ] **Tarea 6.2 — Modal de Creación y Edición de Marca (`BrandFormModal.tsx`)** `(RF-12, CA-12.1, CA-12.2, D-12)`
+- [x] **Tarea 6.2 — Modal de Creación y Edición de Marca (`BrandFormModal.tsx`)** `(RF-12, CA-12.1, CA-12.2, D-12)`
   - **Objetivo:** Crear `src/components/admin/brands/BrandFormModal.tsx` con formulario validado por `brandFormSchema`, control de duplicados case-insensitive contra el store, y manejo asíncrono con `finally` para restablecer `isSubmitting`.
   - **Archivos involucrados:** `src/components/admin/brands/BrandFormModal.tsx`.
   - **Hecho cuando:** `npx tsc --noEmit` termine con código de salida 0.
 
-- [ ] **Tarea 6.3 — Modal de Eliminación con Bloqueo Referencial (`BrandDeleteModal.tsx`)** `(RF-12, CA-12.3, CA-12.5)`
+- [x] **Tarea 6.3 — Modal de Eliminación con Bloqueo Referencial (`BrandDeleteModal.tsx`)** `(RF-12, CA-12.3, CA-12.5)`
   - **Objetivo:** Crear `src/components/admin/brands/BrandDeleteModal.tsx`. Si la marca tiene productos vinculados, debe mostrar una alerta de bloqueo impeditivo listando los productos afectados. Si está libre, debe mostrar diálogo de confirmación con botón rojo destructivo. Crear suite integrada `src/test/admin/brands.test.tsx`.
   - **Archivos involucrados:** `src/components/admin/brands/BrandDeleteModal.tsx`, `src/test/admin/brands.test.tsx`.
   - **Hecho cuando:** `npx vitest run src/test/admin/brands.test.tsx` termine con código de salida 0 validando: 1) alta de marca, 2) rechazo de duplicados, 3) bloqueo de borrado con productos asociados, y 4) eliminación exitosa cuando está libre.
 
-- [ ] **Tarea 6.4 — Vista de Marcas en TanStack Router (`src/routes/admin.marcas.tsx`)** `(RF-12)`
+- [x] **Tarea 6.4 — Vista de Marcas en TanStack Router (`src/routes/admin.marcas.tsx`)** `(RF-12)`
   - **Objetivo:** Crear la ruta `src/routes/admin.marcas.tsx` integrando los componentes del módulo de marcas (`BrandList`, `BrandFormModal`, `BrandDeleteModal`) con botón "Nueva Marca".
   - **Archivos involucrados:** `src/routes/admin.marcas.tsx`.
   - **Hecho cuando:** `npx tsc --noEmit` termine con código de salida 0.
@@ -146,22 +146,22 @@
 
 ## Bloque 7: Módulo de Categorías y Subcategorías (1 Nivel)
 
-- [ ] **Tarea 7.1 — Lista Jerárquica de Categorías con Indentación Visual (`CategoryList.tsx`)** `(RF-10, CA-10.1, CA-10.2)`
+- [x] **Tarea 7.1 — Lista Jerárquica de Categorías con Indentación Visual (`CategoryList.tsx`)** `(RF-10, CA-10.1, CA-10.2)`
   - **Objetivo:** Crear `src/components/admin/categories/CategoryList.tsx` organizando visualmente las categorías raíz y sus subcategorías hijas indentadas, mostrando el conteo de productos asociados a cada ID y botones para editar y eliminar.
   - **Archivos involucrados:** `src/components/admin/categories/CategoryList.tsx`.
   - **Hecho cuando:** `npx tsc --noEmit` termine con código de salida 0 y el árbol visual distinga jerarquías correctamente.
 
-- [ ] **Tarea 7.2 — Modal de Creación y Edición con Prevención de Ciclos (`CategoryFormModal.tsx`)** `(RF-10, CA-10.3, CA-10.4, CL-04, CL-05, D-12)`
+- [x] **Tarea 7.2 — Modal de Creación y Edición con Prevención de Ciclos (`CategoryFormModal.tsx`)** `(RF-10, CA-10.3, CA-10.4, CL-04, CL-05, D-12)`
   - **Objetivo:** Crear `src/components/admin/categories/CategoryFormModal.tsx` validado con `categoryFormSchema`. El selector de "Categoría Padre" solo debe mostrar categorías raíz (`parentId === null`). Si la categoría que se está editando ya tiene hijas vinculadas, el selector de padre debe inhabilitarse por completo (CL-05). Manejar submit con `finally`.
   - **Archivos involucrados:** `src/components/admin/categories/CategoryFormModal.tsx`.
   - **Hecho cuando:** `npx tsc --noEmit` termine con código de salida 0.
 
-- [ ] **Tarea 7.3 — Modal de Eliminación con Bloqueo Estricto de Productos (`CategoryDeleteModal.tsx`)** `(RF-11, CA-11.1, CA-11.2, CA-11.3)`
+- [x] **Tarea 7.3 — Modal de Eliminación con Bloqueo Estricto de Productos (`CategoryDeleteModal.tsx`)** `(RF-11, CA-11.1, CA-11.2, CA-11.3)`
   - **Objetivo:** Crear `src/components/admin/categories/CategoryDeleteModal.tsx`. Si la categoría tiene productos vinculados o subcategorías hijas, muestra alerta impeditiva listando los elementos afectados y deshabilitando el borrado. Si está libre, permite eliminar. Crear suite integrada `src/test/admin/categories.test.tsx`.
   - **Archivos involucrados:** `src/components/admin/categories/CategoryDeleteModal.tsx`, `src/test/admin/categories.test.tsx`.
   - **Hecho cuando:** `npx vitest run src/test/admin/categories.test.tsx` termine con código de salida 0 comprobando: 1) creación de categoría y subcategoría, 2) inhabilitación de selector de padre si tiene hijas, 3) bloqueo de eliminación con productos asociados, y 4) eliminación exitosa de categoría vacía.
 
-- [ ] **Tarea 7.4 — Vista de Categorías en TanStack Router (`src/routes/admin.categorias.tsx`)** `(RF-10, RF-11)`
+- [x] **Tarea 7.4 — Vista de Categorías en TanStack Router (`src/routes/admin.categorias.tsx`)** `(RF-10, RF-11)`
   - **Objetivo:** Refactorizar `src/routes/admin.categorias.tsx` conectando `CategoryList`, `CategoryFormModal` y `CategoryDeleteModal` con botón "Nueva Categoría".
   - **Archivos involucrados:** `src/routes/admin.categorias.tsx`.
   - **Hecho cuando:** `npx tsc --noEmit` termine con código de salida 0.
@@ -170,32 +170,32 @@
 
 ## Bloque 8: Módulo de Productos (Subida de Imágenes y ABM Atómico)
 
-- [ ] **Tarea 8.1 — Componente de Fallback Gráfico de Imagen (`ProductThumbnail.tsx`)** `(RF-06, CA-06.3, CL-10)`
+- [x] **Tarea 8.1 — Componente de Fallback Gráfico de Imagen (`ProductThumbnail.tsx`)** `(RF-06, CA-06.3, CL-10)`
   - **Objetivo:** Crear `src/components/admin/products/ProductThumbnail.tsx` que renderice la imagen desde URL relativa o Data URL y, ante el evento `onError`, conmute automáticamente a un fallback visual neutro (ícono de inyector/repuesto con aria-label descriptivo) sin alterar las dimensiones de la celda. Crear `src/test/admin/ProductThumbnail.test.tsx`.
   - **Archivos involucrados:** `src/components/admin/products/ProductThumbnail.tsx`, `src/test/admin/ProductThumbnail.test.tsx`.
   - **Hecho cuando:** `npx vitest run src/test/admin/ProductThumbnail.test.tsx` termine con código de salida 0 verificando el renderizado de la imagen y la conmutación al componente de fallback al disparar `fireEvent.error`.
 
-- [ ] **Tarea 8.2 — Componente de Carga y Validación Client-Side de Fotos (`ProductImageUpload.tsx`)** `(RF-08, CA-08.1 a CA-08.4, CL-01, CL-02, CL-03)`
+- [x] **Tarea 8.2 — Componente de Carga y Validación Client-Side de Fotos (`ProductImageUpload.tsx`)** `(RF-08, CA-08.1 a CA-08.4, CL-01, CL-02, CL-03)`
   - **Objetivo:** Crear `src/components/admin/products/ProductImageUpload.tsx` con input tipo file (`accept=".jpg,.jpeg,.png,.webp"`). Al seleccionar archivo, valida tamaño (`<= 5MB` exactos) y formato con `imageMetadataSchema`. Si es válido, genera previsualización Data URL; si el usuario selecciona otro archivo, lo sobrescribe limpiamente. Crear `src/test/admin/ProductImageUpload.test.tsx`.
   - **Archivos involucrados:** `src/components/admin/products/ProductImageUpload.tsx`, `src/test/admin/ProductImageUpload.test.tsx`.
   - **Hecho cuando:** `npx vitest run src/test/admin/ProductImageUpload.test.tsx` termine con código de salida 0 validando: 1) aceptación de 5.00 MB, 2) rechazo de 5.01 MB, 3) renderizado de preview, y 4) reemplazo ante nueva selección.
 
-- [ ] **Tarea 8.3 — Grilla de Productos, Búsqueda Sanitizada y Toggle de Visibilidad** `(RF-06, CA-06.1, CA-06.2, CA-06.4, CL-11)`
+- [x] **Tarea 8.3 — Grilla de Productos, Búsqueda Sanitizada y Toggle de Visibilidad** `(RF-06, CA-06.1, CA-06.2, CA-06.4, CL-11)`
   - **Objetivo:** Crear `src/components/admin/products/ProductTable.tsx` y `ProductToolbar.tsx`. Implementar búsqueda literal insensible a mayúsculas que no lance excepciones ante caracteres especiales de RegExp (`[`, `*`, `\`). Renderizar filas con `ProductThumbnail`, marca resuelta por `brandId`, badge visible/oculto, conmutador directo de visibilidad, y botones de edición y eliminación.
   - **Archivos involucrados:** `src/components/admin/products/ProductTable.tsx`, `src/components/admin/products/ProductToolbar.tsx`.
   - **Hecho cuando:** `npx tsc --noEmit` termine con código de salida 0 y el componente resuelva nombres de marca relacionales por ID.
 
-- [ ] **Tarea 8.4 — Modal de Creación y Edición de Producto con Bloque Finally (`ProductFormModal.tsx`)** `(RF-05, CA-05.1 a CA-05.4, CL-06, CL-07, CL-12)`
+- [x] **Tarea 8.4 — Modal de Creación y Edición de Producto con Bloque Finally (`ProductFormModal.tsx`)** `(RF-05, CA-05.1 a CA-05.4, CL-06, CL-07, CL-12)`
   - **Objetivo:** Crear `src/components/admin/products/ProductFormModal.tsx` validado con `productFormSchema`. Integrar `ProductImageUpload`, selector múltiple de categorías (guardando array plano `categoryIds`), selector de marca por UUID, condición enum, precio `>= 0` (admitiendo `$0`), toggles de visibilidad y precio, y submit blindado con bloque `finally` para `isSubmitting`.
   - **Archivos involucrados:** `src/components/admin/products/ProductFormModal.tsx`.
   - **Hecho cuando:** `npx tsc --noEmit` termine con código de salida 0.
 
-- [ ] **Tarea 8.5 — Modal de Eliminación de Producto y Suite de Integración** `(RF-07, CA-07.1, CA-07.2)`
+- [x] **Tarea 8.5 — Modal de Eliminación de Producto y Suite de Integración** `(RF-07, CA-07.1, CA-07.2)`
   - **Objetivo:** Crear `src/components/admin/products/ProductDeleteModal.tsx` con confirmación explícita y botón de peligro en tono rojo. Crear la suite integrada `src/test/admin/products.test.tsx` cubriendo el ciclo completo de producto.
   - **Archivos involucrados:** `src/components/admin/products/ProductDeleteModal.tsx`, `src/test/admin/products.test.tsx`.
   - **Hecho cuando:** `npx vitest run src/test/admin/products.test.tsx` termine con código de salida 0 validando: 1) creación de producto con campos obligatorios, 2) toggle de visibilidad en grilla, 3) búsqueda con caracteres especiales, 4) admisión de precio `$0`, y 5) eliminación permanente.
 
-- [ ] **Tarea 8.6 — Ensamblar la Vista `/admin` de Productos (`src/routes/admin.index.tsx`)** `(RF-05, RF-06, RF-07)`
+- [x] **Tarea 8.6 — Ensamblar la Vista `/admin` de Productos (`src/routes/admin.index.tsx`)** `(RF-05, RF-06, RF-07)`
   - **Objetivo:** Refactorizar `src/routes/admin.index.tsx` integrando `ProductToolbar`, `ProductTable`, `ProductFormModal` y `ProductDeleteModal` como punto de entrada principal del backoffice.
   - **Archivos involucrados:** `src/routes/admin.index.tsx`.
   - **Hecho cuando:** `npx tsc --noEmit` termine con código de salida 0.
@@ -204,22 +204,22 @@
 
 ## Bloque 9: Integración Global de Rutas y Verificación del Definition of Done (DoD)
 
-- [ ] **Tarea 9.1 — Regeneración del Árbol de Rutas de TanStack Router (`src/routeTree.gen.ts`)** `(RF-01, RF-02, RF-10, RF-12)`
+- [x] **Tarea 9.1 — Regeneración del Árbol de Rutas de TanStack Router (`src/routeTree.gen.ts`)** `(RF-01, RF-02, RF-10, RF-12)`
   - **Objetivo:** Ejecutar el generador de rutas de TanStack Router para registrar formalmente las nuevas rutas (`/admin/login`, `/admin/marcas`, `/admin/categorias`, `/admin/dashboard`, `/admin/`) asegurando tipado estricto en la navegación.
   - **Archivos involucrados:** `src/routeTree.gen.ts`.
   - **Hecho cuando:** `npx tsr generate` o el build de Vite regenere `src/routeTree.gen.ts` conteniendo todas las rutas de `/admin` sin errores de resolución.
 
-- [ ] **Tarea 9.2 — Verificación Estricta de Tipos TypeScript** `(DoD Final)`
+- [x] **Tarea 9.2 — Verificación Estricta de Tipos TypeScript** `(DoD Final)`
   - **Objetivo:** Ejecutar la verificación estática de tipos en todo el proyecto asegurando cero errores de compilación.
   - **Archivos involucrados:** Todo el código fuente en `src/`.
   - **Hecho cuando:** `npx tsc --noEmit` devuelva código de salida 0 con 0 errores reportados en la terminal.
 
-- [ ] **Tarea 9.3 — Ejecución de la Suite Completa de Tests Automatizados** `(DoD Final)`
+- [x] **Tarea 9.3 — Ejecución de la Suite Completa de Tests Automatizados** `(DoD Final)`
   - **Objetivo:** Ejecutar toda la suite de pruebas unitarias y de integración de la aplicación con Vitest.
   - **Archivos involucrados:** Todo `src/test/`.
   - **Hecho cuando:** `npm run test` termine con código de salida 0 y el 100% de los tests del proyecto (landing y admin) aprueben en verde.
 
-- [ ] **Tarea 9.4 — Compilación del Bundle de Producción (Cero Regresiones)** `(DoD Final)`
+- [x] **Tarea 9.4 — Compilación del Bundle de Producción (Cero Regresiones)** `(DoD Final)`
   - **Objetivo:** Validar que la aplicación empaqueta para producción sin advertencias de rutas huérfanas, dependencias circulares o errores de empaquetado.
   - **Archivos involucrados:** Todo el proyecto.
   - **Hecho cuando:** `npm run build` termine con código de salida 0 generando el bundle de producción en `dist/`.

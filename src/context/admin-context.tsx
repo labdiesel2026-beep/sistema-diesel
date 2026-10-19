@@ -19,9 +19,32 @@ import { getInitialAdminData } from "@/lib/admin-seed-data";
  */
 export interface CategoryMutationResult {
   success: boolean;
+  blocked?: boolean | undefined;
   reason?: string | undefined;
   affectedProducts?: string[] | undefined;
   category?: AdminCategory | undefined;
+}
+
+/**
+ * Resultado estructurado para operaciones de mutación de marcas.
+ * (CA-12.1 - CA-12.5, CL-06, CL-09)
+ */
+export interface BrandMutationResult {
+  success: boolean;
+  blocked?: boolean | undefined;
+  reason?: string | undefined;
+  affectedProducts?: string[] | undefined;
+  brand?: AdminBrand | undefined;
+}
+
+/**
+ * Resultado estructurado para operaciones de mutación de productos.
+ * (RF-05, RF-06, RF-07, CL-06, CL-11)
+ */
+export interface ProductMutationResult {
+  success: boolean;
+  reason?: string | undefined;
+  product?: AdminProduct | undefined;
 }
 
 export interface AdminContextType {
@@ -40,12 +63,28 @@ export interface AdminContextType {
   getRootCategories: () => AdminCategory[];
   getChildCategories: (parentId: string) => AdminCategory[];
   hasChildren: (categoryId: string) => boolean;
+  getCategoryProductCount: (categoryId: string) => number;
 
-  // Marcas (Estado inicial de memoria para resolución relacional)
+  // Marcas
   brands: AdminBrand[];
+  createBrand: (input: { name: string }) => BrandMutationResult;
+  updateBrand: (id: string, input: { name: string }) => BrandMutationResult;
+  deleteBrand: (id: string) => BrandMutationResult;
+  canDeleteBrand: (id: string) => IntegrityCheckResult;
+  getBrandById: (id: string) => AdminBrand | undefined;
+  getBrandProductCount: (brandId: string) => number;
 
-  // Catálogo de Productos (Estado inicial de memoria para integridad referencial)
+  // Catálogo de Productos
   products: AdminProduct[];
+  createProduct: (input: Omit<AdminProduct, "id">) => ProductMutationResult;
+  updateProduct: (
+    id: string,
+    input: Partial<Omit<AdminProduct, "id">>
+  ) => ProductMutationResult;
+  deleteProduct: (id: string) => ProductMutationResult;
+  toggleVisibility: (id: string) => ProductMutationResult;
+  toggleProductVisibility: (id: string) => ProductMutationResult;
+  searchProducts: (query: string) => AdminProduct[];
 }
 
 const AdminContext = createContext<AdminContextType | null>(null);
@@ -56,7 +95,7 @@ export interface AdminProviderProps {
 
 /**
  * Proveedor de Estado Global de Administración en Memoria Volátil.
- * (RF-10, RF-11, RF-15, CA-10.1 - CA-10.5, CA-11.1 - CA-11.3, CL-04, CL-05, CL-06)
+ * (RF-05, RF-06, RF-07, RF-10, RF-11, RF-12, RF-15, CA-10.1 - CA-12.5, CL-04 - CL-11)
  *
  * Mantiene la base de datos simulada en memoria de React con cero interacción
  * con almacenamiento persistente (localStorage / sessionStorage).
@@ -93,6 +132,13 @@ export function AdminProvider({ children }: AdminProviderProps) {
     [categories]
   );
 
+  const getCategoryProductCount = useCallback(
+    (categoryId: string) => {
+      return products.filter((p) => p.categoryIds.includes(categoryId)).length;
+    },
+    [products]
+  );
+
   // -------------------------------------------------------------------------
   // Verificación de Integridad de Categoría (CA-11.1, CA-11.2, CL-06)
   // -------------------------------------------------------------------------
@@ -103,6 +149,7 @@ export function AdminProvider({ children }: AdminProviderProps) {
       if (!targetCategory) {
         return {
           allowed: false,
+          blocked: true,
           reason: "La categoría especificada no existe.",
         };
       }
@@ -112,6 +159,7 @@ export function AdminProvider({ children }: AdminProviderProps) {
       if (childCategories.length > 0) {
         return {
           allowed: false,
+          blocked: true,
           reason:
             "No se puede eliminar la categoría porque posee subcategorías vinculadas. Reasigne o elimine primero las subcategorías.",
         };
@@ -124,13 +172,14 @@ export function AdminProvider({ children }: AdminProviderProps) {
       if (linkedProducts.length > 0) {
         return {
           allowed: false,
+          blocked: true,
           reason:
             "No se puede eliminar la categoría porque contiene productos asociados. Debe reasignarlos antes de continuar.",
           affectedProducts: linkedProducts.map((p) => p.name),
         };
       }
 
-      return { allowed: true };
+      return { allowed: true, blocked: false };
     },
     [categories, products]
   );
@@ -289,18 +338,307 @@ export function AdminProvider({ children }: AdminProviderProps) {
       if (!check.allowed) {
         return {
           success: false,
+          blocked: true,
           reason: check.reason,
           affectedProducts: check.affectedProducts,
         };
       }
 
       setCategories((prev) => prev.filter((c) => c.id !== id));
-      return { success: true };
+      return { success: true, blocked: false };
     },
     [canDeleteCategory]
   );
 
+  // -------------------------------------------------------------------------
+  // Helpers y Verificación de Integridad de Marcas (RF-12, CA-12.3, CL-06)
+  // -------------------------------------------------------------------------
+
+  const getBrandById = useCallback(
+    (id: string): AdminBrand | undefined => {
+      return brands.find((b) => b.id === id);
+    },
+    [brands]
+  );
+
+  const getBrandProductCount = useCallback(
+    (brandId: string): number => {
+      return products.filter((p) => p.brandId === brandId).length;
+    },
+    [products]
+  );
+
+  const canDeleteBrand = useCallback(
+    (id: string): IntegrityCheckResult => {
+      const targetBrand = brands.find((b) => b.id === id);
+      if (!targetBrand) {
+        return {
+          allowed: false,
+          blocked: true,
+          reason: "La marca especificada no existe.",
+        };
+      }
+
+      // Bloqueo estricto: Productos vinculados (CA-12.3, CL-06)
+      const linkedProducts = products.filter((p) => p.brandId === id);
+      if (linkedProducts.length > 0) {
+        return {
+          allowed: false,
+          blocked: true,
+          reason:
+            "No se puede eliminar la marca porque contiene productos asociados. Debe reasignarlos antes de continuar.",
+          affectedProducts: linkedProducts.map((p) => p.name),
+        };
+      }
+
+      return { allowed: true, blocked: false };
+    },
+    [brands, products]
+  );
+
+  // -------------------------------------------------------------------------
+  // Mutaciones de Marcas (RF-12, CA-12.1 - CA-12.5, CL-09)
+  // -------------------------------------------------------------------------
+
+  const createBrand = useCallback(
+    (input: { name: string }): BrandMutationResult => {
+      const trimmedName = input.name.trim();
+
+      if (trimmedName.length < 2) {
+        return {
+          success: false,
+          reason: "El nombre de la marca debe tener al menos 2 caracteres.",
+        };
+      }
+
+      // Validación de unicidad case-insensitive con trim (CA-12.2)
+      const isDuplicate = brands.some(
+        (b) => b.name.trim().toLowerCase() === trimmedName.toLowerCase()
+      );
+      if (isDuplicate) {
+        return {
+          success: false,
+          reason: "Ya existe una marca con este nombre.",
+        };
+      }
+
+      const newBrand: AdminBrand = {
+        id: crypto.randomUUID(),
+        name: trimmedName,
+      };
+
+      setBrands((prev) => [...prev, newBrand]);
+
+      return {
+        success: true,
+        brand: newBrand,
+      };
+    },
+    [brands]
+  );
+
+  const updateBrand = useCallback(
+    (id: string, input: { name: string }): BrandMutationResult => {
+      const currentBrand = brands.find((b) => b.id === id);
+      if (!currentBrand) {
+        return {
+          success: false,
+          reason: "Marca no encontrada.",
+        };
+      }
+
+      const trimmedName = input.name.trim();
+      if (trimmedName.length < 2) {
+        return {
+          success: false,
+          reason: "El nombre de la marca debe tener al menos 2 caracteres.",
+        };
+      }
+
+      // Unicidad case-insensitive respecto a otras marcas (CA-12.2)
+      const isDuplicate = brands.some(
+        (b) =>
+          b.id !== id &&
+          b.name.trim().toLowerCase() === trimmedName.toLowerCase()
+      );
+      if (isDuplicate) {
+        return {
+          success: false,
+          reason: "Ya existe una marca con este nombre.",
+        };
+      }
+
+      // Renombrado por UUID preservando relaciones (CA-12.4, CL-09)
+      const updatedBrand: AdminBrand = {
+        ...currentBrand,
+        name: trimmedName,
+      };
+
+      setBrands((prev) =>
+        prev.map((b) => (b.id === id ? updatedBrand : b))
+      );
+
+      return {
+        success: true,
+        brand: updatedBrand,
+      };
+    },
+    [brands]
+  );
+
+  const deleteBrand = useCallback(
+    (id: string): BrandMutationResult => {
+      const check = canDeleteBrand(id);
+      if (!check.allowed) {
+        return {
+          success: false,
+          blocked: true,
+          reason: check.reason,
+          affectedProducts: check.affectedProducts,
+        };
+      }
+
+      setBrands((prev) => prev.filter((b) => b.id !== id));
+      return { success: true, blocked: false };
+    },
+    [canDeleteBrand]
+  );
+
+  // -------------------------------------------------------------------------
+  // Mutaciones y Consultas de Productos (RF-05, RF-06, RF-07, CL-11)
+  // -------------------------------------------------------------------------
+
+  const createProduct = useCallback(
+    (input: Omit<AdminProduct, "id">): ProductMutationResult => {
+      const trimmedName = input.name?.trim() ?? "";
+      if (trimmedName.length < 3) {
+        return {
+          success: false,
+          reason: "El nombre del producto debe tener al menos 3 caracteres.",
+        };
+      }
+
+      if (!input.categoryIds || input.categoryIds.length === 0) {
+        return {
+          success: false,
+          reason: "Debe seleccionar al menos una categoría.",
+        };
+      }
+
+      const newProduct: AdminProduct = {
+        ...input,
+        id: crypto.randomUUID(),
+        name: trimmedName,
+      };
+
+      setProducts((prev) => [newProduct, ...prev]);
+
+      return {
+        success: true,
+        product: newProduct,
+      };
+    },
+    []
+  );
+
+  const updateProduct = useCallback(
+    (
+      id: string,
+      input: Partial<Omit<AdminProduct, "id">>
+    ): ProductMutationResult => {
+      const currentProduct = products.find((p) => p.id === id);
+      if (!currentProduct) {
+        return {
+          success: false,
+          reason: "Producto no encontrado.",
+        };
+      }
+
+      const updatedProduct: AdminProduct = {
+        ...currentProduct,
+        ...input,
+        id,
+      };
+
+      setProducts((prev) =>
+        prev.map((p) => (p.id === id ? updatedProduct : p))
+      );
+
+      return {
+        success: true,
+        product: updatedProduct,
+      };
+    },
+    [products]
+  );
+
+  const deleteProduct = useCallback(
+    (id: string): ProductMutationResult => {
+      const currentProduct = products.find((p) => p.id === id);
+      if (!currentProduct) {
+        return {
+          success: false,
+          reason: "Producto no encontrado.",
+        };
+      }
+
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      return { success: true };
+    },
+    [products]
+  );
+
+  const toggleProductVisibility = useCallback(
+    (id: string): ProductMutationResult => {
+      const currentProduct = products.find((p) => p.id === id);
+      if (!currentProduct) {
+        return {
+          success: false,
+          reason: "Producto no encontrado.",
+        };
+      }
+
+      const updatedProduct: AdminProduct = {
+        ...currentProduct,
+        visible: !currentProduct.visible,
+      };
+
+      setProducts((prev) =>
+        prev.map((p) => (p.id === id ? updatedProduct : p))
+      );
+
+      return {
+        success: true,
+        product: updatedProduct,
+      };
+    },
+    [products]
+  );
+
+  const toggleVisibility = toggleProductVisibility;
+
+  /**
+   * Búsqueda en catálogo literal insensible a mayúsculas/minúsculas.
+   * Evita excepciones de sintaxis ante caracteres especiales RegExp (CA-06.4, CL-11).
+   */
+  const searchProducts = useCallback(
+    (query: string): AdminProduct[] => {
+      const clean = query.trim().toLowerCase();
+      if (!clean) return products;
+      return products.filter((p) => {
+        return (
+          p.name.toLowerCase().includes(clean) ||
+          p.oem.toLowerCase().includes(clean) ||
+          p.description.toLowerCase().includes(clean) ||
+          p.vehicleCompatibility.toLowerCase().includes(clean)
+        );
+      });
+    },
+    [products]
+  );
+
   const value: AdminContextType = {
+    // Taxonomías
     categories,
     createCategory,
     updateCategory,
@@ -309,8 +647,25 @@ export function AdminProvider({ children }: AdminProviderProps) {
     getRootCategories,
     getChildCategories,
     hasChildren,
+    getCategoryProductCount,
+
+    // Marcas
     brands,
+    createBrand,
+    updateBrand,
+    deleteBrand,
+    canDeleteBrand,
+    getBrandById,
+    getBrandProductCount,
+
+    // Productos
     products,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    toggleVisibility,
+    toggleProductVisibility,
+    searchProducts,
   };
 
   return (

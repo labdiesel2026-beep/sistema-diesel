@@ -1,58 +1,32 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, Package, Eye, Tags, FileQuestion } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
 import { pageHead } from "@/components/diesel-site";
-import { useAdminProducts } from "@/components/admin-data";
-import { Button } from "@/components/ui/button";
+import { DashboardMetrics } from "@/components/admin/dashboard/DashboardMetrics";
 
 export const Route = createFileRoute("/admin/dashboard")({
   head: () =>
     pageHead(
       "Dashboard — Laboratorio Diésel",
-      "Resumen del catálogo de muestra: productos visibles, categorías y repuestos a cotizar.",
+      "Panel de control y métricas consolidadas del catálogo técnico de inyección diésel y repuestos.",
     ),
-  component: Dashboard,
+  component: AdminDashboardPage,
 });
 
-function Dashboard() {
-  const { products } = useAdminProducts();
-  const metrics = [
-    { label: "Productos", value: products.length, icon: Package },
-    { label: "Visibles", value: products.filter((product) => product.visible).length, icon: Eye },
-    {
-      label: "Categorías",
-      value: new Set(products.map((product) => product.category)).size,
-      icon: Tags,
-    },
-    {
-      label: "A cotizar",
-      value: products.filter((product) => product.price === null).length,
-      icon: FileQuestion,
-    },
-  ];
+function AdminDashboardPage() {
   return (
-    <>
-      <p className="eyebrow mb-2 text-muted-foreground">Administración / Resumen</p>
-      <h1 className="font-display text-3xl font-bold">Dashboard</h1>
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {metrics.map((metric) => (
-          <article key={metric.label} className="rounded-lg border border-border bg-card p-6">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-xs font-semibold text-muted-foreground">{metric.label}</span>
-              <metric.icon className="size-5 text-primary" />
-            </div>
-            <p className="mt-5 font-display text-4xl font-bold">{metric.value}</p>
-          </article>
-        ))}
-      </div>
-      <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-y border-border py-6">
-        <h2 className="font-display text-xl font-semibold">Catálogo de productos</h2>
-        <Button variant="industrial" asChild>
-          <Link to="/admin">
-            Gestionar productos
-            <ArrowRight />
-          </Link>
-        </Button>
-      </div>
-    </>
+    <div className="space-y-6">
+      <header>
+        <p className="eyebrow mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Administración / Indicadores
+        </p>
+        <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
+          Dashboard
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Resumen cuantitativo del inventario, taxonomías y fabricantes registrados en el catálogo.
+        </p>
+      </header>
+
+      <DashboardMetrics />
+    </div>
   );
 }

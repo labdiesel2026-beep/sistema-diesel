@@ -87,6 +87,7 @@ export function ProductFormModal({
   const [fieldErrors, setFieldErrors] = useState<ProductFormErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isUploadingImage, setIsUploadingImage] = useState<boolean>(false);
 
   // Sincronizar estado cuando se abre el modal o cambia el producto a editar
   useEffect(() => {
@@ -123,6 +124,7 @@ export function ProductFormModal({
       setFieldErrors({});
       setFormError(null);
       setIsSubmitting(false);
+      setIsUploadingImage(false);
     }
   }, [open, productToEdit]);
 
@@ -234,7 +236,7 @@ export function ProductFormModal({
 
     try {
       if (isEditing && productToEdit) {
-        const result = updateProduct(productToEdit.id, payload);
+        const result = await updateProduct(productToEdit.id, payload);
         if (result.success) {
           onOpenChange(false);
           onSuccess?.();
@@ -242,7 +244,7 @@ export function ProductFormModal({
           setFormError(result.reason || "Error al actualizar el producto.");
         }
       } else {
-        const result = createProduct(payload);
+        const result = await createProduct(payload);
         if (result.success) {
           onOpenChange(false);
           onSuccess?.();
@@ -303,8 +305,9 @@ export function ProductFormModal({
             <ProductImageUpload
               value={imageUrl}
               onChange={handleImageChange}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isUploadingImage}
               error={fieldErrors.imageUrl}
+              onUploadingChange={setIsUploadingImage}
             />
             {fieldErrors.imageUrl && (
               <p
@@ -646,7 +649,7 @@ export function ProductFormModal({
             <Button
               type="submit"
               variant="industrial"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isUploadingImage}
               data-testid="product-form-submit-btn"
               className="min-w-32 cursor-pointer"
             >
@@ -654,6 +657,11 @@ export function ProductFormModal({
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />
                   Guardando...
+                </>
+              ) : isUploadingImage ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Subiendo imagen...
                 </>
               ) : isEditing ? (
                 "Guardar Cambios"

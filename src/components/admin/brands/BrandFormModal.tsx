@@ -103,7 +103,7 @@ export function BrandFormModal({
     try {
       if (isEditing && brandToEdit) {
         // Actualización relacional por UUID (CA-12.4, CL-09)
-        const result = updateBrand(brandToEdit.id, { name });
+        const result = await updateBrand(brandToEdit.id, { name });
         if (result.success) {
           onOpenChange(false);
           onSuccess?.();
@@ -112,7 +112,7 @@ export function BrandFormModal({
         }
       } else {
         // Creación de nueva marca (CA-12.1, CA-12.2)
-        const result = createBrand({ name });
+        const result = await createBrand({ name });
         if (result.success) {
           onOpenChange(false);
           onSuccess?.();

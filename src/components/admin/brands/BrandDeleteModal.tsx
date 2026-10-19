@@ -52,7 +52,7 @@ export function BrandDeleteModal({
     setIsDeleting(true);
 
     try {
-      const res = deleteBrand(brand.id);
+      const res = await deleteBrand(brand.id);
       if (res.success) {
         onOpenChange(false);
         onSuccess?.();

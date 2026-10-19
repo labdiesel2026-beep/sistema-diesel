@@ -60,11 +60,11 @@ export function ProductTable({
       })
     : baseProducts;
 
-  const handleToggle = (product: AdminProduct) => {
+  const handleToggle = async (product: AdminProduct) => {
     if (onToggleVisibility) {
       onToggleVisibility(product);
     } else {
-      toggleVisibility(product.id);
+      await toggleVisibility(product.id);
     }
   };
 

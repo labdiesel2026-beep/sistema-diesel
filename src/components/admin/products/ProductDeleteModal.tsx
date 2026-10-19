@@ -47,7 +47,7 @@ export function ProductDeleteModal({
     setIsDeleting(true);
 
     try {
-      const res = deleteProduct(product.id);
+      const res = await deleteProduct(product.id);
       if (res.success) {
         onOpenChange(false);
         onSuccess?.();

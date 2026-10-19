@@ -5,13 +5,8 @@ import type {
 } from "@/types/admin";
 
 /**
- * Datos semilla iniciales normalizados con identificadores UUIDv4.
+ * Fixtures de prueba para tests unitarios aislados en Vitest.
  * (RF-15, CA-15.1, D-14)
- *
- * Cumple estrictamente con:
- * - 3 categorías padre y 2 hijas (1 nivel exacto de jerarquía, sin ciclos ni huérfanos).
- * - 3 marcas líderes con UUID propio.
- * - 4 productos de prueba combinando estados (visibles, ocultos, con precio ARS, precio $0 y precio null).
  */
 
 export const INITIAL_CATEGORIES: AdminCategory[] = [
@@ -129,10 +124,6 @@ export interface AdminSeedData {
   products: AdminProduct[];
 }
 
-/**
- * Retorna una copia profunda de los datos semilla iniciales para aislar
- * mutaciones entre instancias de contexto o pruebas automatizadas.
- */
 export function getInitialAdminData(): AdminSeedData {
   return {
     categories: INITIAL_CATEGORIES.map((c) => ({ ...c })),

@@ -13,8 +13,8 @@ export function AdminHeader({ collapsed, onToggleSidebar }: AdminHeaderProps) {
   const { user, logout } = useAdminAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate({ to: "/admin/login", replace: true });
   };
 

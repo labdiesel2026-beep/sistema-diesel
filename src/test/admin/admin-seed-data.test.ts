@@ -4,13 +4,13 @@ import {
   INITIAL_BRANDS,
   INITIAL_PRODUCTS,
   getInitialAdminData,
-} from "@/lib/admin-seed-data";
+} from "@/test/fixtures/admin-fixtures";
 
 // Expresión regular canónica para UUIDv4 estándar
 const UUIDV4_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-describe("Datos Semilla Normalizados con UUIDv4 (admin-seed-data.ts) — Tarea 4.1", () => {
+describe("Datos Semilla y Fixtures de Prueba con UUIDv4 — Tarea 4.1 y 8.5", () => {
   describe("Validación de Identificadores UUIDv4 (D-14, CA-15.1)", () => {
     it("todos los IDs de categorías deben ser UUIDv4 válidos", () => {
       expect(INITIAL_CATEGORIES.length).toBeGreaterThan(0);

@@ -4,7 +4,7 @@ import { SITE_CONFIG } from "@/config/site-config";
 describe("Módulo de Configuración Centralizada (site-config.ts)", () => {
   it("contiene los datos de contacto y ubicación física requeridos", () => {
     // Validación del teléfono oficial (Placeholder pendiente DA-01)
-    expect(SITE_CONFIG.phone).toBe("5491112345678");
+    expect(SITE_CONFIG.phone).toBe("5492657659108");
 
     // Validación de la dirección física (RF-05, DA-02)
     expect(SITE_CONFIG.address).toContain(

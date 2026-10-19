@@ -52,12 +52,14 @@ El catálogo comprende productos y repuestos, incluidos inyectores y bombas. Los
 - **Cuando** se muestre el catálogo, **el sistema deberá** incluir únicamente productos que estén publicados como visibles.
 - **Cuando** un producto no esté visible, **el sistema deberá** excluirlo del listado público y de los resultados de búsqueda y filtrado.
 - **Cuando** no haya productos visibles, **el sistema deberá** mostrar un estado informativo que indique que el catálogo no tiene productos para mostrar.
+- **Cuando** falle la carga del catálogo, **el sistema deberá** mostrar el mensaje amigable “Error temporal al cargar el catálogo” y una acción para reintentar la carga mediante un Error Boundary del catálogo.
 
 ### RF-03 — Búsqueda de productos
 
 **Criterios de aceptación (EARS):**
 
-- **Cuando** el visitante ingrese un término de búsqueda, **el sistema deberá** buscar coincidencias en el nombre del producto, el código OEM, la marca y la compatibilidad de marca o modelo de vehículo, cuando esos datos existan.
+- **Cuando** el visitante ingrese un término de búsqueda, **el sistema deberá** encontrar coincidencias parciales, sin distinguir mayúsculas de minúsculas ni acentos, en el nombre del producto, el código OEM, la marca y la compatibilidad de marca o modelo de vehículo, cuando esos datos existan.
+- **Cuando** un término coincida con el código OEM y con otros campos, **el sistema deberá** priorizar los productos coincidentes por código OEM en los resultados.
 - **Cuando** el visitante modifique o limpie el término de búsqueda, **el sistema deberá** actualizar los resultados de acuerdo con el término vigente.
 - **Cuando** haya un término de búsqueda activo y el visitante seleccione filtros, **el sistema deberá** combinar ambos criterios para determinar los resultados.
 
@@ -66,8 +68,8 @@ El catálogo comprende productos y repuestos, incluidos inyectores y bombas. Los
 **Criterios de aceptación (EARS):**
 
 - **Cuando** el visitante seleccione una marca, **el sistema deberá** limitar los resultados a productos asociados con esa marca.
-- **Cuando** el visitante seleccione una categoría o subcategoría, **el sistema deberá** limitar los resultados a productos asociados con la selección.
-- **Cuando** el visitante combine una búsqueda, una marca y una o más selecciones de categoría, **el sistema deberá** mostrar únicamente los productos que satisfagan los criterios activos.
+- **Cuando** el visitante seleccione una o más categorías o subcategorías, **el sistema deberá** incluir productos asociados con cualquiera de esas selecciones (OR entre categorías).
+- **Cuando** el visitante combine una búsqueda, una marca y una o más selecciones de categoría, **el sistema deberá** aplicar AND entre el texto de búsqueda, la marca seleccionada y el conjunto de categorías seleccionadas.
 - **Cuando** el visitante quite un filtro, **el sistema deberá** actualizar los resultados conservando los demás criterios vigentes.
 
 ### RF-05 — Estado sin resultados
@@ -77,14 +79,16 @@ El catálogo comprende productos y repuestos, incluidos inyectores y bombas. Los
 - **Cuando** la búsqueda o combinación de filtros no produzca coincidencias, **el sistema deberá** indicar claramente que no se encontraron productos.
 - **Cuando** no haya resultados, **el sistema deberá** ofrecer una acción para consultar al taller por WhatsApp acerca de la pieza buscada.
 - **Cuando** el visitante use esa acción, **el sistema deberá** iniciar una consulta que preserve el texto de búsqueda disponible, si lo hubiera, para dar contexto al taller.
+- **Cuando** no haya resultados debido a filtros activos, **el sistema deberá** incluir en el contexto del mensaje las marcas y categorías o subcategorías filtradas.
 
 ### RF-06 — Tarjetas y ficha técnica
 
 **Criterios de aceptación (EARS):**
 
-- **Cuando** se muestren resultados, **el sistema deberá** presentar en cada tarjeta información suficiente para identificar el producto y abrir su ficha.
+- **Cuando** se muestren resultados, **el sistema deberá** presentar en cada tarjeta, como mínimo, la imagen del producto o un placeholder, el nombre, el código OEM cuando exista, el precio o la leyenda “Consultar precio” y un botón de acción.
 - **Cuando** el visitante abra un producto visible, **el sistema deberá** mostrar su ficha técnica con los datos disponibles: nombre, imagen, descripción, marca, categoría o categorías, código OEM, compatibilidad vehicular y condición de la pieza.
-- **Cuando** alguno de esos datos opcionales no esté informado, **el sistema deberá** omitirlo o indicar que no fue informado sin presentar un valor inventado.
+- **Cuando** la imagen de un producto no esté disponible, **el sistema deberá** mostrar un placeholder genérico “Imagen no disponible” en formato SVG local.
+- **Cuando** alguno de los demás datos opcionales no esté informado, **el sistema deberá** omitirlo o indicar que no fue informado sin presentar un valor inventado.
 - **Cuando** el visitante solicite una consulta directa desde una ficha, **el sistema deberá** ofrecer una acción de WhatsApp identificada con ese producto.
 
 ### RF-07 — Presentación del precio
@@ -100,17 +104,20 @@ El catálogo comprende productos y repuestos, incluidos inyectores y bombas. Los
 **Criterios de aceptación (EARS):**
 
 - **Cuando** el visitante agregue un producto visible al carrito, **el sistema deberá** incorporarlo al resumen de consulta, tanto si tiene precio publicado como si requiere cotización.
+- **Cuando** el visitante agregue nuevamente un producto que ya está en el carrito, **el sistema deberá** incrementar su cantidad en una unidad y mantenerlo en una única línea.
 - **Cuando** el visitante actualice la cantidad de un producto, **el sistema deberá** reflejar la cantidad elegida en el resumen.
 - **Cuando** el visitante quite un producto o vacíe el carrito, **el sistema deberá** actualizar el resumen para reflejar el cambio.
 - **Cuando** el visitante recargue la página, **el sistema deberá** conservar la selección del carrito para permitirle retomar la consulta.
 - **Cuando** el carrito no contenga productos, **el sistema deberá** indicar que está vacío y no deberá ofrecer el envío de un pedido vacío.
 - **Cuando** el visitante agregue o cambie cantidades, **el sistema no deberá** descontar, reservar ni limitar cantidades por existencias.
+- **Cuando** el visitante agregue productos al carrito, **el sistema no deberá** imponer un límite máximo al número de productos distintos que puede contener.
 
 ### RF-09 — Consulta directa por un producto
 
 **Criterios de aceptación (EARS):**
 
 - **Cuando** el visitante elija consultar un producto desde su ficha, **el sistema deberá** abrir WhatsApp con un mensaje que identifique el producto y, cuando existan, su código OEM y su precio público o la indicación “A cotizar”.
+- **Cuando** el visitante consulte directamente un producto desde su ficha, **el sistema deberá** asumir e incluir una cantidad de una unidad en el mensaje y no deberá solicitar que el visitante elija la cantidad en la ficha.
 - **Cuando** el visitante inicie una consulta directa, **el sistema no deberá** exigirle crear una cuenta ni completar un formulario previo.
 
 ### RF-10 — Envío de una consulta desde el carrito
@@ -118,6 +125,9 @@ El catálogo comprende productos y repuestos, incluidos inyectores y bombas. Los
 **Criterios de aceptación (EARS):**
 
 - **Cuando** el visitante elija enviar un carrito no vacío, **el sistema deberá** abrir WhatsApp con un mensaje estructurado que incluya cada producto, su cantidad, su código OEM si existe y su precio unitario público o la indicación “A cotizar”.
+- **Cuando** el sistema prepare el enlace de WhatsApp, **el sistema deberá** obtener los datos y precios vigentes de los productos desde la base de datos o desde una caché de catálogo actualizada al momento de preparar el enlace, y no deberá usar datos obsoletos del caché local del carrito.
+- **Cuando** no se pueda obtener un precio vigente para un producto del carrito, **el sistema no deberá** reutilizar un precio posiblemente desactualizado y **deberá** identificarlo como “A cotizar”.
+- **Cuando** el visitante envíe una consulta que exceda el límite de caracteres que WhatsApp admite, **el sistema no deberá** imponer un límite propio de productos; el límite y el comportamiento del mensaje corresponderán a WhatsApp.
 - **Cuando** el visitante inicie el envío desde el carrito, **el sistema no deberá** exigirle crear una cuenta ni completar un formulario previo.
 - **Cuando** el visitante elija la acción de envío, **el sistema deberá** dejar que WhatsApp presente el mensaje para que el visitante lo revise y decida enviarlo; el sitio no deberá comunicar que la consulta es una compra confirmada.
 
@@ -125,15 +135,16 @@ El catálogo comprende productos y repuestos, incluidos inyectores y bombas. Los
 
 **Criterios de aceptación (EARS):**
 
-- **Cuando** un producto ya incorporado al carrito deje de estar visible en el catálogo, **el sistema deberá** mantenerlo en el resumen de esa consulta y señalar que su vigencia o disponibilidad debe reconfirmarse con el taller.
-- **Cuando** el visitante decida enviar un carrito que contiene un producto que dejó de estar visible, **el sistema deberá** conservar esa advertencia en el contexto de la consulta y permitir que el visitante la envíe a WhatsApp.
-- **Cuando** el visitante consulte un producto desde una ficha que ya no esté visible, **el sistema deberá** evitar presentarlo como disponible para una nueva selección y deberá informar que requiere reconfirmación.
+- **Cuando** un producto ya incorporado al carrito deje de estar visible en el catálogo, **el sistema deberá** mantenerlo en el resumen de esa consulta y señalar su “Vigencia en catálogo” como pendiente de reconfirmación con el taller, sin mostrar stock ni existencias.
+- **Cuando** el visitante decida enviar un carrito que contiene un producto cuya vigencia en catálogo requiere reconfirmación, **el sistema deberá** conservar esa advertencia en el contexto de la consulta y permitir que el visitante la envíe a WhatsApp.
+- **Cuando** el visitante acceda mediante enlace directo a un producto oculto, eliminado o inexistente, **el sistema deberá** mostrar una pantalla de “Producto no disponible” en lugar de la ficha y no deberá ofrecerlo para una nueva selección.
 
 ### RF-12 — Catálogo sin información pública de stock
 
 **Criterios de aceptación (EARS):**
 
 - **Cuando** el visitante navegue el catálogo o el carrito, **el sistema no deberá** mostrar cantidades de existencias ni indicadores públicos de stock o disponibilidad.
+- **Cuando** el sistema informe que un producto dejó de estar visible, **el sistema deberá** describir únicamente su vigencia en el catálogo y no deberá presentarla como información de stock o existencias.
 - **Cuando** el visitante envíe una consulta, **el sistema deberá** comunicar que se trata de una solicitud de información y no de una reserva de existencias.
 
 ## 5. Requisitos No Funcionales
@@ -146,6 +157,7 @@ El catálogo comprende productos y repuestos, incluidos inyectores y bombas. Los
 | **RNF-04** | Accesibilidad y claridad | Los controles de búsqueda, filtros, cantidades y consulta deberán tener nombres comprensibles, permitir su uso mediante teclado y presentar estados, errores y cambios de resultados de manera perceptible. Las imágenes deberán contar con descripciones alternativas apropiadas. |
 | **RNF-05** | Comunicación veraz | El catálogo y el mensaje de WhatsApp deberán distinguir una consulta de una compra confirmada, no prometer existencias y presentar precios únicamente bajo las condiciones definidas en RF-07. |
 | **RNF-06** | Idioma | Los textos, mensajes de estado y acciones del catálogo deberán estar redactados en español. |
+| **RNF-07** | Persistencia efímera del carrito | El estado del carrito podrá conservarse en una caché efímera del navegador, por ejemplo `localStorage`, para permitir retomar una consulta. Esa persistencia será descartable y no autoritativa; no reemplazará ni contradecirá la base de datos como fuente de verdad. Los datos vigentes de productos y precios se actualizarán al preparar el enlace de WhatsApp. |
 
 ## 6. Casos Límite
 
@@ -153,14 +165,17 @@ El catálogo comprende productos y repuestos, incluidos inyectores y bombas. Los
 |:---|:---|:---|
 | **CL-01** | No existen productos visibles. | Mostrar el estado vacío del catálogo sin presentar productos ocultos. |
 | **CL-02** | La búsqueda o los filtros no encuentran coincidencias. | Mostrar el estado sin resultados y ofrecer una consulta por WhatsApp contextualizada con el término de búsqueda cuando exista. |
-| **CL-03** | Un producto no tiene imagen o alguno de sus datos opcionales. | La ficha debe seguir siendo comprensible; no se debe inventar ni mostrar información vacía como si fuera un dato real. |
+| **CL-03** | Un producto no tiene imagen o alguno de sus datos opcionales. | Si falta la imagen, mostrar el placeholder SVG local “Imagen no disponible”. Para los demás datos opcionales, no inventar ni mostrar información vacía como si fuera un dato real. |
 | **CL-04** | El precio del producto no se publica. | Mostrar “Consultar precio” en tarjeta y ficha; al incluirlo en una consulta, identificarlo como “A cotizar”. |
 | **CL-05** | El visitante recarga la página con productos en el carrito. | La selección debe conservarse para que pueda retomar la consulta. |
-| **CL-06** | Un producto del carrito deja de estar visible. | Conservarlo en el resumen de consulta, advertir que requiere reconfirmación y permitir incluirlo en el mensaje de WhatsApp. |
+| **CL-06** | Un producto del carrito deja de estar visible. | Conservarlo en el resumen de consulta, mostrar “Vigencia en catálogo: requiere reconfirmación” y permitir incluirlo en el mensaje de WhatsApp, sin exponer stock ni existencias. |
 | **CL-07** | El visitante intenta enviar un carrito vacío. | No iniciar un envío de pedido y mostrar que primero debe agregar productos. |
 | **CL-08** | WhatsApp no está instalado o no está disponible en el dispositivo. | El sitio no debe afirmar que el mensaje fue entregado; debe dejar que el dispositivo o navegador gestione la apertura del enlace y mantener accesible la información del carrito en el sitio. |
-| **CL-09** | El contenido del mensaje contiene caracteres especiales o es extenso. | El contenido debe conservarse de forma legible al iniciar la consulta; el sitio no debe alterar nombres o referencias técnicas. |
+| **CL-09** | El contenido del mensaje contiene caracteres especiales o excede el límite aceptado por WhatsApp. | El contenido debe conservarse de forma legible al iniciar la consulta; el sitio no debe alterar nombres o referencias técnicas ni imponer un límite propio de productos. WhatsApp determina el límite de caracteres y el comportamiento de la apertura del mensaje. |
 | **CL-10** | El visitante ingresa una cantidad no válida o menor que una unidad. | No permitir que se use esa cantidad en el resumen o en el mensaje de consulta; informar cómo corregirla. |
+| **CL-11** | Falla la carga del catálogo. | Mostrar “Error temporal al cargar el catálogo” y una acción para reintentar la carga mediante el Error Boundary del catálogo. |
+| **CL-12** | El visitante accede por enlace directo a un producto oculto, eliminado o inexistente. | Mostrar la pantalla “Producto no disponible” y no presentar la ficha técnica ni permitir una nueva selección. |
+| **CL-13** | Un producto del carrito fue eliminado o sus datos ya no están disponibles en el catálogo vigente. | Mantenerlo identificable en la consulta, marcar su vigencia en catálogo para reconfirmación y no reutilizar precios locales posiblemente desactualizados. |
 
 ## 7. Fuera de Alcance
 
@@ -179,25 +194,23 @@ La especificación se considerará implementada cuando se verifique que:
 
 1. El catálogo conserva el layout, la navegación, el pie de página y la identidad visual de las Specs 001 y 002.
 2. Solo aparecen productos visibles, y el estado vacío se presenta correctamente cuando no hay productos publicados.
-3. La búsqueda encuentra productos por nombre, código OEM, marca y compatibilidad vehicular cuando esos datos están presentes.
-4. Los filtros por marca y categoría funcionan individualmente y combinados con la búsqueda, y se pueden quitar sin perder otros criterios activos.
-5. El estado sin resultados ofrece una consulta contextualizada por WhatsApp.
-6. La ficha muestra los datos disponibles y maneja claramente los campos opcionales no informados.
+3. La búsqueda parcial ignora mayúsculas, minúsculas y acentos, y prioriza coincidencias por código OEM.
+4. Los filtros por marca y categoría funcionan individualmente y combinados con AND entre búsqueda y marca y OR entre las categorías seleccionadas.
+5. El estado sin resultados ofrece una consulta contextualizada con el término y, cuando correspondan, las marcas y categorías filtradas.
+6. Las tarjetas muestran imagen o placeholder, nombre, OEM cuando exista, precio o “Consultar precio” y un botón de acción; la ficha muestra los datos disponibles.
 7. El precio se muestra solo cuando está habilitado; en los demás casos se muestra “Consultar precio” y el carrito identifica el producto como “A cotizar”.
-8. El visitante puede iniciar una consulta directa de un producto o reunir varios productos en un carrito, modificar cantidades y quitar productos.
-9. La selección del carrito sobrevive a una recarga y un carrito vacío no puede enviarse como pedido.
-10. El mensaje de WhatsApp para una consulta directa o de carrito incluye los datos especificados y no presenta la consulta como compra confirmada.
-11. Un producto que deja de estar visible después de agregarse al carrito permanece con advertencia de reconfirmación y puede incluirse en la consulta.
-12. No se publica información de stock, no se reservan existencias y no se imponen límites de cantidad basados en ellas.
-13. Los estados de error y los controles son comprensibles y usables en móvil y escritorio, mediante teclado y tecnologías de asistencia.
-14. La búsqueda y los filtros cumplen el objetivo de actualización de resultados definido en RNF-03 bajo condiciones normales de conexión.
+8. El visitante puede iniciar una consulta directa asumiendo una unidad, o reunir varios productos en un carrito, modificar cantidades y quitar productos.
+9. Al volver a agregar un producto al carrito, se incrementa su cantidad en una única línea; no existe un límite impuesto por el sistema al número de productos distintos.
+10. La selección del carrito sobrevive a una recarga mediante caché local efímera y no autoritativa; un carrito vacío no puede enviarse como pedido.
+11. Antes de preparar el enlace de WhatsApp se actualizan los datos y precios con la información vigente disponible, y el mensaje no presenta la consulta como compra confirmada.
+12. Un producto que deja de estar visible permanece en el carrito con advertencia de vigencia en catálogo; un acceso directo a producto oculto, eliminado o inexistente muestra “Producto no disponible”.
+13. No se publica información de stock ni se reservan existencias.
+14. Si falla la carga del catálogo, se muestra el mensaje de error temporal y la acción de reintento.
+15. Los estados de error y los controles son comprensibles y usables en móvil y escritorio, mediante teclado y tecnologías de asistencia.
+16. La búsqueda y los filtros cumplen el objetivo de actualización de resultados definido en RNF-03 bajo condiciones normales de conexión.
 
 ## 9. Dudas Abiertas
 
 | ID | Duda | Estado |
 |:---|:---|:---|
-| **DA-01** | ¿Cuál es el número oficial de WhatsApp que deberá recibir las consultas? La Spec 002 también lo deja pendiente y deberá resolverse antes de publicar los enlaces comerciales. | **[NECESITA ACLARACIÓN]** |
-| **DA-02** | Si el mismo producto se agrega varias veces al carrito, ¿se debe consolidar en una sola línea incrementando su cantidad o conservar líneas separadas? | **[NECESITA ACLARACIÓN]** |
-| **DA-03** | ¿Qué regla exacta de coincidencia espera el negocio para las búsquedas (por ejemplo, coincidencia parcial, tolerancia a acentos o prioridad de código OEM)? | **[NECESITA ACLARACIÓN]** |
-| **DA-04** | ¿Debe existir un límite máximo de productos distintos por consulta? El SRS no define un límite. | **[NECESITA ACLARACIÓN]** |
-| **DA-05** | La consulta directa se entiende iniciada con una unidad del producto; confirmar si el visitante también debe elegir cantidad desde la ficha antes de abrir WhatsApp. | **[NECESITA ACLARACIÓN]** |
+| **DA-01** | Número oficial de WhatsApp para las consultas. | **Resuelta:** se utilizará el número de la constante inmutable definida en `site-config.ts` en la Spec 002. |

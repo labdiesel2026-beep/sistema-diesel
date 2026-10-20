@@ -10,7 +10,8 @@
  * - Enlace directo pre-formateado a WhatsApp con generateDirectProductWhatsAppUrl().
  */
 
-import { ShoppingCart, Check, MessageCircle, ArrowRight } from "lucide-react";
+import { ShoppingCart, Check } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { ProductImageWithFallback } from "@/components/catalog/ProductImageWithFallback";
 import { useCatalogCart } from "@/context/catalog-cart-context";
@@ -44,7 +45,7 @@ export function ProductCard({
 
   return (
     <article
-      className={`group flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-shadow hover:shadow-md ${className}`}
+      className={`group flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-xl ${className}`}
       data-testid={`product-card-${product.id}`}
     >
       {/* Contenedor Multimedia */}
@@ -52,7 +53,7 @@ export function ProductCard({
         <ProductImageWithFallback
           src={product.imageUrl}
           alt={product.name}
-          className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
         />
 
         {/* Badge de Marca */}
@@ -144,7 +145,7 @@ export function ProductCard({
               rel="noopener noreferrer"
               aria-label={`Consultar por ${product.name} en WhatsApp`}
             >
-              <MessageCircle className="size-4" />
+              <FaWhatsapp className="size-4 shrink-0" />
               <span>WhatsApp Directo</span>
             </a>
           </Button>

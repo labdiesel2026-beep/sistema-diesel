@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Wrench, Gauge, Activity, Package, CheckCircle, type LucideIcon } from "lucide-react";
 import { SITE_CONFIG } from "@/config/site-config";
 
@@ -21,7 +22,13 @@ export function ServicesSection({ className = "" }: ServicesSectionProps) {
     >
       <div className="site-container">
         {/* Encabezado de la sección */}
-        <div className="mx-auto max-w-2xl text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="mx-auto max-w-2xl text-center"
+        >
           <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3.5 py-1 text-xs font-semibold text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300">
             <CheckCircle className="size-3.5 text-blue-600 dark:text-blue-400" />
             Servicios Especializados
@@ -36,17 +43,21 @@ export function ServicesSection({ className = "" }: ServicesSectionProps) {
             Diagnóstico avanzado y reparación integral con instrumental de última generación para
             motores diésel livianos, medianos y pesados.
           </p>
-        </div>
+        </motion.div>
 
         {/* Grilla responsiva de servicios (1 col móvil, 2 tablet, 4 desktop) */}
         <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {SITE_CONFIG.services.map((service) => {
+          {SITE_CONFIG.services.map((service, index) => {
             const IconComponent = ICON_MAP[service.icon] ?? Wrench;
 
             return (
-              <article
+              <motion.article
                 key={service.id}
-                className="group relative flex flex-col justify-between rounded-xl border border-slate-200/80 bg-card p-6 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-950/5 dark:border-slate-800 dark:bg-slate-900"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
+                className="group relative flex flex-col justify-between rounded-xl border border-slate-200/80 bg-card p-6 shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:border-blue-500 hover:ring-1 hover:ring-blue-500/50 hover:shadow-[0_0_25px_-5px_rgba(59,130,246,0.35)] dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-400 dark:hover:ring-blue-400/50 dark:hover:shadow-[0_0_30px_-5px_rgba(96,165,250,0.3)]"
               >
                 <div>
                   {/* Contenedor del ícono técnico */}
@@ -69,7 +80,7 @@ export function ServicesSection({ className = "" }: ServicesSectionProps) {
                 <div className="mt-6 border-t border-slate-100 pt-4 text-xs font-semibold text-blue-600 dark:border-slate-800 dark:text-blue-400">
                   Calidad garantizada
                 </div>
-              </article>
+              </motion.article>
             );
           })}
         </div>
@@ -77,3 +88,5 @@ export function ServicesSection({ className = "" }: ServicesSectionProps) {
     </section>
   );
 }
+
+export default ServicesSection;

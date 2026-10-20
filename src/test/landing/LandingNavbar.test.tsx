@@ -32,16 +32,18 @@ describe("Barra de Navegación (LandingNavbar.tsx)", () => {
     expect(images.length).toBe(0);
   });
 
-  it("renderiza los 5 enlaces áncora de navegación y el enlace a /catalogo (RF-01)", () => {
+  it("renderiza los 4 enlaces áncora de navegación y el enlace a /catalogo (RF-01)", () => {
     render(<LandingNavbar />);
 
-    // Enlaces áncora requeridos por RF-01
-    const expectedAnchors = ["#inicio", "#servicios", "#garantias", "#ubicacion", "#contacto"];
+    // Enlaces áncora requeridos (Contacto removido)
+    const expectedAnchors = ["#inicio", "#servicios", "#garantias", "#ubicacion"];
 
     for (const anchor of expectedAnchors) {
       const anchorElement = document.querySelector(`a[href="${anchor}"]`);
       expect(anchorElement).toBeInTheDocument();
     }
+
+    expect(document.querySelector('a[href="#contacto"]')).not.toBeInTheDocument();
 
     // Enlace al catálogo
     const catalogLink = document.querySelector('a[href="/catalogo"]');

@@ -50,7 +50,6 @@ export const SITE_CONFIG = {
     { label: "Servicios", href: "#servicios" },
     { label: "Garantías", href: "#garantias" },
     { label: "Ubicación", href: "#ubicacion" },
-    { label: "Contacto", href: "#contacto" },
   ] as const satisfies readonly NavLinkItem[],
 
   // Mensajes pre-formateados de WhatsApp (RF-04, RF-06, RF-07)

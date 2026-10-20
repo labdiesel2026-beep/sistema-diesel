@@ -12,9 +12,10 @@
  */
 
 import { useState, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { FaWhatsapp } from "react-icons/fa";
 import {
   ShoppingCart,
-  MessageCircle,
   Plus,
   Minus,
   Trash2,
@@ -128,7 +129,7 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
       >
         {/* Cabecera del Carrito */}
         <SheetHeader className="border-b border-border px-6 py-5 text-left">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between pr-10">
             <SheetTitle className="flex items-center gap-2.5 font-display text-xl">
               <ShoppingCart className="size-5 text-primary" />
               <span>Tu Carrito de Consultas</span>
@@ -189,117 +190,124 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
               </p>
             </div>
           ) : (
-            displayedItems.map((item) => (
-              <article
-                key={item.productId}
-                className="flex gap-4 py-5"
-                data-testid={`cart-item-${item.productId}`}
-              >
-                {/* Imagen del Ítem */}
-                <div className="size-20 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
-                  <ProductImageWithFallback
-                    src={item.imageUrl}
-                    alt={item.name}
-                    className="size-full object-cover"
-                  />
-                </div>
-
-                {/* Detalles Técnicos */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                    {item.brandName && (
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
-                        {item.brandName}
-                      </span>
-                    )}
-                    <span className="rounded-md border border-border bg-muted px-1.5 py-0.2 text-[10px] font-semibold text-muted-foreground">
-                      {item.condition}
-                    </span>
+            <AnimatePresence initial={false}>
+              {displayedItems.map((item) => (
+                <motion.article
+                  key={item.productId}
+                  layout
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className="flex gap-4 py-5 overflow-hidden"
+                  data-testid={`cart-item-${item.productId}`}
+                >
+                  {/* Imagen del Ítem */}
+                  <div className="size-20 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+                    <ProductImageWithFallback
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className="size-full object-cover"
+                    />
                   </div>
 
-                  <h4 className="font-display text-base font-semibold leading-tight text-foreground line-clamp-2">
-                    {item.name}
-                  </h4>
-
-                  {item.oem && (
-                    <p className="mt-1 font-mono text-xs text-muted-foreground">OEM {item.oem}</p>
-                  )}
-
-                  {/* Advertencia Específica de Vigencia */}
-                  {item.requiresReconfirmation && (
-                    <div
-                      className="mt-1.5 inline-flex items-center gap-1 rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:text-amber-400"
-                      data-testid={`badge-reconfirmation-${item.productId}`}
-                    >
-                      <AlertTriangle className="size-3" />
-                      <span>Requiere reconfirmación</span>
+                  {/* Detalles Técnicos */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                      {item.brandName && (
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
+                          {item.brandName}
+                        </span>
+                      )}
+                      <span className="rounded-md border border-border bg-muted px-1.5 py-0.2 text-[10px] font-semibold text-muted-foreground">
+                        {item.condition}
+                      </span>
                     </div>
-                  )}
 
-                  {/* Precio / A cotizar */}
-                  <div className="mt-2 text-sm font-bold text-foreground">
-                    {item.requiresReconfirmation ? (
-                      <span className="text-muted-foreground">A cotizar</span>
-                    ) : item.showPrice && item.price !== null ? (
-                      <span>
-                        {formatPrice(item.price * item.quantity)}
-                        {item.quantity > 1 && (
-                          <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                            ({formatPrice(item.price)} c/u)
-                          </span>
-                        )}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">A cotizar</span>
+                    <h4 className="font-display text-base font-semibold leading-tight text-foreground line-clamp-2">
+                      {item.name}
+                    </h4>
+
+                    {item.oem && (
+                      <p className="mt-1 font-mono text-xs text-muted-foreground">OEM {item.oem}</p>
                     )}
-                  </div>
 
-                  {/* Controles de Cantidad y Eliminación */}
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center rounded-lg border border-border bg-card">
+                    {/* Advertencia Específica de Vigencia */}
+                    {item.requiresReconfirmation && (
+                      <div
+                        className="mt-1.5 inline-flex items-center gap-1 rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:text-amber-400"
+                        data-testid={`badge-reconfirmation-${item.productId}`}
+                      >
+                        <AlertTriangle className="size-3" />
+                        <span>Requiere reconfirmación</span>
+                      </div>
+                    )}
+
+                    {/* Precio / A cotizar */}
+                    <div className="mt-2 text-sm font-bold text-foreground">
+                      {item.requiresReconfirmation ? (
+                        <span className="text-muted-foreground">A cotizar</span>
+                      ) : item.showPrice && item.price !== null ? (
+                        <span>
+                          {formatPrice(item.price * item.quantity)}
+                          {item.quantity > 1 && (
+                            <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                              ({formatPrice(item.price)} c/u)
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">A cotizar</span>
+                      )}
+                    </div>
+
+                    {/* Controles de Cantidad y Eliminación */}
+                    <div className="mt-3 flex items-center justify-between">
+                      <div className="flex items-center rounded-lg border border-border bg-card">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 text-foreground hover:bg-muted"
+                          disabled={item.quantity <= 1}
+                          aria-label={`Reducir cantidad de ${item.name}`}
+                          data-testid={`decrease-quantity-${item.productId}`}
+                          onClick={() => changeQuantity(item.productId, -1)}
+                        >
+                          <Minus className="size-3.5" />
+                        </Button>
+                        <span
+                          className="w-8 text-center font-mono text-xs font-bold text-foreground"
+                          data-testid={`quantity-${item.productId}`}
+                        >
+                          {item.quantity}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 text-foreground hover:bg-muted"
+                          aria-label={`Aumentar cantidad de ${item.name}`}
+                          data-testid={`increase-quantity-${item.productId}`}
+                          onClick={() => changeQuantity(item.productId, 1)}
+                        >
+                          <Plus className="size-3.5" />
+                        </Button>
+                      </div>
+
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="size-8 text-foreground hover:bg-muted"
-                        disabled={item.quantity <= 1}
-                        aria-label={`Reducir cantidad de ${item.name}`}
-                        data-testid={`decrease-quantity-${item.productId}`}
-                        onClick={() => changeQuantity(item.productId, -1)}
+                        className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        aria-label={`Eliminar ${item.name} del carrito`}
+                        data-testid={`remove-item-${item.productId}`}
+                        onClick={() => remove(item.productId)}
                       >
-                        <Minus className="size-3.5" />
-                      </Button>
-                      <span
-                        className="w-8 text-center font-mono text-xs font-bold text-foreground"
-                        data-testid={`quantity-${item.productId}`}
-                      >
-                        {item.quantity}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-8 text-foreground hover:bg-muted"
-                        aria-label={`Aumentar cantidad de ${item.name}`}
-                        data-testid={`increase-quantity-${item.productId}`}
-                        onClick={() => changeQuantity(item.productId, 1)}
-                      >
-                        <Plus className="size-3.5" />
+                        <Trash2 className="size-4" />
                       </Button>
                     </div>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                      aria-label={`Eliminar ${item.name} del carrito`}
-                      data-testid={`remove-item-${item.productId}`}
-                      onClick={() => remove(item.productId)}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
                   </div>
-                </div>
-              </article>
-            ))
+                </motion.article>
+              ))}
+            </AnimatePresence>
           )}
         </div>
 
@@ -332,7 +340,7 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
 
             <Button
               variant="whatsapp"
-              className="h-12 w-full gap-2.5 text-sm font-semibold shadow-xs"
+              className="relative overflow-hidden h-12 w-full gap-2.5 text-sm font-semibold shadow-xs"
               asChild
             >
               <a
@@ -341,8 +349,14 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                 rel="noopener noreferrer"
                 aria-label="Enviar pedido del carrito por WhatsApp"
                 data-testid="whatsapp-checkout-button"
+                className="relative overflow-hidden"
               >
-                <MessageCircle className="size-5" />
+                {/* Shimmer Effect */}
+                <div
+                  className="pointer-events-none absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                  aria-hidden="true"
+                />
+                <FaWhatsapp className="size-5 shrink-0" />
                 <span>Consultar por WhatsApp</span>
               </a>
             </Button>

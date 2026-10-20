@@ -222,6 +222,20 @@
     linear-gradient(28deg, transparent 46%, var(--border) 47%, var(--border) 49%, transparent 50%),
     linear-gradient(95deg, transparent 45%, var(--border) 46%, var(--border) 48%, transparent 49%);
 }
+@theme {
+  --animate-shimmer: shimmer 2s infinite linear;
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+}
+.animate-shimmer {
+  animation: var(--animate-shimmer);
+}
 @media (max-width: 767px) {
   .site-container {
     width: calc(100% - 36px);

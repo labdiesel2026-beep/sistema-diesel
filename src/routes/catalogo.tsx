@@ -200,7 +200,7 @@ export function CatalogPage({
 
   return (
     <>
-      <LandingNavbar />
+      <LandingNavbar isCatalog />
 
       <main className="min-h-screen bg-background">
         {/* Hero Section Institucional */}

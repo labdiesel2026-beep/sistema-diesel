@@ -1,4 +1,5 @@
-import { ShieldCheck, CheckCircle2, MessageCircle } from "lucide-react";
+import { ShieldCheck, CheckCircle2 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { SITE_CONFIG } from "@/config/site-config";
 import { buildWhatsAppUrl } from "@/lib/whatsapp-utils";
@@ -61,7 +62,7 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
                 className="h-13 w-full px-6 text-sm font-bold shadow-md sm:w-auto"
               >
                 <a href={warrantyUrl} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="mr-2 size-5" />
+                  <FaWhatsapp className="size-5" />
                   Solicitar Garantía / Soporte
                 </a>
               </Button>

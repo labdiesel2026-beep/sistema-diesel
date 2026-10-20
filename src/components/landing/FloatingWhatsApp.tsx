@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MessageCircle } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { SITE_CONFIG } from "@/config/site-config";
 import { buildWhatsAppUrl } from "@/lib/whatsapp-utils";
 
@@ -11,7 +11,7 @@ interface FloatingWhatsAppProps {
 
 export function FloatingWhatsApp({
   className = "",
-  targetSectionIds = ["garantias", "contacto"],
+  targetSectionIds = ["garantias", "ubicacion"],
 }: FloatingWhatsAppProps) {
   const [isOverlapping, setIsOverlapping] = useState(false);
 
@@ -69,16 +69,24 @@ export function FloatingWhatsApp({
         isOverlapping ? "pointer-events-none translate-y-6 opacity-0" : "translate-y-0 opacity-100"
       } ${className}`}
     >
-      <a
-        href={generalUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Contactar por WhatsApp para consulta general o turnos"
-        className="group flex size-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl shadow-emerald-950/25 transition-transform hover:scale-110 hover:bg-[#20BA5A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 active:scale-95"
-      >
-        <MessageCircle className="size-7" />
-        <span className="sr-only">Contactar por WhatsApp</span>
-      </a>
+      <div className="relative flex items-center justify-center">
+        {/* Capa base: El latido */}
+        <div
+          className="absolute inset-0 rounded-full bg-[#25D366] animate-[ping_2.5s_cubic-bezier(0,0,0.2,1)_infinite] opacity-60"
+          aria-hidden="true"
+        />
+        {/* Capa superior: El botón interactivo estático */}
+        <a
+          href={generalUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Contactar por WhatsApp para consulta general o turnos"
+          className="relative z-10 flex size-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl shadow-emerald-950/25 transition-transform hover:scale-110 hover:bg-[#20BA5A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 active:scale-95"
+        >
+          <FaWhatsapp className="size-7" />
+          <span className="sr-only">Contactar por WhatsApp</span>
+        </a>
+      </div>
     </aside>
   );
 }

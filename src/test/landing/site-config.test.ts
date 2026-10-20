@@ -54,10 +54,11 @@ describe("Módulo de Configuración Centralizada (site-config.ts)", () => {
   });
 
   it("contiene los enlaces áncora de navegación principal", () => {
-    // RF-01, RF-08: Enlaces a secciones
-    const expectedAnchors = ["#inicio", "#servicios", "#garantias", "#ubicacion", "#contacto"];
+    // RF-01, RF-08: Enlaces a secciones activas (Contacto removido)
+    const expectedAnchors = ["#inicio", "#servicios", "#garantias", "#ubicacion"];
     const actualAnchors = SITE_CONFIG.navLinks.map((link) => link.href);
 
+    expect(actualAnchors).toHaveLength(4);
     for (const anchor of expectedAnchors) {
       expect(actualAnchors).toContain(anchor);
     }

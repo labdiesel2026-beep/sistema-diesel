@@ -24,6 +24,28 @@ Object.defineProperty(window, "matchMedia", {
   }),
 });
 
+// Mock de IntersectionObserver para Framer Motion (whileInView) en jsdom
+class GlobalMockIntersectionObserver {
+  readonly root: Element | null = null;
+  readonly rootMargin: string = "";
+  readonly thresholds: ReadonlyArray<number> = [];
+  observe = () => {};
+  unobserve = () => {};
+  disconnect = () => {};
+  takeRecords = () => [];
+}
+
+Object.defineProperty(globalThis, "IntersectionObserver", {
+  writable: true,
+  configurable: true,
+  value: GlobalMockIntersectionObserver,
+});
+Object.defineProperty(window, "IntersectionObserver", {
+  writable: true,
+  configurable: true,
+  value: GlobalMockIntersectionObserver,
+});
+
 // Emulación de datos iniciales exclusiva para tests unitarios aislados
 (globalThis as any).__TEST_ADMIN_INITIAL_DATA__ = {
   brands: [...INITIAL_BRANDS],

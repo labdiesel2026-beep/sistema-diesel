@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ContactSection } from "@/components/landing/ContactSection";
+import { useEffect } from "react";
+import { FeaturedProductsCarousel } from "@/components/landing/FeaturedProductsCarousel";
 import { FloatingWhatsApp } from "@/components/landing/FloatingWhatsApp";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { LandingFooter } from "@/components/landing/LandingFooter";
@@ -37,15 +38,22 @@ export const Route = createFileRoute("/")({
 export function LandingPage() {
   useHashNavigation();
 
+  // Asegurar que la Landing Page siempre inicie en el encabezado (top: 0) a menos que haya un hash explícito
+  useEffect(() => {
+    if (typeof window !== "undefined" && !window.location.hash) {
+      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    }
+  }, []);
+
   return (
     <>
       <LandingNavbar />
       <main>
         <HeroSection />
+        <FeaturedProductsCarousel />
         <ServicesSection />
         <WarrantySection />
         <LocationSection />
-        <ContactSection />
       </main>
       <LandingFooter />
       <FloatingWhatsApp />

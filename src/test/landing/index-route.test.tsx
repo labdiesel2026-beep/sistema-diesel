@@ -40,11 +40,11 @@ describe("Ruta principal de Landing Page", () => {
   });
 
   it("desplaza a la sección indicada por el hash al cargar", async () => {
-    window.history.replaceState(null, "", "/#contacto");
+    window.history.replaceState(null, "", "/#ubicacion");
     const { container } = render(<LandingPage />);
-    const contactSection = container.querySelector<HTMLElement>("#contacto")!;
+    const locationSection = container.querySelector<HTMLElement>("#ubicacion")!;
     const scrollIntoView = vi.fn();
-    contactSection.scrollIntoView = scrollIntoView;
+    locationSection.scrollIntoView = scrollIntoView;
 
     await waitFor(() =>
       expect(scrollIntoView).toHaveBeenCalledWith({
@@ -54,15 +54,16 @@ describe("Ruta principal de Landing Page", () => {
     );
   });
 
-  it("ensambla la navegación y todas las secciones institucionales (RF-01 a RF-08)", () => {
+  it("ensambla la navegación y todas las secciones institucionales activas (RF-01 a RF-08)", () => {
     window.history.replaceState(null, "", "/");
     const { container } = render(<LandingPage />);
 
     expect(screen.getByRole("navigation", { name: "Navegación principal" })).toBeInTheDocument();
 
-    for (const sectionId of ["inicio", "servicios", "garantias", "ubicacion", "contacto"]) {
+    for (const sectionId of ["inicio", "servicios", "garantias", "ubicacion"]) {
       expect(container.querySelector(`#${sectionId}`)).toBeInTheDocument();
     }
+    expect(container.querySelector("#contacto")).not.toBeInTheDocument();
 
     expect(screen.getByRole("contentinfo")).toBeInTheDocument();
     expect(

@@ -1,57 +1,108 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu, X, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { Menu, X, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SITE_CONFIG } from "@/config/site-config";
 
 interface LandingNavbarProps {
   className?: string;
+  isCatalog?: boolean;
 }
 
-export function LandingNavbar({ className = "" }: LandingNavbarProps) {
+export function LandingNavbar({ className = "", isCatalog }: LandingNavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  const isCatalogPage =
+    isCatalog ??
+    (typeof window !== "undefined" && window.location.pathname.startsWith("/catalogo"));
 
   return (
     <header
       className={`sticky top-0 z-40 w-full border-b border-border/80 bg-background/95 backdrop-blur-md transition-all ${className}`}
     >
       <div className="site-container flex h-18 items-center justify-between gap-4">
-        {/* Denominación tipográfica (sin logo gráfico según DA-03) */}
-        <a
-          href="#inicio"
-          onClick={() => setIsOpen(false)}
-          className="group flex items-center gap-2 text-xl font-bold tracking-tight text-foreground"
-          aria-label={`${SITE_CONFIG.name} - Ir al inicio`}
-        >
-          <span className="font-display">
-            Laboratorio{" "}
-            <span className="text-primary transition-colors group-hover:text-blue-500">Diésel</span>
-          </span>
-        </a>
+        {/* Denominación tipográfica con navegación hacia Inicio */}
+        {isCatalogPage ? (
+          <Link
+            to="/"
+            onClick={() => setIsOpen(false)}
+            className="group flex items-center gap-2 text-xl font-bold tracking-tight text-foreground"
+            aria-label={`${SITE_CONFIG.name} - Volver al inicio`}
+          >
+            <span className="font-display">
+              Laboratorio{" "}
+              <span className="text-primary transition-colors group-hover:text-blue-500">Diésel</span>
+            </span>
+          </Link>
+        ) : (
+          <a
+            href="#inicio"
+            onClick={() => setIsOpen(false)}
+            className="group flex items-center gap-2 text-xl font-bold tracking-tight text-foreground"
+            aria-label={`${SITE_CONFIG.name} - Ir al inicio`}
+          >
+            <span className="font-display">
+              Laboratorio{" "}
+              <span className="text-primary transition-colors group-hover:text-blue-500">Diésel</span>
+            </span>
+          </a>
+        )}
 
         {/* Navegación Desktop (Visible >= 768px / md) */}
         <nav
           className="hidden items-center gap-7 text-sm font-medium md:flex"
           aria-label="Navegación principal"
         >
-          {SITE_CONFIG.navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {link.label}
-            </a>
-          ))}
+          {SITE_CONFIG.navLinks.map((link) => {
+            const targetHref = isCatalogPage ? `/${link.href}` : link.href;
+
+            return (
+              <a
+                key={link.href}
+                href={targetHref}
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {link.label}
+              </a>
+            );
+          })}
         </nav>
 
         {/* Acciones de cabecera Desktop */}
         <div className="hidden items-center gap-3 md:flex">
-          <Button variant="industrial" asChild className="h-10 px-4 font-semibold">
-            <Link to="/catalogo">
-              Ver Catálogo <ArrowRight className="ml-1.5 size-4" />
-            </Link>
-          </Button>
+          {isCatalogPage ? (
+            <Button variant="outline" asChild className="h-10 px-4 font-semibold border-border hover:bg-muted">
+              <Link to="/">
+                <ArrowLeft className="mr-1.5 size-4" />
+                Volver al Inicio
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              variant="industrial"
+              asChild
+              className="group relative overflow-hidden h-10 px-4 font-semibold shadow-md shadow-primary/25 transition-all duration-300 hover:shadow-primary/40 active:scale-95"
+            >
+              <Link to="/catalogo" className="relative overflow-hidden flex items-center">
+                {/* Rayo de luz reflectante continuo */}
+                <div
+                  className="pointer-events-none absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                  aria-hidden="true"
+                />
+                <span className="relative z-10 flex items-center">
+                  Ver Catálogo
+                  <motion.span
+                    animate={{ x: [0, 4, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                    className="ml-1.5 inline-flex"
+                  >
+                    <ArrowRight className="size-4" />
+                  </motion.span>
+                </span>
+              </Link>
+            </Button>
+          )}
         </div>
 
         {/* Botón menú hamburguesa Móvil (< 768px) */}
@@ -76,27 +127,59 @@ export function LandingNavbar({ className = "" }: LandingNavbarProps) {
           aria-label="Menú móvil"
         >
           <nav className="flex flex-col gap-4 text-base font-medium">
-            {SITE_CONFIG.navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setIsOpen(false)}
-                className="rounded-md px-3 py-2 text-foreground transition-colors hover:bg-muted"
-              >
-                {link.label}
-              </a>
-            ))}
+            {SITE_CONFIG.navLinks.map((link) => {
+              const targetHref = isCatalogPage ? `/${link.href}` : link.href;
+
+              return (
+                <a
+                  key={link.href}
+                  href={targetHref}
+                  onClick={() => setIsOpen(false)}
+                  className="rounded-md px-3 py-2 text-foreground transition-colors hover:bg-muted"
+                >
+                  {link.label}
+                </a>
+              );
+            })}
             <div className="mt-2 border-t border-border pt-4">
-              <Button
-                variant="industrial"
-                asChild
-                className="w-full justify-center h-11 font-semibold"
-                onClick={() => setIsOpen(false)}
-              >
-                <Link to="/catalogo">
-                  Ver Catálogo <ArrowRight className="ml-1.5 size-4" />
-                </Link>
-              </Button>
+              {isCatalogPage ? (
+                <Button
+                  variant="outline"
+                  asChild
+                  className="w-full justify-center h-11 font-semibold"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Link to="/">
+                    <ArrowLeft className="mr-1.5 size-4" />
+                    Volver al Inicio
+                  </Link>
+                </Button>
+              ) : (
+                <Button
+                  variant="industrial"
+                  asChild
+                  className="group relative overflow-hidden w-full justify-center h-11 font-semibold shadow-md shadow-primary/25"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Link to="/catalogo" className="relative overflow-hidden flex items-center justify-center">
+                    {/* Rayo de luz reflectante continuo */}
+                    <div
+                      className="pointer-events-none absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                      aria-hidden="true"
+                    />
+                    <span className="relative z-10 flex items-center">
+                      Ver Catálogo
+                      <motion.span
+                        animate={{ x: [0, 4, 0] }}
+                        transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                        className="ml-1.5 inline-flex"
+                      >
+                        <ArrowRight className="size-4" />
+                      </motion.span>
+                    </span>
+                  </Link>
+                </Button>
+              )}
             </div>
           </nav>
         </div>

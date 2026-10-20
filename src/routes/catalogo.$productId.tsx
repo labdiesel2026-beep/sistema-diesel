@@ -124,7 +124,7 @@ export function ProductDetailPage({
 
   return (
     <>
-      <LandingNavbar />
+      <LandingNavbar isCatalog />
 
       <main className="min-h-screen bg-background py-8 md:py-12">
         <div className="site-container">

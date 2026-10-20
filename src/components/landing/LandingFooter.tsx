@@ -73,8 +73,8 @@ export function LandingFooter({ className = "" }: LandingFooterProps) {
                 </a>
               </li>
               <li>
-                <a href="#contacto" className="transition-colors hover:text-white">
-                  Solicitar Turno / Consulta
+                <a href="#ubicacion" className="transition-colors hover:text-white">
+                  Visitar Taller / Ubicación
                 </a>
               </li>
             </ul>

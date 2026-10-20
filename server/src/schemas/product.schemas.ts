@@ -35,6 +35,7 @@ export const productFormSchema = z
     showPrice: z.boolean().default(true),
     visible: z.boolean().default(true),
     oem: z.string().trim().optional().default(""),
+    isFeatured: z.boolean().default(false),
   })
   .strict();
 
@@ -44,6 +45,15 @@ export const productFormSchema = z
 export const visibilityPatchSchema = z
   .object({
     visible: z.boolean({ error: "El campo 'visible' debe ser un valor booleano" }),
+  })
+  .strict();
+
+/**
+ * Esquema Zod estricto para alternar estado destacado de un producto (Fase 6).
+ */
+export const featuredPatchSchema = z
+  .object({
+    isFeatured: z.boolean({ error: "El campo 'isFeatured' debe ser un valor booleano" }),
   })
   .strict();
 
@@ -58,4 +68,5 @@ export const productQuerySchema = z
 
 export type ProductFormData = z.infer<typeof productFormSchema>;
 export type VisibilityPatchData = z.infer<typeof visibilityPatchSchema>;
+export type FeaturedPatchData = z.infer<typeof featuredPatchSchema>;
 export type ProductQueryData = z.infer<typeof productQuerySchema>;

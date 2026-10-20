@@ -397,6 +397,7 @@ describe("Suite Integral de Integración: CRUD del Catálogo de Productos y Mét
         totalProducts: 3,
         visibleProducts: 2,
         hiddenProducts: 1,
+        featuredProducts: 0,
         totalCategories: 3, // Inyectores, Bombas de Inyección, Toberas
         totalBrands: 2, // Bosch, Delphi
       });

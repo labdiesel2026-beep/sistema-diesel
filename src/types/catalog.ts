@@ -24,6 +24,8 @@ export interface CatalogProduct {
   showPrice: boolean; // Si false, se muestra "Consultar precio"
   visible: boolean; // Solo visible === true se exhibe en el listado público
   oem: string | null; // Código OEM grabado en la pieza
+  isFeatured?: boolean;
+  featuredAt?: string | Date | null;
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }

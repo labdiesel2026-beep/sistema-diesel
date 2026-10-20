@@ -200,4 +200,129 @@ describe("Servicio Transaccional de Productos (Tarea 6.1) — server/tests/produ
       expect(pivotRows.length).toBe(0);
     });
   });
+
+  describe("toggleFeatured y getFeaturedProducts (Fase 6 — Tareas 3.1, 3.2, 3.3)", () => {
+    it("conmuta un producto a destacado y asigna marca temporal featuredAt", async () => {
+      const product = await productService.createProduct({
+        name: "Inyector Destacado 1",
+        description: "Test",
+        imageUrl: "/uploads/f1.webp",
+        brandId,
+        categoryIds: [categoryId1],
+        condition: "Nuevo",
+        price: 1000,
+        showPrice: true,
+        visible: true,
+      });
+
+      const featured = await productService.toggleFeatured(product.id, true);
+      expect(featured.isFeatured).toBe(true);
+      expect(featured.featuredAt).not.toBeNull();
+
+      const unfeatured = await productService.toggleFeatured(product.id, false);
+      expect(unfeatured.isFeatured).toBe(false);
+      expect(unfeatured.featuredAt).toBeNull();
+    });
+
+    it("rechaza destacar un producto si su visibilidad es oculta (400 Bad Request)", async () => {
+      const hiddenProduct = await productService.createProduct({
+        name: "Inyector Oculto",
+        description: "Test",
+        imageUrl: "/uploads/hidden.webp",
+        brandId,
+        categoryIds: [categoryId1],
+        condition: "Nuevo",
+        price: 1000,
+        showPrice: true,
+        visible: false,
+      });
+
+      await expect(
+        productService.toggleFeatured(hiddenProduct.id, true),
+      ).rejects.toThrow(AppError);
+    });
+
+    it("rechaza destacar un 11º producto arrojando 409 Conflict al alcanzar el cupo máximo de 10", async () => {
+      // Crear y destacar 10 productos
+      for (let i = 1; i <= 10; i++) {
+        const p = await productService.createProduct({
+          name: `Inyector Cupo ${i}`,
+          description: `Test ${i}`,
+          imageUrl: `/uploads/p${i}.webp`,
+          brandId,
+          categoryIds: [categoryId1],
+          condition: "Nuevo",
+          price: 1000,
+          showPrice: true,
+          visible: true,
+        });
+        await productService.toggleFeatured(p.id, true);
+      }
+
+      // Crear el 11º producto
+      const eleventh = await productService.createProduct({
+        name: "Inyector Excedente 11",
+        description: "Test",
+        imageUrl: "/uploads/p11.webp",
+        brandId,
+        categoryIds: [categoryId1],
+        condition: "Nuevo",
+        price: 1000,
+        showPrice: true,
+        visible: true,
+      });
+
+      // Intentar destacar el 11º debe fallar con 409 Conflict
+      await expect(
+        productService.toggleFeatured(eleventh.id, true),
+      ).rejects.toThrow("Límite alcanzado. Desmarca un producto primero");
+    });
+
+    it("retorna los productos destacados ordenados por featuredAt DESC (LIFO) y excluye productos ocultos", async () => {
+      const p1 = await productService.createProduct({
+        name: "Producto A (Primero)",
+        description: "Test",
+        imageUrl: "/uploads/a.webp",
+        brandId,
+        categoryIds: [categoryId1],
+        condition: "Nuevo",
+        price: 1000,
+        showPrice: true,
+        visible: true,
+      });
+      await productService.toggleFeatured(p1.id, true);
+
+      // Esperar breve tick para diferenciar timestamp
+      await new Promise((r) => setTimeout(r, 15));
+
+      const p2 = await productService.createProduct({
+        name: "Producto B (Segundo - LIFO primero)",
+        description: "Test",
+        imageUrl: "/uploads/b.webp",
+        brandId,
+        categoryIds: [categoryId1],
+        condition: "Nuevo",
+        price: 2000,
+        showPrice: true,
+        visible: true,
+      });
+      await productService.toggleFeatured(p2.id, true);
+
+      const featuredList = await productService.getFeaturedProducts();
+      expect(featuredList.length).toBe(2);
+      expect(featuredList[0].name).toBe("Producto B (Segundo - LIFO primero)");
+      expect(featuredList[1].name).toBe("Producto A (Primero)");
+
+      // Si ocultamos Producto B, deja de figurar en el carrusel pero preserva isFeatured
+      await productService.updateProductVisibility(p2.id, false);
+      const afterHide = await productService.getFeaturedProducts();
+      expect(afterHide.length).toBe(1);
+      expect(afterHide[0].name).toBe("Producto A (Primero)");
+
+      // Verificar en DB que Producto B aún conserva isFeatured: true
+      const p2InDb = await prisma.product.findUnique({ where: { id: p2.id } });
+      expect(p2InDb?.isFeatured).toBe(true);
+      expect(p2InDb?.featuredAt).not.toBeNull();
+    });
+  });
 });

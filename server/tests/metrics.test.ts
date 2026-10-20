@@ -37,6 +37,7 @@ describe("Servicio y Endpoint de Métricas del Dashboard (GET /api/admin/metrics
       totalProducts: 0,
       visibleProducts: 0,
       hiddenProducts: 0,
+      featuredProducts: 0,
       totalCategories: 0,
       totalBrands: 0,
     });
@@ -123,6 +124,7 @@ describe("Servicio y Endpoint de Métricas del Dashboard (GET /api/admin/metrics
       totalProducts: 4,
       visibleProducts: 3,
       hiddenProducts: 1,
+      featuredProducts: 0,
       totalCategories: 4,
       totalBrands: 3,
     });

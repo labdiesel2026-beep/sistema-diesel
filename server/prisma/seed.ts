@@ -65,6 +65,8 @@ const SEED_PRODUCTS = [
     showPrice: true,
     visible: true,
     oem: "0445110369",
+    isFeatured: true,
+    featuredAt: new Date(Date.now() - 3600 * 1000), // Hace 1 hora (LIFO primero)
   },
   {
     id: "a0f1e2d3-2222-4000-8000-222222222222",
@@ -80,6 +82,8 @@ const SEED_PRODUCTS = [
     showPrice: false,
     visible: true,
     oem: "28236381",
+    isFeatured: true,
+    featuredAt: new Date(Date.now() - 7200 * 1000), // Hace 2 horas
   },
   {
     id: "a0f1e2d3-3333-4000-8000-333333333333",
@@ -94,6 +98,8 @@ const SEED_PRODUCTS = [
     showPrice: true,
     visible: false,
     oem: "23670-0L050",
+    isFeatured: false,
+    featuredAt: null,
   },
   {
     id: "a0f1e2d3-4444-4000-8000-444444444444",
@@ -109,6 +115,8 @@ const SEED_PRODUCTS = [
     showPrice: true,
     visible: true,
     oem: "0445115007",
+    isFeatured: false,
+    featuredAt: null,
   },
 ];
 
@@ -256,6 +264,8 @@ async function main() {
           showPrice: product.showPrice,
           visible: product.visible,
           oem: product.oem,
+          isFeatured: product.isFeatured ?? false,
+          featuredAt: product.featuredAt ?? null,
         },
       });
     } else {
@@ -272,6 +282,8 @@ async function main() {
           showPrice: product.showPrice,
           visible: product.visible,
           oem: product.oem,
+          isFeatured: product.isFeatured ?? false,
+          featuredAt: product.featuredAt ?? null,
         },
       });
       targetProductId = created.id;

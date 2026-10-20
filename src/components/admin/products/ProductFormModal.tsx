@@ -30,6 +30,7 @@ export interface ProductFormErrors {
   showPrice?: string | undefined;
   visible?: string | undefined;
   oem?: string | undefined;
+  isFeatured?: string | undefined;
 }
 
 export interface ProductFormModalProps {
@@ -41,7 +42,7 @@ export interface ProductFormModalProps {
 
 /**
  * Modal de Creación y Edición de Productos con Validación Zod Fail-Fast y Bloque Finally.
- * (RF-05, CA-05.1 a CA-05.4, CL-06, CL-07, CL-12)
+ * (RF-02, RF-03, RF-05, CA-02.1 a CA-02.3, CA-05.1 a CA-05.4, CL-05, CL-06, CL-07, CL-12)
  *
  * Características:
  * - Validación desacoplada con `productFormSchema` (.strict()).
@@ -49,7 +50,8 @@ export interface ProductFormModalProps {
  * - Selector múltiple de categorías almacenando array plano `categoryIds: string[]` (CA-05.3).
  * - Selector relacional de marcas por UUID (`brandId`).
  * - Soporte de precio `>= 0` (admitiendo $0 y null para "A cotizar") (CA-05.2).
- * - Toggles reactivos para visibilidad y visualización de precio.
+ * - Toggles reactivos para visibilidad, precio y destacado en carrusel de inicio (máx. 10).
+ * - Bloqueo preventivo de conmutador de destacado cuando el cupo alcanza 10/10 en creación (RF-02, CA-02.2).
  * - Mutación segura en bloque `try/finally` asegurando `isSubmitting: false` (CA-05.4, CL-12).
  */
 export function ProductFormModal({
@@ -58,7 +60,7 @@ export function ProductFormModal({
   productToEdit,
   onSuccess,
 }: ProductFormModalProps) {
-  const { brands, categories, createProduct, updateProduct } = useAdmin();
+  const { brands, categories, createProduct, updateProduct, products, metrics } = useAdmin();
   const isEditing = Boolean(productToEdit);
 
   // Estados del formulario
@@ -73,12 +75,22 @@ export function ProductFormModal({
   const [showPrice, setShowPrice] = useState<boolean>(true);
   const [visible, setVisible] = useState<boolean>(true);
   const [oem, setOem] = useState<string>("");
+  const [isFeatured, setIsFeatured] = useState<boolean>(false);
 
   // Estados de validación y red
   const [fieldErrors, setFieldErrors] = useState<ProductFormErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isUploadingImage, setIsUploadingImage] = useState<boolean>(false);
+
+  // Control preventivo de cupo de productos destacados (RF-02, CA-02.2, CA-02.3, CL-05)
+  const featuredCount =
+    metrics?.featuredProducts ??
+    (products ? products.filter((p) => p.isFeatured).length : 0);
+  const isFeaturedLimitReached = featuredCount >= 10;
+  const isFeaturedDisabled =
+    isSubmitting ||
+    (isFeaturedLimitReached && (!isEditing || !productToEdit?.isFeatured));
 
   // Sincronizar estado cuando se abre el modal o cambia el producto a editar
   useEffect(() => {
@@ -99,6 +111,7 @@ export function ProductFormModal({
         setShowPrice(productToEdit.showPrice);
         setVisible(productToEdit.visible);
         setOem(productToEdit.oem || "");
+        setIsFeatured(Boolean(productToEdit.isFeatured));
       } else {
         setName("");
         setDescription("");
@@ -111,6 +124,7 @@ export function ProductFormModal({
         setShowPrice(true);
         setVisible(true);
         setOem("");
+        setIsFeatured(false);
       }
       setFieldErrors({});
       setFormError(null);
@@ -138,6 +152,7 @@ export function ProductFormModal({
     showPrice,
     visible,
     oem: oem.trim(),
+    isFeatured,
   });
 
   const validateField = (fieldName: keyof ProductFormErrors) => {
@@ -602,6 +617,36 @@ export function ProductFormModal({
                     onCheckedChange={setVisible}
                     disabled={isSubmitting}
                     data-testid="product-visible-switch"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label
+                      htmlFor="product-featured"
+                      className="text-xs font-semibold cursor-pointer"
+                    >
+                      Mostrar en Carrusel de Inicio
+                    </Label>
+                    {isFeaturedLimitReached && (!isEditing || !productToEdit?.isFeatured) ? (
+                      <p
+                        className="text-[11px] text-destructive font-medium"
+                        data-testid="product-featured-limit-warning"
+                      >
+                        Límite de 10 destacados alcanzado. Desmarca uno primero desde la tabla
+                      </p>
+                    ) : (
+                      <p className="text-[11px] text-muted-foreground">
+                        Exhibe el repuesto en el carrusel principal de la Landing Page (máx. 10).
+                      </p>
+                    )}
+                  </div>
+                  <Switch
+                    id="product-featured"
+                    checked={isFeatured}
+                    onCheckedChange={setIsFeatured}
+                    disabled={isFeaturedDisabled}
+                    data-testid="product-featured-switch"
                   />
                 </div>
               </div>

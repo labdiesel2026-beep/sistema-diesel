@@ -66,11 +66,15 @@ model Product {
   showPrice            Boolean           @default(true) @map("show_price")
   visible              Boolean           @default(true)
   oem                  String?
+  isFeatured           Boolean           @default(false) @map("is_featured")
+  featuredAt           DateTime?         @map("featured_at")
   productCategories    ProductCategory[]
   createdAt            DateTime          @default(now()) @map("created_at")
   updatedAt            DateTime          @updatedAt @map("updated_at")
 
   @@index([visible])
+  @@index([visible, isFeatured])
+  @@index([featuredAt(sort: Desc)])
   @@map("products")
 }
 

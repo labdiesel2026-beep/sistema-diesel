@@ -142,14 +142,57 @@ export async function deleteProduct(
   }
 }
 
+/**
+ * GET /api/products/featured
+ * Endpoint público que retorna la colección acotada de productos destacados
+ * activos para el carrusel de la Landing Page (RF-06, RF-07, RNF-05).
+ */
+export async function getFeaturedProducts(
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const products = await productService.getFeaturedProducts();
+    res.status(200).json(products);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * PATCH /api/products/:id/featured
+ * Endpoint protegido con autenticación y anti-CSRF (RF-01, RF-03, RF-05).
+ * Modifica atómicamente el estado de destacado de un producto individual.
+ * Valida el límite de 10 productos (respondiendo 409 Conflict si está lleno)
+ * y la visibilidad activa (respondiendo 400 Bad Request si está oculto).
+ */
+export async function updateProductFeatured(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const updated = await productService.toggleFeatured(
+      req.params.id as string,
+      req.body.isFeatured,
+    );
+    res.status(200).json(updated);
+  } catch (error) {
+    next(error);
+  }
+}
+
 export { toProductDto };
 
 export default {
   getProducts,
   getProductById,
+  getFeaturedProducts,
   createProduct,
   updateProduct,
   updateProductVisibility,
+  updateProductFeatured,
   deleteProduct,
   toProductDto,
 };

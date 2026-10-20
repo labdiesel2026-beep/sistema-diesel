@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Package, Eye, EyeOff, Tags, BadgeCheck, ArrowRight } from "lucide-react";
+import { Package, Eye, EyeOff, Tags, BadgeCheck, ArrowRight, Star } from "lucide-react";
 import { useAdmin } from "@/context/admin-context";
 import { Button } from "@/components/ui/button";
 
@@ -7,19 +7,22 @@ import { Button } from "@/components/ui/button";
  * Componente de métricas cuantitativas y accesos directos del catálogo.
  * (RF-04, CA-04.1, CA-04.2)
  *
- * Muestra 5 indicadores calculados reactivamente desde el estado en memoria:
+ * Muestra 6 indicadores calculados reactivamente desde el estado en memoria:
  * 1. Total de productos
  * 2. Productos visibles
  * 3. Productos pausados / ocultos
- * 4. Total de categorías registradas
- * 5. Total de marcas registradas
+ * 4. Productos destacados (X / 10)
+ * 5. Total de categorías registradas
+ * 6. Total de marcas registradas
  */
 export function DashboardMetrics() {
-  const { products, categories, brands } = useAdmin();
+  const { products, categories, brands, metrics } = useAdmin();
 
   const totalProducts = products.length;
   const visibleProducts = products.filter((p) => p.visible).length;
   const hiddenProducts = products.filter((p) => !p.visible).length;
+  const featuredProducts =
+    metrics?.featuredProducts ?? products.filter((p) => p.isFeatured).length;
   const totalCategories = categories.length;
   const totalBrands = brands.length;
 
@@ -52,6 +55,15 @@ export function DashboardMetrics() {
       linkText: "Revisar pausados",
     },
     {
+      id: "featured-products",
+      label: "Productos destacados",
+      value: `${featuredProducts} / 10`,
+      description: "Exhibidos en carrusel de inicio",
+      icon: Star,
+      to: "/admin",
+      linkText: "Gestionar destacados",
+    },
+    {
       id: "total-categories",
       label: "Total de categorías",
       value: totalCategories,
@@ -73,8 +85,8 @@ export function DashboardMetrics() {
 
   return (
     <div className="space-y-8" data-testid="dashboard-metrics-container">
-      {/* Grid de 5 tarjetas cuantitativas reactivas (CA-04.1) */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      {/* Grid de 6 tarjetas cuantitativas reactivas (CA-04.1) */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {metricCards.map((card) => {
           const Icon = card.icon;
           return (

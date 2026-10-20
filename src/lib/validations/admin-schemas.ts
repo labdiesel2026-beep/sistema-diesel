@@ -117,6 +117,7 @@ export const productFormSchema = z
     showPrice: z.boolean().default(true),
     visible: z.boolean().default(true),
     oem: z.string().trim().optional().default(""),
+    isFeatured: z.boolean().default(false),
   })
   .strict();
 

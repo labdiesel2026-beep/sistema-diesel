@@ -1,6 +1,9 @@
-import { Pencil, Trash2, Package } from "lucide-react";
+import { useState } from "react";
+import { Pencil, Trash2, Package, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import type { AdminProduct } from "@/types/admin";
 import { useAdmin } from "@/context/admin-context";
+import { ApiError } from "@/lib/api";
 import { ProductThumbnail } from "@/components/admin/products/ProductThumbnail";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -17,50 +20,90 @@ import {
 export interface ProductTableProps {
   products?: AdminProduct[] | undefined;
   searchQuery?: string | undefined;
+  onlyFeatured?: boolean | undefined;
   onEdit?: ((product: AdminProduct) => void) | undefined;
   onDelete?: ((product: AdminProduct) => void) | undefined;
   onToggleVisibility?: ((product: AdminProduct) => void) | undefined;
+  onToggleFeatured?: ((product: AdminProduct) => Promise<void> | void) | undefined;
 }
 
 /**
  * Grilla de administración de productos con resolución relacional de marcas por ID,
- * búsqueda sanitizada y conmutador de visibilidad.
- * (RF-06, CA-06.1, CA-06.2, CA-06.4, CL-11)
+ * búsqueda sanitizada, conmutador de visibilidad y conmutador de destacados.
+ * (RF-01, RF-03, RF-04, RF-05, RF-06, CA-01.1 a CA-01.4, CA-04.3, CA-06.1, CA-06.2, CA-06.4, CL-11)
  */
 export function ProductTable({
   products: propProducts,
   searchQuery = "",
+  onlyFeatured = false,
   onEdit,
   onDelete,
   onToggleVisibility,
+  onToggleFeatured,
 }: ProductTableProps) {
-  const { products: contextProducts, getBrandById, toggleVisibility } = useAdmin();
+  const {
+    products: contextProducts,
+    getBrandById,
+    toggleVisibility,
+    toggleFeaturedProduct,
+  } = useAdmin();
+  const [loadingFeaturedId, setLoadingFeaturedId] = useState<string | null>(null);
 
   // Permite operar con productos pasados por prop o directamente del Context
   const baseProducts = propProducts ?? contextProducts;
 
-  // Filtrado con búsqueda literal insensible a mayúsculas (CA-06.4, CL-11)
-  // Al usar String.includes() en lugar de RegExp, caracteres como [, *, \, + no lanzan excepciones
+  // Filtrado con búsqueda literal insensible a mayúsculas y filtro solo destacados (RF-04, CA-04.3, CL-11)
   const cleanQuery = searchQuery.trim().toLowerCase();
-  const filteredProducts = cleanQuery
-    ? baseProducts.filter((product) => {
-        const brand = getBrandById(product.brandId);
-        const brandName = brand ? brand.name.toLowerCase() : "";
-        return (
-          product.name.toLowerCase().includes(cleanQuery) ||
-          product.oem.toLowerCase().includes(cleanQuery) ||
-          product.description.toLowerCase().includes(cleanQuery) ||
-          product.vehicleCompatibility.toLowerCase().includes(cleanQuery) ||
-          brandName.includes(cleanQuery)
-        );
-      })
-    : baseProducts;
+  const filteredProducts = baseProducts.filter((product) => {
+    if (onlyFeatured && !product.isFeatured) {
+      return false;
+    }
+
+    if (!cleanQuery) return true;
+
+    const brand = getBrandById(product.brandId);
+    const brandName = brand ? brand.name.toLowerCase() : "";
+    return (
+      (product.name || "").toLowerCase().includes(cleanQuery) ||
+      (product.oem || "").toLowerCase().includes(cleanQuery) ||
+      (product.description || "").toLowerCase().includes(cleanQuery) ||
+      (product.vehicleCompatibility || "").toLowerCase().includes(cleanQuery) ||
+      brandName.includes(cleanQuery)
+    );
+  });
 
   const handleToggle = async (product: AdminProduct) => {
     if (onToggleVisibility) {
       onToggleVisibility(product);
     } else {
       await toggleVisibility(product.id);
+    }
+  };
+
+  const handleToggleFeatured = async (product: AdminProduct) => {
+    if (!product.visible || loadingFeaturedId !== null) {
+      return;
+    }
+    setLoadingFeaturedId(product.id);
+    try {
+      if (onToggleFeatured) {
+        await onToggleFeatured(product);
+      } else {
+        const result = await toggleFeaturedProduct(product.id, !product.isFeatured);
+        if (!result.success && result.reason) {
+          // Si el contexto no disparó toast por algún mock personalizado
+        }
+      }
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.error ||
+        (err instanceof ApiError && err.status === 409
+          ? "Límite alcanzado. Desmarca un producto primero"
+          : err?.message) ||
+        "Límite alcanzado. Desmarca un producto primero";
+      toast.error(msg);
+    } finally {
+      setLoadingFeaturedId(null);
     }
   };
 
@@ -112,6 +155,9 @@ export function ProductTable({
                 Compatibilidad
               </TableHead>
               <TableHead className="px-4 py-4 font-semibold text-foreground">Precio</TableHead>
+              <TableHead className="px-4 py-4 text-center font-semibold text-foreground">
+                Destacado
+              </TableHead>
               <TableHead className="px-4 py-4 text-center font-semibold text-foreground">
                 Visibilidad
               </TableHead>
@@ -199,6 +245,49 @@ export function ProductTable({
                     >
                       {formatProductPrice(product)}
                     </span>
+                  </TableCell>
+
+                  {/* Interruptor de Destacado y Badge de Cupo (RF-01, CA-01.1 a CA-01.4, RF-03) */}
+                  <TableCell className="px-4 py-3 text-center">
+                    <div className="flex flex-col items-center justify-center gap-1.5">
+                      <div className="flex items-center gap-2">
+                        <div className="relative flex items-center justify-center">
+                          <Switch
+                            checked={Boolean(product.isFeatured)}
+                            onCheckedChange={() => handleToggleFeatured(product)}
+                            disabled={!product.visible || loadingFeaturedId === product.id}
+                            aria-label={`Alternar destacado de ${product.name}`}
+                            data-testid={`product-featured-switch-${product.id}`}
+                            title={
+                              !product.visible
+                                ? "No se puede destacar un producto con visibilidad oculta"
+                                : product.isFeatured
+                                  ? "Quitar de destacados del inicio"
+                                  : "Destacar en carrusel de inicio"
+                            }
+                          />
+                          {loadingFeaturedId === product.id && (
+                            <div
+                              className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-[1px] rounded-full"
+                              data-testid={`product-featured-spinner-${product.id}`}
+                            >
+                              <Loader2 className="size-3.5 animate-spin text-amber-500" />
+                            </div>
+                          )}
+                        </div>
+                        <Badge
+                          variant={product.isFeatured ? "default" : "secondary"}
+                          className={`text-[11px] ${
+                            product.isFeatured
+                              ? "bg-amber-500/15 text-amber-700 hover:bg-amber-500/20 dark:bg-amber-500/20 dark:text-amber-400 border-amber-500/30"
+                              : "bg-muted text-muted-foreground border-border"
+                          }`}
+                          data-testid={`product-featured-badge-${product.id}`}
+                        >
+                          {product.isFeatured ? "Destacado" : "Normal"}
+                        </Badge>
+                      </div>
+                    </div>
                   </TableCell>
 
                   {/* Interruptor de Visibilidad y Badge de Estado (CA-06.1, CA-06.2) */}

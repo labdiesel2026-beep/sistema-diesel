@@ -1,15 +1,17 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import type { AdminCategory, AdminBrand, AdminProduct, IntegrityCheckResult } from "@/types/admin";
 import { api, ApiError } from "@/lib/api";
+import { toast } from "sonner";
 
 /**
  * Métricas cuantitativas del catálogo sincronizadas desde PostgreSQL.
- * (RF-10, CA-10.1)
+ * (RF-10, CA-10.1, Fase 6 RF-04)
  */
 export interface CatalogMetrics {
   totalProducts: number;
   visibleProducts: number;
   hiddenProducts: number;
+  featuredProducts?: number;
   totalCategories: number;
   totalBrands: number;
 }
@@ -92,6 +94,10 @@ export interface AdminContextType {
   deleteProduct: (id: string) => Promise<ProductMutationResult>;
   toggleVisibility: (id: string) => Promise<ProductMutationResult>;
   toggleProductVisibility: (id: string) => Promise<ProductMutationResult>;
+  toggleFeaturedProduct: (
+    id: string,
+    targetFeatured?: boolean,
+  ) => Promise<ProductMutationResult>;
   searchProducts: (query: string) => AdminProduct[];
 }
 
@@ -188,6 +194,8 @@ export function AdminProvider({
           showPrice: Boolean(p.showPrice),
           visible: Boolean(p.visible),
           oem: p.oem || "",
+          isFeatured: Boolean(p.isFeatured),
+          featuredAt: p.featuredAt ?? null,
         })),
       );
       setMetrics(fetchedMetrics || null);
@@ -721,6 +729,7 @@ export function AdminProvider({
           vehicleCompatibility: input.vehicleCompatibility
             ? input.vehicleCompatibility.trim()
             : null,
+          isFeatured: Boolean(input.isFeatured),
         };
 
         const response = await api.post<any>("/api/products", payload);
@@ -739,6 +748,8 @@ export function AdminProvider({
           showPrice: Boolean(response.showPrice),
           visible: Boolean(response.visible),
           oem: response.oem || "",
+          isFeatured: Boolean(response.isFeatured),
+          featuredAt: response.featuredAt ?? null,
         };
 
         setProducts((prev) => [newProduct, ...prev]);
@@ -791,6 +802,7 @@ export function AdminProvider({
           vehicleCompatibility: merged.vehicleCompatibility
             ? merged.vehicleCompatibility.trim()
             : null,
+          isFeatured: merged.isFeatured,
         };
 
         const response = await api.put<any>(`/api/products/${id}`, payload);
@@ -809,6 +821,8 @@ export function AdminProvider({
           showPrice: Boolean(response.showPrice),
           visible: Boolean(response.visible),
           oem: response.oem || "",
+          isFeatured: Boolean(response.isFeatured),
+          featuredAt: response.featuredAt ?? null,
         };
 
         setProducts((prev) => prev.map((p) => (p.id === id ? updatedProduct : p)));
@@ -851,6 +865,14 @@ export function AdminProvider({
         const updatedProduct: AdminProduct = {
           ...currentProduct,
           visible: response.visible,
+          isFeatured:
+            response.isFeatured !== undefined
+              ? Boolean(response.isFeatured)
+              : Boolean(currentProduct.isFeatured),
+          featuredAt:
+            response.featuredAt !== undefined
+              ? response.featuredAt
+              : (currentProduct.featuredAt ?? null),
         };
 
         setProducts((prev) => prev.map((p) => (p.id === id ? updatedProduct : p)));
@@ -875,6 +897,72 @@ export function AdminProvider({
   );
 
   const toggleVisibility = toggleProductVisibility;
+
+  const toggleFeaturedProduct = useCallback(
+    async (id: string, targetFeatured?: boolean): Promise<ProductMutationResult> => {
+      const currentProduct = products.find((p) => p.id === id);
+      if (!currentProduct) {
+        return {
+          success: false,
+          reason: "Producto no encontrado.",
+        };
+      }
+
+      const nextFeatured =
+        targetFeatured !== undefined ? targetFeatured : !currentProduct.isFeatured;
+
+      // Restricción preventiva de UI (RF-05, CA-01.4)
+      if (nextFeatured && !currentProduct.visible) {
+        const errorMsg = "No se puede destacar un producto con visibilidad oculta.";
+        toast.error(errorMsg);
+        return {
+          success: false,
+          reason: errorMsg,
+        };
+      }
+
+      try {
+        const response = await api.patch<any>(`/api/products/${id}/featured`, {
+          isFeatured: nextFeatured,
+        });
+
+        const updatedProduct: AdminProduct = {
+          ...currentProduct,
+          isFeatured: Boolean(response.isFeatured),
+          featuredAt: response.featuredAt ?? null,
+        };
+
+        setProducts((prev) => prev.map((p) => (p.id === id ? updatedProduct : p)));
+        refreshMetrics().catch(() => {});
+
+        toast.success(
+          nextFeatured ? "Producto añadido a destacados" : "Producto removido de destacados",
+        );
+
+        return {
+          success: true,
+          product: updatedProduct,
+        };
+      } catch (err: any) {
+        let reason = "Error al actualizar el estado de destacado.";
+        if (err instanceof ApiError) {
+          if (err.status === 409) {
+            reason = "Límite alcanzado. Desmarca un producto primero";
+          } else if (err.data?.error) {
+            reason = err.data.error;
+          } else if (err.message) {
+            reason = err.message;
+          }
+        }
+        toast.error(reason);
+        return {
+          success: false,
+          reason,
+        };
+      }
+    },
+    [products, refreshMetrics],
+  );
 
   const deleteProduct = useCallback(
     async (id: string): Promise<ProductMutationResult> => {
@@ -961,6 +1049,7 @@ export function AdminProvider({
     deleteProduct,
     toggleVisibility,
     toggleProductVisibility,
+    toggleFeaturedProduct,
     searchProducts,
   };
 

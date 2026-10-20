@@ -8,6 +8,7 @@ export interface ProductDto {
   description: string;
   imageUrl: string;
   brandId: string;
+  brandName?: string;
   categoryIds: string[];
   vehicleCompatibility: string | null;
   condition: string;
@@ -15,6 +16,8 @@ export interface ProductDto {
   showPrice: boolean;
   visible: boolean;
   oem: string | null;
+  isFeatured: boolean;
+  featuredAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,6 +33,7 @@ export function toProductDto(product: any): ProductDto {
     description: product.description,
     imageUrl: product.imageUrl,
     brandId: product.brandId,
+    brandName: product.brand?.name ?? undefined,
     categoryIds: (product.productCategories || []).map((pc: any) => pc.categoryId),
     vehicleCompatibility: product.vehicleCompatibility ?? null,
     condition: product.condition,
@@ -37,6 +41,8 @@ export function toProductDto(product: any): ProductDto {
     showPrice: product.showPrice,
     visible: product.visible,
     oem: product.oem ?? null,
+    isFeatured: product.isFeatured ?? false,
+    featuredAt: product.featuredAt ?? null,
     createdAt: product.createdAt,
     updatedAt: product.updatedAt,
   };
@@ -53,6 +59,7 @@ export class ProductService {
     const products = await prisma.product.findMany({
       where: options?.visibleOnly ? { visible: true } : undefined,
       include: {
+        brand: { select: { name: true } },
         productCategories: {
           select: { categoryId: true },
         },
@@ -70,6 +77,7 @@ export class ProductService {
     const product = await prisma.product.findUnique({
       where: { id },
       include: {
+        brand: { select: { name: true } },
         productCategories: {
           select: { categoryId: true },
         },
@@ -81,6 +89,81 @@ export class ProductService {
     }
 
     return toProductDto(product);
+  }
+
+  /**
+   * Obtiene los productos destacados activos para el carrusel de la Landing Page (RF-06, RF-07).
+   * Filtra estrictamente por visible: true AND isFeatured: true y ordena por featuredAt DESC (LIFO).
+   */
+  async getFeaturedProducts(): Promise<ProductDto[]> {
+    const products = await prisma.product.findMany({
+      where: {
+        visible: true,
+        isFeatured: true,
+      },
+      include: {
+        brand: { select: { name: true } },
+        productCategories: { select: { categoryId: true } },
+      },
+      orderBy: {
+        featuredAt: "desc",
+      },
+      take: 10,
+    });
+
+    return products.map(toProductDto);
+  }
+
+  /**
+   * Conmuta de forma atómica el estado de destacado de un producto (RF-01, RF-03, RF-05).
+   * Aplica transacción interactiva con conteo de cupo para evitar race conditions.
+   * Si excede 10 destacados, responde con AppError.conflict (HTTP 409).
+   * Si el producto está oculto y se intenta destacar, responde con AppError.badRequest (HTTP 400).
+   */
+  async toggleFeatured(id: string, isFeatured: boolean): Promise<ProductDto> {
+    return prisma.$transaction(async (tx) => {
+      const current = await tx.product.findUnique({
+        where: { id },
+        include: {
+          brand: { select: { name: true } },
+          productCategories: { select: { categoryId: true } },
+        },
+      });
+
+      if (!current) {
+        throw AppError.notFound("Producto no encontrado");
+      }
+
+      if (isFeatured) {
+        if (!current.visible) {
+          throw AppError.badRequest("No se puede destacar un producto con visibilidad oculta");
+        }
+
+        if (!current.isFeatured) {
+          const count = await tx.product.count({
+            where: { isFeatured: true },
+          });
+
+          if (count >= 10) {
+            throw AppError.conflict("Límite alcanzado. Desmarca un producto primero");
+          }
+        }
+      }
+
+      const updated = await tx.product.update({
+        where: { id },
+        data: {
+          isFeatured,
+          featuredAt: isFeatured ? new Date() : null,
+        },
+        include: {
+          brand: { select: { name: true } },
+          productCategories: { select: { categoryId: true } },
+        },
+      });
+
+      return toProductDto(updated);
+    });
   }
 
   /**
@@ -106,7 +189,24 @@ export class ProductService {
         throw AppError.badRequest("Una o más categorías seleccionadas no existen");
       }
 
-      // 3. Crear el producto y vincularlo en la tabla pivote ProductCategory
+      // 3. Validar estado de destacado y cupo máximo de 10 (RF-02, RF-03)
+      let isFeatured = data.isFeatured ?? false;
+      let featuredAt: Date | null = null;
+
+      if (isFeatured) {
+        if (!data.visible) {
+          throw AppError.badRequest("No se puede destacar un producto con visibilidad oculta");
+        }
+        const count = await tx.product.count({
+          where: { isFeatured: true },
+        });
+        if (count >= 10) {
+          throw AppError.conflict("Límite alcanzado. Desmarca un producto primero");
+        }
+        featuredAt = new Date();
+      }
+
+      // 4. Crear el producto y vincularlo en la tabla pivote ProductCategory
       const created = await tx.product.create({
         data: {
           name: data.name.trim(),
@@ -119,6 +219,8 @@ export class ProductService {
           showPrice: data.showPrice,
           visible: data.visible,
           oem: data.oem?.trim() || null,
+          isFeatured,
+          featuredAt,
           productCategories: {
             create: data.categoryIds.map((categoryId) => ({
               category: { connect: { id: categoryId } },
@@ -126,6 +228,7 @@ export class ProductService {
           },
         },
         include: {
+          brand: { select: { name: true } },
           productCategories: {
             select: { categoryId: true },
           },
@@ -182,7 +285,28 @@ export class ProductService {
         })),
       });
 
-      // 5. Actualizar campos del producto
+      // 5. Validar estado de destacado y cupo máximo de 10 (RF-02, RF-03)
+      let isFeatured = data.isFeatured !== undefined ? data.isFeatured : current.isFeatured;
+      let featuredAt = current.featuredAt;
+
+      if (isFeatured) {
+        if (!data.visible) {
+          throw AppError.badRequest("No se puede destacar un producto con visibilidad oculta");
+        }
+        if (!current.isFeatured) {
+          const count = await tx.product.count({
+            where: { isFeatured: true },
+          });
+          if (count >= 10) {
+            throw AppError.conflict("Límite alcanzado. Desmarca un producto primero");
+          }
+          featuredAt = new Date();
+        }
+      } else {
+        featuredAt = null;
+      }
+
+      // 6. Actualizar campos del producto
       const updated = await tx.product.update({
         where: { id },
         data: {
@@ -196,8 +320,11 @@ export class ProductService {
           showPrice: data.showPrice,
           visible: data.visible,
           oem: data.oem?.trim() || null,
+          isFeatured,
+          featuredAt,
         },
         include: {
+          brand: { select: { name: true } },
           productCategories: {
             select: { categoryId: true },
           },

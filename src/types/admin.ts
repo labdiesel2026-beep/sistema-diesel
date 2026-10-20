@@ -42,6 +42,8 @@ export interface AdminProduct {
   showPrice: boolean;
   visible: boolean;
   oem: string;
+  isFeatured?: boolean | undefined;
+  featuredAt?: string | Date | null | undefined;
 }
 
 /**

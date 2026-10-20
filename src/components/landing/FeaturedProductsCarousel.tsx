@@ -1,100 +1,94 @@
+import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductImageWithFallback } from "@/components/catalog/ProductImageWithFallback";
 import { formatPrice } from "@/lib/catalog-whatsapp";
+import { fetchFeaturedProducts, type FeaturedProductItem } from "@/services/landing.service";
 
-export interface FeaturedProductItem {
-  id: string;
-  name: string;
-  brandName: string;
-  oem: string;
-  condition: "Nuevo" | "Reacondicionado";
-  price: number | null;
-  showPrice: boolean;
-  vehicleCompatibility: string;
-  imageUrl?: string | null;
-}
+export type { FeaturedProductItem };
 
 export interface FeaturedProductsCarouselProps {
-  products?: FeaturedProductItem[];
-  className?: string;
+  products?: FeaturedProductItem[] | undefined;
+  className?: string | undefined;
 }
 
 /**
- * Datos mock de alta fidelidad para el carrusel de productos destacados.
- * Permite maquetar y demostrar el flujo antes de la hidratación desde la API.
+ * Carrusel dinámico de productos destacados para la Landing Page (Fase 6 - Bloque 7, Tarea 7.2).
+ * (RF-06, RF-07, RNF-03, RNF-05, CL-01, CL-02)
+ *
+ * Características:
+ * - Hidratación dinámica desde GET /api/products/featured con degradación silenciosa.
+ * - Prevención de CLS mediante contenedor de reserva de altura mínima (min-h-[460px]).
+ * - Desmontaje automático y limpio (retorna null) si hay 0 destacados o fallo de API.
+ * - Envoltura semántica de tarjeta en Link directo a /catalogo/$productId.
+ * - Animación de bucle continuo infinito con framer-motion.
  */
-const DEFAULT_FEATURED_PRODUCTS: FeaturedProductItem[] = [
-  {
-    id: "fp-1",
-    name: "Inyector Common Rail Bosch 0445110",
-    brandName: "Bosch",
-    oem: "0445110369",
-    condition: "Nuevo",
-    price: 320000,
-    showPrice: true,
-    vehicleCompatibility: "Toyota Hilux 2.8 / 3.0 D-4D",
-    imageUrl: "",
-  },
-  {
-    id: "fp-2",
-    name: "Inyector Common Rail Delphi 28231014",
-    brandName: "Delphi",
-    oem: "28231014",
-    condition: "Reacondicionado",
-    price: 245000,
-    showPrice: true,
-    vehicleCompatibility: "Ford Ranger / Transit 2.2 TDCi Puma",
-    imageUrl: "",
-  },
-  {
-    id: "fp-3",
-    name: "Inyector Piezoeléctrico Continental VDO",
-    brandName: "Continental",
-    oem: "A2C59511603",
-    condition: "Nuevo",
-    price: null,
-    showPrice: false,
-    vehicleCompatibility: "Volkswagen Amarok 2.0 BiTDI",
-    imageUrl: "",
-  },
-  {
-    id: "fp-4",
-    name: "Bomba de Alta Presión Bosch CP4",
-    brandName: "Bosch",
-    oem: "0445010507",
-    condition: "Reacondicionado",
-    price: 580000,
-    showPrice: true,
-    vehicleCompatibility: "Amarok 2.0 TDI / Amarok V6 3.0",
-    imageUrl: "",
-  },
-  {
-    id: "fp-5",
-    name: "Inyector Denso Common Rail G2",
-    brandName: "Denso",
-    oem: "095000-5471",
-    condition: "Nuevo",
-    price: 310000,
-    showPrice: true,
-    vehicleCompatibility: "Nissan Frontier / Mitsubishi L200 2.5 DID",
-    imageUrl: "",
-  },
-];
-
 export function FeaturedProductsCarousel({
-  products = DEFAULT_FEATURED_PRODUCTS,
+  products: propProducts,
   className = "",
 }: FeaturedProductsCarouselProps) {
+  const [loadedProducts, setLoadedProducts] = useState<FeaturedProductItem[] | null>(
+    propProducts ?? null,
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(propProducts === undefined);
+
+  useEffect(() => {
+    if (propProducts !== undefined) {
+      setLoadedProducts(propProducts);
+      setIsLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+    setIsLoading(true);
+
+    fetchFeaturedProducts()
+      .then((items) => {
+        if (isMounted) {
+          setLoadedProducts(items);
+          setIsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setLoadedProducts([]);
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [propProducts]);
+
+  // Durante la carga inicial, reservar espacio vertical anti-CLS (CA-07.1)
+  if (isLoading) {
+    return (
+      <div
+        data-testid="featured-carousel-skeleton"
+        className={`min-h-[460px] w-full bg-background dark:bg-slate-950 py-20 border-y border-border/60 ${className}`}
+        aria-hidden="true"
+      />
+    );
+  }
+
+  const activeProducts = loadedProducts ?? [];
+
+  // Si no hay productos destacados o la petición falló, desmontaje silencioso (CA-07.2, CL-01, CL-02)
+  if (activeProducts.length === 0) {
+    return null;
+  }
+
   // Duplicamos internamente el array para que el bucle continuo no se corte visualmente
-  const marqueeProducts = [...products, ...products];
+  const marqueeProducts = [...activeProducts, ...activeProducts];
 
   return (
     <section
       id="destacados"
-      className={`scroll-mt-20 bg-background py-20 dark:bg-slate-950 sm:py-24 border-y border-border/60 overflow-hidden ${className}`}
+      data-testid="featured-products-section"
+      className={`scroll-mt-20 bg-background py-20 dark:bg-slate-950 sm:py-24 border-y border-border/60 overflow-hidden min-h-[460px] ${className}`}
       aria-labelledby="destacados-heading"
     >
       <div className="site-container">
@@ -156,7 +150,8 @@ export function FeaturedProductsCarousel({
                   className="group relative flex w-[290px] shrink-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xs transition-all duration-300 hover:border-primary/60 hover:shadow-2xl hover:shadow-primary/10 sm:w-[320px] md:w-[340px] cursor-pointer"
                 >
                   <Link
-                    to="/catalogo"
+                    to="/catalogo/$productId"
+                    params={{ productId: product.id }}
                     className="flex flex-col h-full focus:outline-none"
                     aria-label={`Ver ${product.name} en el catálogo oficial`}
                   >

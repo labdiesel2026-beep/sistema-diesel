@@ -1,6 +1,10 @@
 import type { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/prisma.js";
-import { authService, AUTH_COOKIE_NAME, AUTH_TOKEN_EXPIRATION_SECONDS } from "../services/auth.service.js";
+import {
+  authService,
+  AUTH_COOKIE_NAME,
+  AUTH_TOKEN_EXPIRATION_SECONDS,
+} from "../services/auth.service.js";
 import { ENV } from "../config/env.js";
 import type { LoginInput } from "../schemas/auth.schemas.js";
 
@@ -17,7 +21,7 @@ import type { LoginInput } from "../schemas/auth.schemas.js";
 export async function login(
   req: Request<{}, {}, LoginInput>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> {
   try {
     const { email, password } = req.body;
@@ -73,11 +77,7 @@ export async function login(
  *
  * Endpoint: POST /api/auth/logout
  */
-export async function logout(
-  _req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export async function logout(_req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     res.cookie(AUTH_COOKIE_NAME, "", {
       httpOnly: true,
@@ -100,11 +100,7 @@ export async function logout(
  * Endpoint: GET /api/auth/me
  * Protegido por requireAuth. Recupera la entidad desde PostgreSQL mediante req.user.id.
  */
-export async function me(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export async function me(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user?.id;
 

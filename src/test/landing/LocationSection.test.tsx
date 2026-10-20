@@ -28,10 +28,7 @@ describe("Sección de Ubicación y Mapa (LocationSection.tsx)", () => {
 
     expect(iframe).toBeInTheDocument();
     expect(iframe?.getAttribute("src")).toBe(SITE_CONFIG.googleMapsEmbedUrl);
-    expect(iframe).toHaveAttribute(
-      "title",
-      "Mapa de ubicación del taller Laboratorio Diésel",
-    );
+    expect(iframe).toHaveAttribute("title", "Mapa de ubicación del taller Laboratorio Diésel");
   });
 
   it("ofrece un enlace accesible de fallback 'Cómo llegar' hacia Google Maps (CL-01)", () => {
@@ -44,9 +41,6 @@ describe("Sección de Ubicación y Mapa (LocationSection.tsx)", () => {
     expect(fallbackLink).toBeInTheDocument();
     expect(fallbackLink).toHaveAttribute("target", "_blank");
     expect(fallbackLink).toHaveAttribute("rel", "noopener noreferrer");
-    expect(fallbackLink).toHaveAttribute(
-      "href",
-      SITE_CONFIG.googleMapsDirectionsUrl,
-    );
+    expect(fallbackLink).toHaveAttribute("href", SITE_CONFIG.googleMapsDirectionsUrl);
   });
 });

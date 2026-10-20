@@ -9,7 +9,7 @@ import { categoryService } from "../services/category.service.js";
 export async function getCategories(
   _req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> {
   try {
     const categories = await categoryService.getAllCategories();
@@ -22,7 +22,7 @@ export async function getCategories(
 export async function getCategoryById(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> {
   try {
     const category = await categoryService.getCategoryById(req.params.id as string);
@@ -35,7 +35,7 @@ export async function getCategoryById(
 export async function createCategory(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> {
   try {
     const category = await categoryService.createCategory(req.body);
@@ -48,13 +48,10 @@ export async function createCategory(
 export async function updateCategory(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> {
   try {
-    const updated = await categoryService.updateCategory(
-      req.params.id as string,
-      req.body
-    );
+    const updated = await categoryService.updateCategory(req.params.id as string, req.body);
     res.status(200).json(updated);
   } catch (error) {
     next(error);
@@ -64,7 +61,7 @@ export async function updateCategory(
 export async function deleteCategory(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> {
   try {
     await categoryService.deleteCategory(req.params.id as string);

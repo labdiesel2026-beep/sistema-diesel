@@ -31,7 +31,7 @@ export interface RequestOptions extends Omit<RequestInit, "body"> {
 
 async function request<T>(
   endpoint: string,
-  options: RequestOptions & { body?: any; isFormData?: boolean } = {}
+  options: RequestOptions & { body?: any; isFormData?: boolean } = {},
 ): Promise<T> {
   const { params, body, isFormData, headers: customHeaders, ...customOptions } = options;
 

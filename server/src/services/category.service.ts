@@ -117,7 +117,7 @@ export class CategoryService {
 
       if (parent.parentId !== null) {
         throw AppError.badRequest(
-          "Límite de jerarquía excedido: solo se permite 1 nivel de profundidad (no se pueden anidar subcategorías bajo subcategorías)"
+          "Límite de jerarquía excedido: solo se permite 1 nivel de profundidad (no se pueden anidar subcategorías bajo subcategorías)",
         );
       }
     }
@@ -167,7 +167,7 @@ export class CategoryService {
     // Bloquear asignar padre si ya posee subcategorías (violaría el límite de 1 nivel)
     if (data.parentId && current.children.length > 0) {
       throw AppError.badRequest(
-        "No se puede asignar un padre a esta categoría porque ya posee subcategorías hijas (máximo 1 nivel permitido)"
+        "No se puede asignar un padre a esta categoría porque ya posee subcategorías hijas (máximo 1 nivel permitido)",
       );
     }
 
@@ -183,7 +183,7 @@ export class CategoryService {
 
       if (parent.parentId !== null) {
         throw AppError.badRequest(
-          "Límite de jerarquía excedido: solo se permite 1 nivel de profundidad (el padre debe ser una categoría raíz)"
+          "Límite de jerarquía excedido: solo se permite 1 nivel de profundidad (el padre debe ser una categoría raíz)",
         );
       }
     }
@@ -241,14 +241,14 @@ export class CategoryService {
     // 1. Verificación preventiva de subcategorías hijas
     if (current.children.length > 0) {
       throw AppError.conflict(
-        "No se puede eliminar la categoría porque contiene subcategorías asociadas"
+        "No se puede eliminar la categoría porque contiene subcategorías asociadas",
       );
     }
 
     // 2. Verificación preventiva de productos vinculados en tabla pivote
     if (current.productCategories.length > 0) {
       throw AppError.conflict(
-        "No se puede eliminar la categoría porque tiene productos vinculados"
+        "No se puede eliminar la categoría porque tiene productos vinculados",
       );
     }
 
@@ -261,7 +261,7 @@ export class CategoryService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2003" || error.code === "P2014") {
           throw AppError.conflict(
-            "No se puede eliminar la categoría debido a restricciones de integridad referencial"
+            "No se puede eliminar la categoría debido a restricciones de integridad referencial",
           );
         }
         if (error.code === "P2025") {

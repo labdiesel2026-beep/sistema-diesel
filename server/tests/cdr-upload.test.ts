@@ -44,7 +44,9 @@ describe("Suite de Integración: Tubería Paranoica CDR y Uploads (server/tests/
       .attach("file", Buffer.from("<svg><rect width='100' height='100'/></svg>"), "dibujo.svg");
 
     expect(svgRes.status).toBe(400);
-    expect(svgRes.body.error).toContain("Solo se permiten imágenes en formato .jpg, .jpeg, .png o .webp");
+    expect(svgRes.body.error).toContain(
+      "Solo se permiten imágenes en formato .jpg, .jpeg, .png o .webp",
+    );
 
     // Binario con extensión prohibida
     const exeRes = await request(app)
@@ -109,7 +111,10 @@ describe("Suite de Integración: Tubería Paranoica CDR y Uploads (server/tests/
     // Comprobar que el archivo se guardó físicamente
     const filename = path.basename(imageUrl);
     const diskPath = path.join(DEFAULT_UPLOADS_DIR, filename);
-    const exists = await fs.access(diskPath).then(() => true).catch(() => false);
+    const exists = await fs
+      .access(diskPath)
+      .then(() => true)
+      .catch(() => false);
     expect(exists).toBe(true);
 
     // Inspeccionar la imagen guardada en disco

@@ -1,294 +1,466 @@
+/**
+ * Ruta Principal del Catálogo Público (/catalogo).
+ * (Spec 003, RF-01 a RF-12, Bloque 6 - Tarea T-17)
+ *
+ * Características:
+ * - Integración institucional con LandingNavbar y LandingFooter (RF-01).
+ * - Sincronización bidireccional de Search Params en URL con TanStack Router (RF-03, RF-04).
+ * - Consumo del cliente HTTP centralizado (catalogService) filtrando visible: true (RF-02).
+ * - Grilla con esqueleto de carga ProductGridSkeleton y tarjetas ProductCard (RF-06 a RF-09).
+ * - Filtros facetados combinados CatalogFilters con árbol jerárquico y conteos (RF-04).
+ * - Estado sin resultados con consulta asistida hacia WhatsApp (RF-05).
+ * - Botón flotante reactivo del carrito de consultas y drawer CartDrawer (RF-08, RF-10, RF-12).
+ * - Error boundary CatalogErrorBoundary ante fallos de conexión (Principio 6).
+ */
+
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import {
-  Search,
-  ShoppingCart,
-  MessageCircle,
-  SlidersHorizontal,
-  ChevronDown,
-  Check,
-  Image as ImageIcon,
-  X,
-} from "lucide-react";
-import { Header, Footer, pageHead, whatsappUrl } from "@/components/diesel-site";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Search, ShoppingCart, MessageCircle, X } from "lucide-react";
+import { LandingNavbar } from "@/components/landing/LandingNavbar";
+import { LandingFooter } from "@/components/landing/LandingFooter";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useCatalogCart } from "@/components/catalog-cart";
-import { catalogProducts, filterProducts, formatPrice } from "@/lib/catalog-data";
+import { ProductCard } from "@/components/catalog/ProductCard";
+import { ProductGridSkeleton } from "@/components/catalog/ProductGridSkeleton";
+import { CatalogFilters } from "@/components/catalog/CatalogFilters";
+import { CartDrawer } from "@/components/catalog/CartDrawer";
+import { CatalogErrorBoundary, CatalogErrorView } from "@/components/catalog/CatalogErrorBoundary";
+import { useCatalogCart } from "@/context/catalog-cart-context";
+import { catalogService } from "@/services/catalog-service";
+import { filterCatalogProducts } from "@/lib/catalog-filter";
+import { generateNoResultsWhatsAppUrl } from "@/lib/catalog-whatsapp";
+import {
+  catalogSearchParamsSchema,
+  normalizeFilterParam,
+  type CatalogSearchParams,
+} from "@/schemas/catalog-schemas";
+import type { CatalogProduct, CatalogBrand, CatalogCategory } from "@/types/catalog";
+import { pageHead } from "@/components/diesel-site";
 
 export const Route = createFileRoute("/catalogo")({
+  validateSearch: (search: Record<string, unknown>): Partial<CatalogSearchParams> => {
+    const parsed = catalogSearchParamsSchema.safeParse(search);
+    return parsed.success ? parsed.data : {};
+  },
   head: () =>
     pageHead(
       "Catálogo de inyectores — Laboratorio Diésel",
       "Inyectores Bosch, Delphi y Denso. Buscá por código OEM, filtrá por marca y categoría y consultá precios en pesos argentinos.",
     ),
-  component: CatalogPage,
+  component: CatalogRouteComponent,
 });
 
-const brands = ["Bosch", "Delphi", "Denso"];
-const categories = ["Inyectores Common Rail", "Inyectores piezoeléctricos"];
-function CatalogPage() {
-  const [search, setSearch] = useState("");
-  const [selectedBrands, setBrands] = useState<string[]>([]);
-  const [selectedCategories, setCategories] = useState<string[]>([]);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const { items, add } = useCatalogCart();
-  const filtered = filterProducts(search, selectedBrands, selectedCategories);
-  const filterCount = selectedBrands.length + selectedCategories.length;
-  const toggle = (current: string[], value: string) =>
-    current.includes(value) ? current.filter((item) => item !== value) : [...current, value];
-  const reset = () => {
-    setSearch("");
-    setBrands([]);
-    setCategories([]);
+export interface CatalogPageProps {
+  searchParams?: Partial<CatalogSearchParams>;
+  onUpdateSearchParams?: (updates: { q?: string; brand?: string[]; category?: string[] }) => void;
+  mockProducts?: CatalogProduct[];
+  mockBrands?: CatalogBrand[];
+  mockCategories?: CatalogCategory[];
+}
+
+export function CatalogPage({
+  searchParams,
+  onUpdateSearchParams,
+  mockProducts,
+  mockBrands,
+  mockCategories,
+}: CatalogPageProps = {}) {
+  const { count: cartCount } = useCatalogCart();
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Estados de datos obtenidos de la API REST
+  const [products, setProducts] = useState<CatalogProduct[]>(mockProducts || []);
+  const [brands, setBrands] = useState<CatalogBrand[]>(mockBrands || []);
+  const [categories, setCategories] = useState<CatalogCategory[]>(mockCategories || []);
+  const [isLoading, setIsLoading] = useState(!mockProducts);
+  const [fetchError, setFetchError] = useState<Error | null>(null);
+
+  // Búsqueda y facetas locales sincronizadas
+  const [searchQuery, setSearchQuery] = useState(searchParams?.q || "");
+  const [selectedBrandIds, setSelectedBrandIds] = useState<string[]>(
+    normalizeFilterParam(searchParams?.brand),
+  );
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
+    normalizeFilterParam(searchParams?.category),
+  );
+
+  // Sincronizar cambios entrantes de searchParams
+  useEffect(() => {
+    if (searchParams) {
+      setSearchQuery(searchParams.q || "");
+      setSelectedBrandIds(normalizeFilterParam(searchParams.brand));
+      setSelectedCategoryIds(normalizeFilterParam(searchParams.category));
+    }
+  }, [searchParams]);
+
+  // Carga asíncrona de datos desde el servicio HTTP centralizado
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    setFetchError(null);
+    try {
+      const [fetchedProducts, fetchedBrands, fetchedCategories] = await Promise.all([
+        catalogService.getVisibleProducts(),
+        catalogService.getBrands(),
+        catalogService.getCategories(),
+      ]);
+      setProducts(fetchedProducts);
+      setBrands(fetchedBrands);
+      setCategories(fetchedCategories);
+    } catch (err) {
+      setFetchError(err instanceof Error ? err : new Error(String(err)));
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!mockProducts) {
+      loadData();
+    }
+  }, [loadData, mockProducts]);
+
+  // Manejadores reactivos con sincronización
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    onUpdateSearchParams?.({
+      q: query,
+      brand: selectedBrandIds,
+      category: selectedCategoryIds,
+    });
   };
+
+  const handleBrandToggle = (brandId: string) => {
+    const next = selectedBrandIds.includes(brandId)
+      ? selectedBrandIds.filter((id) => id !== brandId)
+      : [...selectedBrandIds, brandId];
+    setSelectedBrandIds(next);
+    onUpdateSearchParams?.({
+      q: searchQuery,
+      brand: next,
+      category: selectedCategoryIds,
+    });
+  };
+
+  const handleCategoryToggle = (categoryId: string) => {
+    const next = selectedCategoryIds.includes(categoryId)
+      ? selectedCategoryIds.filter((id) => id !== categoryId)
+      : [...selectedCategoryIds, categoryId];
+    setSelectedCategoryIds(next);
+    onUpdateSearchParams?.({
+      q: searchQuery,
+      brand: selectedBrandIds,
+      category: next,
+    });
+  };
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setSelectedBrandIds([]);
+    setSelectedCategoryIds([]);
+    onUpdateSearchParams?.({ q: "", brand: [], category: [] });
+  };
+
+  // Mapa de marca para lookup rápido
+  const brandsMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const b of brands) {
+      map.set(b.id, b.name);
+    }
+    return map;
+  }, [brands]);
+
+  // Filtrado cruzado multidimensional con priorización OEM (RF-03, RF-04)
+  const filteredProducts = useMemo(() => {
+    return filterCatalogProducts({
+      products,
+      searchQuery,
+      selectedBrandIds,
+      selectedCategoryIds,
+      categories,
+      brandsLookup: brandsMap,
+    });
+  }, [products, searchQuery, selectedBrandIds, selectedCategoryIds, categories, brandsMap]);
+
+  // Metadatos para consulta asistida en estado sin resultados (RF-05)
+  const activeBrandNames = useMemo(
+    () => selectedBrandIds.map((id) => brandsMap.get(id) || id),
+    [selectedBrandIds, brandsMap],
+  );
+
+  const activeCategoryNames = useMemo(() => {
+    const catMap = new Map(categories.map((c) => [c.id, c.name]));
+    return selectedCategoryIds.map((id) => catMap.get(id) || id);
+  }, [selectedCategoryIds, categories]);
+
+  const noResultsWhatsAppUrl = useMemo(
+    () => generateNoResultsWhatsAppUrl(searchQuery, activeBrandNames, activeCategoryNames),
+    [searchQuery, activeBrandNames, activeCategoryNames],
+  );
+
+  const activeFiltersCount = selectedBrandIds.length + selectedCategoryIds.length;
 
   return (
     <>
-      <Header />
-      <main>
-        <section className="border-b border-hero-border bg-hero py-9 text-hero-foreground md:py-11">
+      <LandingNavbar />
+
+      <main className="min-h-screen bg-background">
+        {/* Hero Section Institucional */}
+        <section className="border-b border-border/80 bg-hero py-10 text-hero-foreground md:py-14">
           <div className="site-container">
-            <p className="eyebrow mb-3 text-hero-muted">Laboratorio Diésel / Catálogo</p>
-            <h1 className="font-display text-4xl font-bold md:text-5xl">
-              El inyector que tu motor necesita.
-            </h1>
-            <p className="mt-3 text-sm leading-6 text-hero-muted">
-              Common Rail. Calidad comprobada. Respaldo en cada pieza.
+            <p className="mb-2 font-mono text-xs font-semibold tracking-wider text-primary uppercase">
+              Laboratorio Diésel · Catálogo Oficial
             </p>
-            <label className="mt-7 flex h-14 max-w-3xl items-center gap-3 rounded-xl border border-border bg-card px-4 text-foreground focus-within:ring-2 focus-within:ring-primary">
-              <Search className="size-5 shrink-0 text-primary" />
-              <input
-                type="search"
-                className="w-full min-w-0 bg-transparent text-sm outline-none"
-                placeholder="Buscar por Código OEM o Marca..."
-                aria-label="Buscar por Código OEM o Marca"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-              />
-            </label>
-          </div>
-        </section>
-        <div className="site-container py-8 md:py-10">
-          <div className="grid gap-7 lg:grid-cols-[220px_minmax(0,1fr)]">
-            <aside className="min-w-0" aria-label="Filtros de productos">
-              <Button
-                variant="outline"
-                className="h-12 w-full justify-between rounded-xl bg-card lg:hidden"
-                aria-expanded={filtersOpen}
-                aria-controls="catalog-filters"
-                onClick={() => setFiltersOpen(!filtersOpen)}
+            <h1 className="font-display text-3xl font-bold tracking-tight md:text-5xl">
+              El inyector y repuesto que tu motor necesita.
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
+              Common Rail, bombas de alta presión y componentes de precisión. Buscá por código OEM,
+              verificá compatibilidad y cotizá directamente por WhatsApp.
+            </p>
+
+            {/* Barra de Búsqueda Global (RF-03) */}
+            <div className="mt-7 max-w-2xl">
+              <label
+                htmlFor="catalog-search-input"
+                className="flex h-13 items-center gap-3 rounded-xl border border-border bg-card px-4 text-foreground shadow-xs transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20"
               >
-                <span className="flex items-center gap-2">
-                  <SlidersHorizontal /> Filtros {filterCount > 0 && `(${filterCount})`}
-                </span>
-                <ChevronDown className={filtersOpen ? "rotate-180" : ""} />
-              </Button>
-              <div
-                id="catalog-filters"
-                className={`${filtersOpen ? "block" : "hidden"} mt-5 lg:mt-0 lg:block`}
-              >
-                <div className="mb-6 flex items-center justify-between">
-                  <h2 className="flex items-center gap-2 font-display text-xl font-semibold">
-                    <SlidersHorizontal className="size-4 text-primary" /> Filtros
-                  </h2>
-                  {filterCount > 0 && (
-                    <Button
-                      variant="link"
-                      size="sm"
-                      onClick={() => {
-                        setBrands([]);
-                        setCategories([]);
-                      }}
-                    >
-                      Limpiar
-                    </Button>
-                  )}
-                </div>
-                <fieldset className="border-t border-border py-6">
-                  <legend className="sr-only">Marcas</legend>
-                  <h3 className="mb-5 text-xs font-bold uppercase text-muted-foreground">Marcas</h3>
-                  <div className="space-y-4">
-                    {brands.map((brand) => (
-                      <label key={brand} className="flex cursor-pointer items-center gap-3 text-sm">
-                        <Checkbox
-                          checked={selectedBrands.includes(brand)}
-                          onCheckedChange={() => setBrands(toggle(selectedBrands, brand))}
-                          aria-label={brand}
-                        />
-                        <span className="flex-1">{brand}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {catalogProducts.filter((product) => product.brand === brand).length}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-                <fieldset className="border-t border-border py-6">
-                  <legend className="sr-only">Categorías</legend>
-                  <h3 className="mb-5 text-xs font-bold uppercase text-muted-foreground">
-                    Categorías
-                  </h3>
-                  <div className="space-y-4">
-                    {categories.map((category) => (
-                      <label
-                        key={category}
-                        className="flex cursor-pointer items-start gap-3 text-sm leading-5"
-                      >
-                        <Checkbox
-                          className="mt-0.5"
-                          checked={selectedCategories.includes(category)}
-                          onCheckedChange={() =>
-                            setCategories(toggle(selectedCategories, category))
-                          }
-                          aria-label={category}
-                        />
-                        <span>{category}</span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-                <p className="border-t border-border pt-5 text-xs leading-6 text-muted-foreground">
-                  ¿No encontrás tu código?
-                  <br />
-                  <a
-                    className="font-semibold text-primary"
-                    href={whatsappUrl()}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <Search className="size-5 shrink-0 text-primary" />
+                <input
+                  id="catalog-search-input"
+                  type="search"
+                  className="w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                  placeholder="Buscar por Código OEM, repuesto, marca o vehículo..."
+                  aria-label="Buscar por Código OEM, repuesto, marca o vehículo"
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  data-testid="catalog-search-input"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => handleSearchChange("")}
+                    className="p-1 text-muted-foreground hover:text-foreground"
+                    aria-label="Limpiar término de búsqueda"
                   >
-                    Consultanos por WhatsApp →
-                  </a>
-                </p>
-              </div>
-            </aside>
-            <div className="min-w-0">
-              <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-                <h2 className="min-w-0 font-display text-2xl font-semibold">Inyectores diésel</h2>
-                <span aria-live="polite" className="shrink-0 text-xs text-muted-foreground">
-                  {filtered.length} productos
-                </span>
-              </div>
-              {(filterCount > 0 || search) && (
-                <div className="mb-5 flex flex-wrap items-center gap-2">
-                  {[...selectedBrands, ...selectedCategories].map((value) => (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      key={value}
-                      onClick={() =>
-                        brands.includes(value)
-                          ? setBrands(toggle(selectedBrands, value))
-                          : setCategories(toggle(selectedCategories, value))
-                      }
-                    >
-                      {value}
-                      <X className="size-3" />
-                    </Button>
-                  ))}
-                  <Button variant="link" size="sm" onClick={reset}>
-                    Limpiar búsqueda
-                  </Button>
-                </div>
-              )}
-              <div className="grid items-stretch gap-5 sm:grid-cols-2 xl:gap-6">
-                {filtered.map((product) => {
-                  const quantity =
-                    items.find((item) => item.product.id === product.id)?.quantity ?? 0;
-                  return (
-                    <article
-                      key={product.id}
-                      className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card"
-                    >
-                      <div className="relative flex aspect-[2/1] items-center justify-center border-b border-border bg-muted">
-                        <div
-                          role="img"
-                          aria-label={`Imagen de muestra de ${product.name}`}
-                          className="text-center text-muted-foreground/60"
-                        >
-                          <ImageIcon className="mx-auto size-10 stroke-1" />
-                          <span className="mt-2 block text-[10px]">Imagen del producto</span>
-                        </div>
-                        <span className="absolute left-4 top-4 rounded-md border border-border bg-card px-2.5 py-1 text-[11px] font-bold">
-                          {product.brand}
-                        </span>
-                        <span
-                          className={`absolute right-4 top-4 rounded-md px-2.5 py-1 text-[11px] font-semibold ${product.condition === "Nuevo" ? "bg-primary/10 text-primary" : "bg-secondary text-secondary-foreground"}`}
-                        >
-                          {product.condition}
-                        </span>
-                      </div>
-                      <div className="flex flex-1 flex-col p-5 md:p-6">
-                        <span className="mb-3 self-start rounded-md border border-primary/15 bg-primary/5 px-2.5 py-1.5 font-mono text-xs font-semibold text-primary">
-                          OEM {product.oem}
-                        </span>
-                        <h3 className="font-display text-2xl font-semibold leading-tight">
-                          {product.name}
-                        </h3>
-                        <p className="mt-2 text-xs text-muted-foreground">{product.detail}</p>
-                        <div className="mb-5 mt-5 flex h-9 items-center">
-                          {product.price === null ? (
-                            <span className="rounded-md bg-muted px-3 py-2 text-sm font-semibold text-muted-foreground">
-                              A cotizar
-                            </span>
-                          ) : (
-                            <p className="font-display text-2xl font-bold">
-                              {formatPrice(product.price)}
-                            </p>
-                          )}
-                        </div>
-                        <div className="mt-auto grid gap-2">
-                          <Button
-                            variant="industrial"
-                            className="h-11 w-full"
-                            onClick={() => add(product)}
-                          >
-                            {quantity ? <Check /> : <ShoppingCart />}
-                            {quantity
-                              ? `En el carrito (${quantity}) · Agregar`
-                              : "Agregar al Carrito"}
-                          </Button>
-                          <Button variant="whatsapp" className="h-11 w-full" asChild>
-                            <a
-                              href={whatsappUrl(
-                                `Hola, quisiera consultar por ${product.name}, marca ${product.brand}, OEM ${product.oem}.`,
-                              )}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <MessageCircle />
-                              WhatsApp
-                            </a>
-                          </Button>
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-              {filtered.length === 0 && (
-                <div className="py-16 text-center">
-                  <Search className="mx-auto mb-4 size-8 text-muted-foreground" />
-                  <h3 className="font-display text-2xl font-semibold">
-                    No encontramos ese inyector
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Probá con otro código OEM o cambiá los filtros.
-                  </p>
-                  <Button variant="industrial" className="mt-5" onClick={reset}>
-                    Ver todos los productos
-                  </Button>
-                </div>
-              )}
-              <p className="mt-7 text-xs leading-5 text-muted-foreground">
-                Catálogo de muestra · Precios y códigos ilustrativos. Confirmá compatibilidad y
-                disponibilidad antes de comprar.
-              </p>
+                    <X className="size-4" />
+                  </button>
+                )}
+              </label>
             </div>
           </div>
+        </section>
+
+        {/* Contenido Principal con Filtros y Grilla */}
+        <div className="site-container py-8 md:py-12">
+          {fetchError ? (
+            <CatalogErrorView onRetry={loadData} />
+          ) : (
+            <div className="grid gap-8 lg:grid-cols-[250px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)]">
+              {/* Columna Lateral: Filtros Facetados (RF-04) */}
+              <aside aria-label="Filtros del catálogo" className="min-w-0">
+                <CatalogFilters
+                  brands={brands}
+                  categories={categories}
+                  selectedBrandIds={selectedBrandIds}
+                  selectedCategoryIds={selectedCategoryIds}
+                  onBrandToggle={handleBrandToggle}
+                  onCategoryToggle={handleCategoryToggle}
+                  onResetFilters={handleResetFilters}
+                  products={products}
+                />
+              </aside>
+
+              {/* Columna Principal: Grilla de Productos y Estados */}
+              <div className="min-w-0">
+                {/* Encabezado de la Grilla */}
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
+                  <div>
+                    <h2 className="font-display text-2xl font-bold text-foreground">
+                      Repuestos Diésel
+                    </h2>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {isLoading
+                        ? "Cargando repuestos..."
+                        : `${filteredProducts.length} productos disponibles`}
+                    </p>
+                  </div>
+
+                  {/* Chips de Filtros Activos */}
+                  {(activeFiltersCount > 0 || searchQuery) && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {searchQuery && (
+                        <span className="inline-flex items-center gap-1.5 rounded-md border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+                          <span>Búsqueda: {searchQuery}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleSearchChange("")}
+                            className="hover:text-primary/70"
+                            aria-label="Eliminar filtro de búsqueda"
+                          >
+                            <X className="size-3" />
+                          </button>
+                        </span>
+                      )}
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleResetFilters}
+                        className="h-7 text-xs font-semibold text-muted-foreground hover:text-foreground"
+                        data-testid="reset-all-filters-chip"
+                      >
+                        Limpiar filtros
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Grilla Asíncrona / Estados */}
+                {isLoading ? (
+                  <ProductGridSkeleton count={6} />
+                ) : products.length === 0 ? (
+                  /* Catálogo totalmente vacío en la BD */
+                  <div
+                    className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card p-12 text-center"
+                    data-testid="empty-catalog-state"
+                  >
+                    <h3 className="font-display text-xl font-semibold text-foreground">
+                      No hay repuestos publicados actualmente
+                    </h3>
+                    <p className="mt-2 max-w-sm text-xs text-muted-foreground">
+                      El taller está actualizando el catálogo de inyectores. Por favor consultanos
+                      directamente por WhatsApp.
+                    </p>
+                  </div>
+                ) : filteredProducts.length === 0 ? (
+                  /* Estado Sin Resultados para la búsqueda / filtros activos (RF-05) */
+                  <div
+                    className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card p-8 text-center sm:p-14"
+                    data-testid="no-results-state"
+                  >
+                    <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
+                      <Search className="size-7 stroke-[1.75]" />
+                    </div>
+                    <h3 className="font-display text-2xl font-bold text-foreground">
+                      No encontramos repuestos con los criterios aplicados
+                    </h3>
+                    <p className="mt-2.5 max-w-md text-sm leading-relaxed text-muted-foreground">
+                      {searchQuery
+                        ? `No hay coincidencias para "${searchQuery}". Consultanos por WhatsApp con el código de tu pieza o vehículo y te asistimos inmediatamente.`
+                        : "No encontramos piezas que coincidan con la combinación de filtros seleccionada."}
+                    </p>
+                    <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                      <Button
+                        variant="whatsapp"
+                        className="h-11 gap-2 px-5 font-semibold shadow-xs"
+                        asChild
+                      >
+                        <a
+                          href={noResultsWhatsAppUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          data-testid="no-results-whatsapp-button"
+                        >
+                          <MessageCircle className="size-4" />
+                          <span>Consultar pieza por WhatsApp</span>
+                        </a>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="h-11 px-5 font-medium"
+                        onClick={handleResetFilters}
+                        data-testid="no-results-reset-button"
+                      >
+                        Limpiar filtros
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  /* Grilla de Productos Coincidentes */
+                  <div
+                    className="grid items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6"
+                    data-testid="catalog-product-grid"
+                  >
+                    {filteredProducts.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        brandName={brandsMap.get(product.brandId) || ""}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Botón Flotante Reactivo del Carrito de Consultas (RF-08) */}
+        <div className="fixed bottom-6 right-6 z-40">
+          <Button
+            variant="industrial"
+            size="lg"
+            className="h-14 gap-3 rounded-full px-5 shadow-xl hover:scale-105 transition-transform"
+            onClick={() => setIsCartOpen(true)}
+            aria-label={`Ver carrito de consultas (${cartCount} productos)`}
+            data-testid="floating-cart-button"
+          >
+            <div className="relative">
+              <ShoppingCart className="size-5" />
+              {cartCount > 0 && (
+                <span
+                  className="absolute -right-2.5 -top-2.5 flex size-5 items-center justify-center rounded-full bg-destructive text-[11px] font-bold text-destructive-foreground animate-in zoom-in"
+                  data-testid="floating-cart-badge"
+                >
+                  {cartCount}
+                </span>
+              )}
+            </div>
+            <span className="font-semibold text-sm hidden sm:inline">Tu Carrito</span>
+          </Button>
+        </div>
+
+        {/* Drawer Lateral del Carrito con Revalidación Activa (RF-08, RF-10) */}
+        <CartDrawer open={isCartOpen} onOpenChange={setIsCartOpen} />
       </main>
-      <Footer />
+
+      <LandingFooter />
     </>
   );
 }
+
+function CatalogRouteComponent() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+
+  const handleUpdateSearch = (updates: { q?: string; brand?: string[]; category?: string[] }) => {
+    navigate({
+      search: (prev) => {
+        const next: Partial<CatalogSearchParams> = { ...prev };
+        if (updates.q !== undefined) {
+          if (updates.q) next.q = updates.q;
+          else delete next.q;
+        }
+        if (updates.brand !== undefined) {
+          if (updates.brand.length === 1) next.brand = updates.brand[0];
+          else if (updates.brand.length > 1) next.brand = updates.brand;
+          else delete next.brand;
+        }
+        if (updates.category !== undefined) {
+          if (updates.category.length === 1) next.category = updates.category[0];
+          else if (updates.category.length > 1) next.category = updates.category;
+          else delete next.category;
+        }
+        return next;
+      },
+      replace: true,
+    });
+  };
+
+  return (
+    <CatalogErrorBoundary>
+      <CatalogPage searchParams={search} onUpdateSearchParams={handleUpdateSearch} />
+    </CatalogErrorBoundary>
+  );
+}
+
+export default CatalogPage;

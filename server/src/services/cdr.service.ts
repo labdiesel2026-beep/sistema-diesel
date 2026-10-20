@@ -26,7 +26,7 @@ export async function validateImageMagicBytes(fileBuffer: Buffer): Promise<strin
 
   if (!detectedType || !ALLOWED_MIME_TYPES.has(detectedType.mime)) {
     throw new ValidationError(
-      "El contenido del archivo no corresponde a una imagen válida (JPEG, PNG o WebP)"
+      "El contenido del archivo no corresponde a una imagen válida (JPEG, PNG o WebP)",
     );
   }
 
@@ -38,7 +38,9 @@ export async function validateImageMagicBytes(fileBuffer: Buffer): Promise<strin
  * ataques de Denegación de Servicio por Pixel Flood / Bomba de Descompresión.
  * (RF-04, CA-04.6, D-08)
  */
-export async function inspectImageDimensions(imageInstance: Sharp): Promise<{ width: number; height: number }> {
+export async function inspectImageDimensions(
+  imageInstance: Sharp,
+): Promise<{ width: number; height: number }> {
   const metadata = await imageInstance.metadata();
 
   if (!metadata.width || !metadata.height) {
@@ -47,7 +49,7 @@ export async function inspectImageDimensions(imageInstance: Sharp): Promise<{ wi
 
   if (metadata.width > MAX_DIMENSION_PX || metadata.height > MAX_DIMENSION_PX) {
     throw new ValidationError(
-      `Dimensiones de imagen excesivas (${metadata.width}x${metadata.height}px). Límite de seguridad: ${MAX_DIMENSION_PX}px`
+      `Dimensiones de imagen excesivas (${metadata.width}x${metadata.height}px). Límite de seguridad: ${MAX_DIMENSION_PX}px`,
     );
   }
 
@@ -85,7 +87,7 @@ export async function reconstructToWebp(imageInstance: Sharp): Promise<Buffer> {
  */
 export async function processImageUpload(
   fileBuffer: Buffer,
-  uploadsDir: string = DEFAULT_UPLOADS_DIR
+  uploadsDir: string = DEFAULT_UPLOADS_DIR,
 ): Promise<string> {
   // 1. Verificación de Magic Bytes con file-type
   await validateImageMagicBytes(fileBuffer);

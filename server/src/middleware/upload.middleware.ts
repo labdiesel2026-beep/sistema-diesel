@@ -9,11 +9,7 @@ export const MAX_IMAGE_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB (5242880 bytes
 // Almacenamiento en memoria RAM estricto (RF-04): nunca escribe en disco antes de sanitizar
 const storage = multer.memoryStorage();
 
-const fileFilter = (
-  _req: Request,
-  file: Express.Multer.File,
-  cb: multer.FileFilterCallback
-) => {
+const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const extension = path.extname(file.originalname).toLowerCase();
 
   if (!ALLOWED_IMAGE_EXTENSIONS.has(extension)) {

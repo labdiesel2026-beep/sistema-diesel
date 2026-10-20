@@ -36,13 +36,7 @@ describe("Barra de Navegación (LandingNavbar.tsx)", () => {
     render(<LandingNavbar />);
 
     // Enlaces áncora requeridos por RF-01
-    const expectedAnchors = [
-      "#inicio",
-      "#servicios",
-      "#garantias",
-      "#ubicacion",
-      "#contacto",
-    ];
+    const expectedAnchors = ["#inicio", "#servicios", "#garantias", "#ubicacion", "#contacto"];
 
     for (const anchor of expectedAnchors) {
       const anchorElement = document.querySelector(`a[href="${anchor}"]`);

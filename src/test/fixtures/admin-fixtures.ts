@@ -1,8 +1,4 @@
-import type {
-  AdminCategory,
-  AdminBrand,
-  AdminProduct,
-} from "@/types/admin";
+import type { AdminCategory, AdminBrand, AdminProduct } from "@/types/admin";
 
 /**
  * Fixtures de prueba para tests unitarios aislados en Vitest.
@@ -59,10 +55,7 @@ export const INITIAL_PRODUCTS: AdminProduct[] = [
     description:
       "Inyector de alta precisión para motorización 2.0 TDI. Calibrado en banco de pruebas.",
     imageUrl: "/uploads/amarok-20-tdi.webp",
-    categoryIds: [
-      "e4b6d812-7a2b-4f51-b8f3-0a567c891001",
-      "e4b6d812-7a2b-4f51-b8f3-0a567c891002",
-    ],
+    categoryIds: ["e4b6d812-7a2b-4f51-b8f3-0a567c891001", "e4b6d812-7a2b-4f51-b8f3-0a567c891002"],
     brandId: "b1a2c3d4-0001-4000-8000-000000000001",
     vehicleCompatibility: "Volkswagen Amarok 2.0 TDI (2010-2021)",
     condition: "Nuevo",
@@ -89,8 +82,7 @@ export const INITIAL_PRODUCTS: AdminProduct[] = [
   {
     id: "a0f1e2d3-3333-4000-8000-333333333333",
     name: "Inyector Hilux 3.0 D-4D",
-    description:
-      "Inyector Denso original para línea Toyota Hilux 1KD-FTV. Envasado de fábrica.",
+    description: "Inyector Denso original para línea Toyota Hilux 1KD-FTV. Envasado de fábrica.",
     imageUrl: "/uploads/hilux-30-d4d.webp",
     categoryIds: ["e4b6d812-7a2b-4f51-b8f3-0a567c891002"],
     brandId: "b1a2c3d4-0003-4000-8000-000000000003",

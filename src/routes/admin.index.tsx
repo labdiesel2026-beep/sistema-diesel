@@ -29,9 +29,7 @@ function AdminProductsPage() {
   const [productToEdit, setProductToEdit] = useState<AdminProduct | null>(null);
 
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<AdminProduct | null>(
-    null
-  );
+  const [productToDelete, setProductToDelete] = useState<AdminProduct | null>(null);
 
   const handleCreate = () => {
     setProductToEdit(null);
@@ -56,7 +54,7 @@ function AdminProductsPage() {
           p.name.toLowerCase().includes(clean) ||
           p.oem.toLowerCase().includes(clean) ||
           p.description.toLowerCase().includes(clean) ||
-          p.vehicleCompatibility.toLowerCase().includes(clean)
+          p.vehicleCompatibility.toLowerCase().includes(clean),
       ).length
     : products.length;
 
@@ -71,7 +69,8 @@ function AdminProductsPage() {
           Catálogo de Repuestos
         </h1>
         <p className="text-sm text-muted-foreground">
-          Control de inventario, edición técnica, códigos OEM, compatibilidad vehicular y visibilidad en tienda.
+          Control de inventario, edición técnica, códigos OEM, compatibilidad vehicular y
+          visibilidad en tienda.
         </p>
       </header>
 
@@ -85,18 +84,10 @@ function AdminProductsPage() {
       />
 
       {/* Grilla interactiva de repuestos con resolución relacional de marcas y switches de visibilidad */}
-      <ProductTable
-        searchQuery={searchQuery}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <ProductTable searchQuery={searchQuery} onEdit={handleEdit} onDelete={handleDelete} />
 
       {/* Modal de Creación y Edición de Producto con validación Zod */}
-      <ProductFormModal
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        productToEdit={productToEdit}
-      />
+      <ProductFormModal open={formOpen} onOpenChange={setFormOpen} productToEdit={productToEdit} />
 
       {/* Modal de Eliminación con confirmación destructiva */}
       <ProductDeleteModal

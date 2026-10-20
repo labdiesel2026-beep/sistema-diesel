@@ -29,11 +29,7 @@ export function AdminHeader({ collapsed, onToggleSidebar }: AdminHeaderProps) {
           aria-label={collapsed ? "Expandir menú lateral" : "Contraer menú lateral"}
           onClick={onToggleSidebar}
         >
-          {collapsed ? (
-            <PanelLeftOpen className="size-5" />
-          ) : (
-            <PanelLeftClose className="size-5" />
-          )}
+          {collapsed ? <PanelLeftOpen className="size-5" /> : <PanelLeftClose className="size-5" />}
         </Button>
 
         <div className="flex items-center gap-2">

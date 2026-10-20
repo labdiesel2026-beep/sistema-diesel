@@ -185,19 +185,19 @@ flowchart TD
     Req[Petición POST /api/uploads/product-image] --> RateLimit{Rate Limit <= 10 req/15min}
     RateLimit -- Superado --> E429[429 Too Many Requests]
     RateLimit -- OK --> Multer[Fase 1: Multer memoryStorage <= 5 MB]
-    
+
     Multer -- Excede 5 MB o sin archivo --> E400[400 Bad Request]
     Multer -- Buffer en RAM --> ExtCheck{Fase 2: Extensión en whitelist}
-    
+
     ExtCheck -- Inválida --> E400
     ExtCheck -- Válida --> MagicBytes{Fase 3: file-type Magic Bytes}
-    
+
     MagicBytes -- MIME Mismatch o Corrupto --> E400
     MagicBytes -- Coincide JPEG/PNG/WebP --> DecompBomb{Fase 4a: sharp.metadata width/height <= 4096 px}
-    
+
     DecompBomb -- Dimensiones > 4096 px --> E400Bomb[400 Bad Request: Pixel Flood detectado]
     DecompBomb -- Dimensiones Seguras --> SharpRebuild[Fase 4b: Sharp Reconstrucción: resize max 1080x1080, quality 80 WebP, strip EXIF]
-    
+
     SharpRebuild --> UUIDName[Fase 5: Generar crypto.randomUUID + .webp]
     UUIDName --> WriteDisk[Guardar en server/uploads/uuid.webp]
     WriteDisk --> Res201[Retornar 201 Created: imageUrl: /uploads/uuid.webp]
@@ -234,7 +234,9 @@ export async function processImageUpload(fileBuffer: Buffer, uploadsDir: string)
   }
 
   if (metadata.width > MAX_DIMENSION_PX || metadata.height > MAX_DIMENSION_PX) {
-    throw new ValidationError(`Dimensiones de imagen excesivas (${metadata.width}x${metadata.height}). Límite: ${MAX_DIMENSION_PX}px`);
+    throw new ValidationError(
+      `Dimensiones de imagen excesivas (${metadata.width}x${metadata.height}). Límite: ${MAX_DIMENSION_PX}px`,
+    );
   }
 
   // 3. Desarme y Reconstrucción: Resize acotado + eliminación total de EXIF + WebP (CA-05.1, CA-05.2, D-09)
@@ -276,7 +278,9 @@ export async function safelyDeleteImage(imageUrl: string, uploadsDir: string): P
     await fs.unlink(absoluteFilePath);
   } catch (error: any) {
     // Aislamiento de error EBUSY en Windows o archivo ya inexistente (CA-06.4, D-10)
-    console.warn(`[FileStorage Warning] No se pudo eliminar físicamente el archivo ${basename}: ${error.message}`);
+    console.warn(
+      `[FileStorage Warning] No se pudo eliminar físicamente el archivo ${basename}: ${error.message}`,
+    );
     // No relanza la excepción: la transacción de base de datos ya tuvo éxito y manda la lógica de negocio
   }
 }
@@ -288,50 +292,54 @@ export async function safelyDeleteImage(imageUrl: string, uploadsDir: string): P
 
 Alineado con `constitution.md` §2, `AGENTS.MD` §3 y `specs/004-admin-panel/plan.md` §4:
 
-| Método | Ruta | Esquema Zod de Validación | Seguridad / Middleware | RF Cubierto | Descripción / Payload |
-|---|---|---|---|---|---|
-| `POST` | `/api/auth/login` | `loginSchema.strict()` | Rate Limit (5 req/15m), Anti-CSRF | `RF-01` | Autentica con Argon2id y emite cookie `HttpOnly` con JWT (8h). |
-| `POST` | `/api/auth/logout` | Ninguno | Anti-CSRF | `RF-02` | Destruye cookie `session` (`Max-Age=0`). |
-| `GET` | `/api/auth/me` | Ninguno | `requireAuth` (Cookie JWT) | `RF-03` | Sesión silenciosa: rehidrata `{ id, email, role }` al montar/F5. |
-| `POST` | `/api/uploads/product-image` | `imageUploadSchema` (Filtro Multer) | `requireAuth`, Rate Limit (10 req/15m) | `RF-04, RF-05` | Tubería CDR completa, devuelve `{ imageUrl: "/uploads/<uuid>.webp" }`. |
-| `GET` | `/api/products` | `productQuerySchema` (opcional) | Público | `RF-07` | Lista catálogo plano con `categoryIds: string[]` normalizado por DTO. |
-| `POST` | `/api/products` | `productCreateSchema.strict()` | `requireAuth`, Anti-CSRF | `RF-07` | Inserta Producto y vincula filas en `ProductCategory` en transacción. |
-| `PUT` | `/api/products/:id` | `uuidParamSchema`, `productUpdateSchema.strict()` | `requireAuth`, Anti-CSRF | `RF-07` | Actualiza producto y sincroniza `ProductCategory`. Purgado seguro de imagen previa. |
-| `PATCH` | `/api/products/:id/visibility` | `uuidParamSchema`, `visibilityPatchSchema.strict()` | `requireAuth`, Anti-CSRF | `RF-07` | Alterna visibilidad recibiendo body explícito `{ visible: boolean }`. |
-| `DELETE` | `/api/products/:id` | `uuidParamSchema` | `requireAuth`, Anti-CSRF | `RF-07` | Elimina producto en DB (cascade en `ProductCategory`) y purga `.webp`. |
-| `GET` | `/api/categories` | Ninguno | Público | `RF-08` | Lista categorías ordenadas con `id`, `name`, `parentId`. |
-| `POST` | `/api/categories` | `categoryFormSchema.strict()` | `requireAuth`, Anti-CSRF | `RF-08` | Crea categoría verificando unicidad global CI y límite de 1 nivel. |
-| `PUT` | `/api/categories/:id` | `uuidParamSchema`, `categoryFormSchema.strict()` | `requireAuth`, Anti-CSRF | `RF-08` | Actualiza categoría previniendo auto-asignación y ciclos jerárquicos. |
-| `DELETE` | `/api/categories/:id` | `uuidParamSchema` | `requireAuth`, Anti-CSRF | `RF-08` | Elimina categoría. Retorna `409 Conflict` si tiene productos o hijas (`Restrict`). |
-| `GET` | `/api/brands` | Ninguno | Público | `RF-09` | Lista marcas ordenadas alfabéticamente. |
-| `POST` | `/api/brands` | `brandFormSchema.strict()` | `requireAuth`, Anti-CSRF | `RF-09` | Crea marca con validación de unicidad insensible a mayúsculas. |
-| `PUT` | `/api/brands/:id` | `uuidParamSchema`, `brandFormSchema.strict()` | `requireAuth`, Anti-CSRF | `RF-09` | Edita nombre de marca con unicidad CI. |
-| `DELETE` | `/api/brands/:id` | `uuidParamSchema` | `requireAuth`, Anti-CSRF | `RF-09` | Elimina marca. Retorna `409 Conflict` si tiene productos vinculados (`Restrict`). |
-| `GET` | `/api/admin/metrics` | Ninguno | `requireAuth` | `RF-10` | Agregaciones de catálogo: totales, visibles, ocultos, categorías y marcas. |
+| Método   | Ruta                           | Esquema Zod de Validación                           | Seguridad / Middleware                 | RF Cubierto    | Descripción / Payload                                                               |
+| -------- | ------------------------------ | --------------------------------------------------- | -------------------------------------- | -------------- | ----------------------------------------------------------------------------------- |
+| `POST`   | `/api/auth/login`              | `loginSchema.strict()`                              | Rate Limit (5 req/15m), Anti-CSRF      | `RF-01`        | Autentica con Argon2id y emite cookie `HttpOnly` con JWT (8h).                      |
+| `POST`   | `/api/auth/logout`             | Ninguno                                             | Anti-CSRF                              | `RF-02`        | Destruye cookie `session` (`Max-Age=0`).                                            |
+| `GET`    | `/api/auth/me`                 | Ninguno                                             | `requireAuth` (Cookie JWT)             | `RF-03`        | Sesión silenciosa: rehidrata `{ id, email, role }` al montar/F5.                    |
+| `POST`   | `/api/uploads/product-image`   | `imageUploadSchema` (Filtro Multer)                 | `requireAuth`, Rate Limit (10 req/15m) | `RF-04, RF-05` | Tubería CDR completa, devuelve `{ imageUrl: "/uploads/<uuid>.webp" }`.              |
+| `GET`    | `/api/products`                | `productQuerySchema` (opcional)                     | Público                                | `RF-07`        | Lista catálogo plano con `categoryIds: string[]` normalizado por DTO.               |
+| `POST`   | `/api/products`                | `productCreateSchema.strict()`                      | `requireAuth`, Anti-CSRF               | `RF-07`        | Inserta Producto y vincula filas en `ProductCategory` en transacción.               |
+| `PUT`    | `/api/products/:id`            | `uuidParamSchema`, `productUpdateSchema.strict()`   | `requireAuth`, Anti-CSRF               | `RF-07`        | Actualiza producto y sincroniza `ProductCategory`. Purgado seguro de imagen previa. |
+| `PATCH`  | `/api/products/:id/visibility` | `uuidParamSchema`, `visibilityPatchSchema.strict()` | `requireAuth`, Anti-CSRF               | `RF-07`        | Alterna visibilidad recibiendo body explícito `{ visible: boolean }`.               |
+| `DELETE` | `/api/products/:id`            | `uuidParamSchema`                                   | `requireAuth`, Anti-CSRF               | `RF-07`        | Elimina producto en DB (cascade en `ProductCategory`) y purga `.webp`.              |
+| `GET`    | `/api/categories`              | Ninguno                                             | Público                                | `RF-08`        | Lista categorías ordenadas con `id`, `name`, `parentId`.                            |
+| `POST`   | `/api/categories`              | `categoryFormSchema.strict()`                       | `requireAuth`, Anti-CSRF               | `RF-08`        | Crea categoría verificando unicidad global CI y límite de 1 nivel.                  |
+| `PUT`    | `/api/categories/:id`          | `uuidParamSchema`, `categoryFormSchema.strict()`    | `requireAuth`, Anti-CSRF               | `RF-08`        | Actualiza categoría previniendo auto-asignación y ciclos jerárquicos.               |
+| `DELETE` | `/api/categories/:id`          | `uuidParamSchema`                                   | `requireAuth`, Anti-CSRF               | `RF-08`        | Elimina categoría. Retorna `409 Conflict` si tiene productos o hijas (`Restrict`).  |
+| `GET`    | `/api/brands`                  | Ninguno                                             | Público                                | `RF-09`        | Lista marcas ordenadas alfabéticamente.                                             |
+| `POST`   | `/api/brands`                  | `brandFormSchema.strict()`                          | `requireAuth`, Anti-CSRF               | `RF-09`        | Crea marca con validación de unicidad insensible a mayúsculas.                      |
+| `PUT`    | `/api/brands/:id`              | `uuidParamSchema`, `brandFormSchema.strict()`       | `requireAuth`, Anti-CSRF               | `RF-09`        | Edita nombre de marca con unicidad CI.                                              |
+| `DELETE` | `/api/brands/:id`              | `uuidParamSchema`                                   | `requireAuth`, Anti-CSRF               | `RF-09`        | Elimina marca. Retorna `409 Conflict` si tiene productos vinculados (`Restrict`).   |
+| `GET`    | `/api/admin/metrics`           | Ninguno                                             | `requireAuth`                          | `RF-10`        | Agregaciones de catálogo: totales, visibles, ocultos, categorías y marcas.          |
 
 ---
 
 ## 5. Decisiones Técnicas Justificadas (Trade-Offs y Alternativas)
 
 ### 5.1 Tabla Pivote Explícita (`ProductCategory`) vs. Relación Implícita de Prisma `(D-03, RF-07, RF-08)`
-* **Decisión Adoptada:** Modelar una entidad explícita `model ProductCategory { productId, categoryId, @@id(...) }`.
-* **Alternativa Descartada:** Uso de la relación M:N implícita de Prisma (`categories Category[]`).
-* **Justificación del Descarte:** La relación implícita de Prisma autogenera una tabla oculta en PostgreSQL y aplica forzosamente `onDelete: Cascade` en ambas direcciones. Esto significa que si un administrador ejecutase la eliminación de una categoría, PostgreSQL desvincularía silenciosamente todos los productos asociados sin emitir error, vulnerando el requisito Zero-Trust de que la base de datos sea la última línea defensiva (`onDelete: Restrict`). La tabla explícita permite definir `onDelete: Restrict` en la relación hacia `Category` y `onDelete: Cascade` únicamente desde `Product`.
+
+- **Decisión Adoptada:** Modelar una entidad explícita `model ProductCategory { productId, categoryId, @@id(...) }`.
+- **Alternativa Descartada:** Uso de la relación M:N implícita de Prisma (`categories Category[]`).
+- **Justificación del Descarte:** La relación implícita de Prisma autogenera una tabla oculta en PostgreSQL y aplica forzosamente `onDelete: Cascade` en ambas direcciones. Esto significa que si un administrador ejecutase la eliminación de una categoría, PostgreSQL desvincularía silenciosamente todos los productos asociados sin emitir error, vulnerando el requisito Zero-Trust de que la base de datos sea la última línea defensiva (`onDelete: Restrict`). La tabla explícita permite definir `onDelete: Restrict` en la relación hacia `Category` y `onDelete: Cascade` únicamente desde `Product`.
 
 ### 5.2 Algoritmo de Hashing: Argon2id vs. Bcrypt / SHA-256 `(D-08, RF-01, RF-11)`
-* **Decisión Adoptada:** Implementación exclusiva de `argon2` variante Argon2id (configuración recomendada OWASP: 64 MB RAM, 3 iteraciones, 1 hilo).
-* **Alternativa Descartada:** Uso de `bcrypt` o algoritmos de digest rápido.
-* **Justificación del Descarte:** Bcrypt es vulnerable a ataques acelerados mediante matrices de GPUs masivas y hardware ASIC dedicado debido a su bajo requerimiento de memoria. Argon2id es el ganador del Password Hashing Competition (PHC) y está especificado de manera innegociable en `AGENTS.MD` §2 por su resistencia combinada a ataques por canal lateral (*side-channel*) y fuerza bruta masiva paralela en memoria.
+
+- **Decisión Adoptada:** Implementación exclusiva de `argon2` variante Argon2id (configuración recomendada OWASP: 64 MB RAM, 3 iteraciones, 1 hilo).
+- **Alternativa Descartada:** Uso de `bcrypt` o algoritmos de digest rápido.
+- **Justificación del Descarte:** Bcrypt es vulnerable a ataques acelerados mediante matrices de GPUs masivas y hardware ASIC dedicado debido a su bajo requerimiento de memoria. Argon2id es el ganador del Password Hashing Competition (PHC) y está especificado de manera innegociable en `AGENTS.MD` §2 por su resistencia combinada a ataques por canal lateral (_side-channel_) y fuerza bruta masiva paralela en memoria.
 
 ### 5.3 Almacenamiento Local con Tubería CDR vs. Cloud Object Storage (AWS S3 / Cloudinary) `(D-05, D-09, D-12, RF-05)`
-* **Decisión Adoptada:** Almacenamiento local en disco en el contenedor (`server/uploads/`) protegido mediante reconstrucción obligatoria Sharp a `.webp`.
-* **Alternativa Descartada:** Subida directa a buckets de AWS S3 o servicios SaaS como Cloudinary.
-* **Justificación del Descarte:** Para el alcance del MVP del taller, la integración con S3 añade dependencias de red externas, credenciales de nube adicionales (AWS IAM) y costos fijos innecesarios. Al mismo tiempo, las subidas directas a servicios externos suelen tentar al desarrollador a omitir la sanitización local de archivos (Magic Bytes y stripping EXIF). El almacenamiento local con Sharp garantiza control 100% soberano del archivo y cumplimiento de la Constitución §3 sin costo operativo adicional.
+
+- **Decisión Adoptada:** Almacenamiento local en disco en el contenedor (`server/uploads/`) protegido mediante reconstrucción obligatoria Sharp a `.webp`.
+- **Alternativa Descartada:** Subida directa a buckets de AWS S3 o servicios SaaS como Cloudinary.
+- **Justificación del Descarte:** Para el alcance del MVP del taller, la integración con S3 añade dependencias de red externas, credenciales de nube adicionales (AWS IAM) y costos fijos innecesarios. Al mismo tiempo, las subidas directas a servicios externos suelen tentar al desarrollador a omitir la sanitización local de archivos (Magic Bytes y stripping EXIF). El almacenamiento local con Sharp garantiza control 100% soberano del archivo y cumplimiento de la Constitución §3 sin costo operativo adicional.
 
 ### 5.4 Formato de Errores: Híbrido (400 Legibles / 500 Opacos) vs. Opacidad Total `(D-07, RF-01, RF-07)`
-* **Decisión Adoptada:** Devolver `{ error: string, details: [...] }` para errores de validación de cliente (400, 401, 409) y `{ error: "Error interno del servidor", referencia: "<uuid>" }` para colapsos 500.
-* **Alternativa Descartada:** Devolver únicamente `{ error: "Referencia: <uuid>" }` en todos los códigos HTTP.
-* **Justificación del Descarte:** Si el frontend recibe solo un UUID ante un campo de formulario inválido, la experiencia de usuario (UX) queda completamente destruida (el usuario no sabe qué campo corregir). Reservar la opacidad absoluta para los errores 500 protege los secretos del servidor y la base de datos (evitando fuga de stack traces o consultas Prisma) mientras mantiene la usabilidad del panel.
+
+- **Decisión Adoptada:** Devolver `{ error: string, details: [...] }` para errores de validación de cliente (400, 401, 409) y `{ error: "Error interno del servidor", referencia: "<uuid>" }` para colapsos 500.
+- **Alternativa Descartada:** Devolver únicamente `{ error: "Referencia: <uuid>" }` en todos los códigos HTTP.
+- **Justificación del Descarte:** Si el frontend recibe solo un UUID ante un campo de formulario inválido, la experiencia de usuario (UX) queda completamente destruida (el usuario no sabe qué campo corregir). Reservar la opacidad absoluta para los errores 500 protege los secretos del servidor y la base de datos (evitando fuga de stack traces o consultas Prisma) mientras mantiene la usabilidad del panel.
 
 ---
 
@@ -340,11 +348,12 @@ Alineado con `constitution.md` §2, `AGENTS.MD` §3 y `specs/004-admin-panel/pla
 La suite de pruebas del servidor se ejecutará con **Vitest** y **Supertest** contra una base de datos PostgreSQL real (el contenedor de Docker `laboratorio_diesel_db` o base de datos de test dedicada), garantizando fidelidad relacional total:
 
 ### 6.1 Aislamiento de Pruebas y Limpieza (`server/tests/helpers/reset-db.ts`)
-* Antes de cada batería de tests (`beforeEach`), un script de reseteo ejecutará un truncado en cascada rápido de las tablas:
+
+- Antes de cada batería de tests (`beforeEach`), un script de reseteo ejecutará un truncado en cascada rápido de las tablas:
   ```sql
   TRUNCATE TABLE "product_categories", "products", "categories", "brands", "admin_users" CASCADE;
   ```
-* Se inyectará el usuario administrador semilla para los tests que requieran sesión activa.
+- Se inyectará el usuario administrador semilla para los tests que requieran sesión activa.
 
 ### 6.2 Casos de Prueba Críticos
 
@@ -407,4 +416,4 @@ VITE_CONTACT_WHATSAPP=5492657659108
 
 ---
 
-*Fin del plan técnico de arquitectura e implementación.*
+_Fin del plan técnico de arquitectura e implementación._

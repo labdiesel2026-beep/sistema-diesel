@@ -7,8 +7,7 @@ import {
 } from "@/test/fixtures/admin-fixtures";
 
 // Expresión regular canónica para UUIDv4 estándar
-const UUIDV4_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUIDV4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 describe("Datos Semilla y Fixtures de Prueba con UUIDv4 — Tarea 4.1 y 8.5", () => {
   describe("Validación de Identificadores UUIDv4 (D-14, CA-15.1)", () => {
@@ -53,7 +52,7 @@ describe("Datos Semilla y Fixtures de Prueba con UUIDv4 — Tarea 4.1 y 8.5", ()
 
     it("las subcategorías hijas deben referenciar a una categoría raíz existente (sin huérfanos ni ciclos)", () => {
       const rootIds = new Set(
-        INITIAL_CATEGORIES.filter((c) => c.parentId === null).map((c) => c.id)
+        INITIAL_CATEGORIES.filter((c) => c.parentId === null).map((c) => c.id),
       );
 
       const childCategories = INITIAL_CATEGORIES.filter((c) => c.parentId !== null);
@@ -99,14 +98,10 @@ describe("Datos Semilla y Fixtures de Prueba con UUIDv4 — Tarea 4.1 y 8.5", ()
       const hasVisible = INITIAL_PRODUCTS.some((p) => p.visible === true);
       const hasHidden = INITIAL_PRODUCTS.some((p) => p.visible === false);
       const hasPositivePrice = INITIAL_PRODUCTS.some(
-        (p) => p.price !== null && p.price > 0 && p.showPrice === true
+        (p) => p.price !== null && p.price > 0 && p.showPrice === true,
       );
-      const hasZeroPrice = INITIAL_PRODUCTS.some(
-        (p) => p.price === 0 && p.showPrice === true
-      );
-      const hasNullPrice = INITIAL_PRODUCTS.some(
-        (p) => p.price === null && p.showPrice === false
-      );
+      const hasZeroPrice = INITIAL_PRODUCTS.some((p) => p.price === 0 && p.showPrice === true);
+      const hasNullPrice = INITIAL_PRODUCTS.some((p) => p.price === null && p.showPrice === false);
 
       expect(hasVisible).toBe(true);
       expect(hasHidden).toBe(true);

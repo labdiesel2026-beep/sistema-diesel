@@ -20,7 +20,7 @@ declare global {
 export const requireAuth: RequestHandler = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   const token = req.cookies?.[AUTH_COOKIE_NAME];
 

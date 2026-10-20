@@ -142,7 +142,7 @@ export class ProductService {
    */
   async updateProduct(
     id: string,
-    data: ProductFormData
+    data: ProductFormData,
   ): Promise<{ product: ProductDto; previousImageUrl: string }> {
     return prisma.$transaction(async (tx) => {
       // 1. Verificar existencia del producto

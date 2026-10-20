@@ -121,29 +121,26 @@ export function CategoryDeleteModal({
               <span>Bloqueo Impeditivo de Integridad</span>
             </div>
 
-            <p className="text-xs text-muted-foreground">
-              {integrity.reason}
-            </p>
+            <p className="text-xs text-muted-foreground">{integrity.reason}</p>
 
-            {integrity.affectedProducts &&
-              integrity.affectedProducts.length > 0 && (
-                <div className="mt-2 space-y-1.5 border-t border-destructive/20 pt-2">
-                  <span className="text-[11px] font-semibold text-foreground uppercase tracking-wider">
-                    Productos afectados ({integrity.affectedProducts.length}):
-                  </span>
-                  <ul
-                    data-testid="category-affected-products-list"
-                    className="max-h-32 overflow-y-auto space-y-1 text-xs text-muted-foreground pl-1"
-                  >
-                    {integrity.affectedProducts.map((prodName) => (
-                      <li key={prodName} className="flex items-center gap-2">
-                        <Package className="size-3 text-muted-foreground shrink-0" />
-                        <span className="truncate">{prodName}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+            {integrity.affectedProducts && integrity.affectedProducts.length > 0 && (
+              <div className="mt-2 space-y-1.5 border-t border-destructive/20 pt-2">
+                <span className="text-[11px] font-semibold text-foreground uppercase tracking-wider">
+                  Productos afectados ({integrity.affectedProducts.length}):
+                </span>
+                <ul
+                  data-testid="category-affected-products-list"
+                  className="max-h-32 overflow-y-auto space-y-1 text-xs text-muted-foreground pl-1"
+                >
+                  {integrity.affectedProducts.map((prodName) => (
+                    <li key={prodName} className="flex items-center gap-2">
+                      <Package className="size-3 text-muted-foreground shrink-0" />
+                      <span className="truncate">{prodName}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
 

@@ -11,15 +11,7 @@ import {
 
 // Mock de @tanstack/react-router Link para testing unitario
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({
-    to,
-    children,
-    ...props
-  }: {
-    to: string;
-    children: ReactNode;
-    [key: string]: any;
-  }) => (
+  Link: ({ to, children, ...props }: { to: string; children: ReactNode; [key: string]: any }) => (
     <a href={to} {...props}>
       {children}
     </a>
@@ -31,14 +23,8 @@ vi.mock("@tanstack/react-router", () => ({
  * inmediata de los contadores en el Dashboard.
  */
 function DashboardHarness() {
-  const {
-    products,
-    toggleVisibility,
-    createProduct,
-    deleteProduct,
-    createCategory,
-    createBrand,
-  } = useAdmin();
+  const { products, toggleVisibility, createProduct, deleteProduct, createCategory, createBrand } =
+    useAdmin();
 
   return (
     <div>
@@ -125,7 +111,7 @@ describe("Componente de Métricas del Dashboard (DashboardMetrics) — Tarea 5.2
     render(
       <AdminProvider>
         <DashboardMetrics />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     const initialTotalProducts = INITIAL_PRODUCTS.length;
@@ -159,7 +145,7 @@ describe("Componente de Métricas del Dashboard (DashboardMetrics) — Tarea 5.2
     render(
       <AdminProvider>
         <DashboardHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     const visibleEl = screen.getByTestId("metric-value-visible-products");
@@ -192,7 +178,7 @@ describe("Componente de Métricas del Dashboard (DashboardMetrics) — Tarea 5.2
     render(
       <AdminProvider>
         <DashboardHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     const totalEl = screen.getByTestId("metric-value-total-products");
@@ -221,7 +207,7 @@ describe("Componente de Métricas del Dashboard (DashboardMetrics) — Tarea 5.2
     render(
       <AdminProvider>
         <DashboardHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     const categoriesEl = screen.getByTestId("metric-value-total-categories");
@@ -247,7 +233,7 @@ describe("Componente de Métricas del Dashboard (DashboardMetrics) — Tarea 5.2
     render(
       <AdminProvider>
         <DashboardMetrics />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     const linkProducts = screen.getByTestId("quick-link-products");

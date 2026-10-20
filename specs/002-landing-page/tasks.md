@@ -4,9 +4,10 @@
 **Especificación:** [specs/002-landing-page/spec.md](file:///c:/Users/Usuario/Desktop/GEPI%20SOFTWARE%20-%20TRABAJOS/inyectores-diesel/InyectoresDiesel/specs/002-landing-page/spec.md)  
 **Plan Técnico:** [specs/002-landing-page/plan.md](file:///c:/Users/Usuario/Desktop/GEPI%20SOFTWARE%20-%20TRABAJOS/inyectores-diesel/InyectoresDiesel/specs/002-landing-page/plan.md)  
 **Marco de Referencia:** [docs/constitution.md](file:///c:/Users/Usuario/Desktop/GEPI%20SOFTWARE%20-%20TRABAJOS/inyectores-diesel/InyectoresDiesel/docs/constitution.md) y [docs/SRS.md](file:///c:/Users/Usuario/Desktop/GEPI%20SOFTWARE%20-%20TRABAJOS/inyectores-diesel/InyectoresDiesel/docs/SRS.md)  
-**Estado:** Listo para Ejecución  
+**Estado:** Listo para Ejecución
 
 > **Reglas de Ejecución:**
+>
 > - Se ejecuta **estrictamente una sola tarea a la vez** respetando el orden secuencial de dependencias.
 > - Cada tarea debe estar completada y validada según su criterio **"Hecho cuando:"** antes de marcar su checkbox `[x]` y avanzar a la siguiente.
 > - Ningún criterio de finalización es subjetivo: todos deben ser verificables de forma binaria mediante la terminal (códigos de salida, comandos de test o inspección) o aserciones de pruebas automatizadas sobre el DOM.

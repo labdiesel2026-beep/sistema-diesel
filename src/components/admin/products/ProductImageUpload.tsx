@@ -61,9 +61,7 @@ export function ProductImageUpload({
     });
 
     if (!validationResult.success) {
-      const firstError =
-        validationResult.error.errors[0]?.message ||
-        "Archivo de imagen inválido";
+      const firstError = validationResult.error.errors[0]?.message || "Archivo de imagen inválido";
       setInternalError(firstError);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -94,7 +92,7 @@ export function ProductImageUpload({
 
           const response = await api.upload<{ imageUrl: string }>(
             "/api/uploads/product-image",
-            formData
+            formData,
           );
 
           if (response && response.imageUrl) {
@@ -142,9 +140,7 @@ export function ProductImageUpload({
           <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Loader2 className="size-5 animate-spin" />
           </div>
-          <p className="mt-2 text-sm font-semibold text-foreground">
-            Subiendo imagen...
-          </p>
+          <p className="mt-2 text-sm font-semibold text-foreground">Subiendo imagen...</p>
           <p className="mt-1 text-xs text-muted-foreground">
             Optimizando y convirtiendo a formato WebP con Sharp...
           </p>

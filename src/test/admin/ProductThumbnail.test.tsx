@@ -4,12 +4,7 @@ import { ProductThumbnail } from "@/components/admin/products/ProductThumbnail";
 
 describe("Componente de Fallback Gráfico de Imagen (ProductThumbnail) — Tarea 8.1", () => {
   it("debe renderizar la imagen con src y alt correctos ante una URL válida (CA-06.3)", () => {
-    render(
-      <ProductThumbnail
-        src="/uploads/amarok-20-tdi.webp"
-        alt="Inyector Amarok 2.0 TDI"
-      />
-    );
+    render(<ProductThumbnail src="/uploads/amarok-20-tdi.webp" alt="Inyector Amarok 2.0 TDI" />);
 
     const img = screen.getByTestId("product-thumbnail-img") as HTMLImageElement;
     expect(img).toBeDefined();
@@ -20,12 +15,7 @@ describe("Componente de Fallback Gráfico de Imagen (ProductThumbnail) — Tarea
   });
 
   it("debe conmutar automáticamente al fallback gráfico con aria-label descriptivo al disparar onError (RF-06, CA-06.3, CL-10)", () => {
-    render(
-      <ProductThumbnail
-        src="/uploads/foto-inexistente.webp"
-        alt="Inyector Averiado"
-      />
-    );
+    render(<ProductThumbnail src="/uploads/foto-inexistente.webp" alt="Inyector Averiado" />);
 
     const img = screen.getByTestId("product-thumbnail-img");
     expect(img).toBeDefined();
@@ -43,9 +33,7 @@ describe("Componente de Fallback Gráfico de Imagen (ProductThumbnail) — Tarea
     expect(fallback.getAttribute("role")).toBe("img");
 
     // Accesible mediante getByRole
-    expect(
-      screen.getByRole("img", { name: "Imagen no disponible" })
-    ).toBeDefined();
+    expect(screen.getByRole("img", { name: "Imagen no disponible" })).toBeDefined();
   });
 
   it("debe renderizar directamente el fallback gráfico cuando src es nulo, indefinido o string vacío", () => {
@@ -73,9 +61,7 @@ describe("Componente de Fallback Gráfico de Imagen (ProductThumbnail) — Tarea
   });
 
   it("debe restablecer el estado de renderizado si se provee una nueva URL tras un error previo", () => {
-    const { rerender } = render(
-      <ProductThumbnail src="/primera-ruta-rota.webp" />
-    );
+    const { rerender } = render(<ProductThumbnail src="/primera-ruta-rota.webp" />);
 
     const brokenImg = screen.getByTestId("product-thumbnail-img");
     fireEvent.error(brokenImg);

@@ -36,7 +36,7 @@ describe("Componente de Carga y Validación Client-Side de Fotos (ProductImageUp
     const valid5MbFile = createMockFile(
       "inyector-bosch-5mb.jpg",
       5 * 1024 * 1024, // 5242880 bytes exactos
-      "image/jpeg"
+      "image/jpeg",
     );
 
     await act(async () => {
@@ -49,7 +49,7 @@ describe("Componente de Carga y Validación Client-Side de Fotos (ProductImageUp
 
     // Callback invocado con la Data URL
     expect(handleChange).toHaveBeenCalledWith(
-      `data:image/jpeg;base64,mock-data-url-inyector-bosch-5mb.jpg`
+      `data:image/jpeg;base64,mock-data-url-inyector-bosch-5mb.jpg`,
     );
 
     // Previsualización renderizada en el DOM
@@ -66,7 +66,7 @@ describe("Componente de Carga y Validación Client-Side de Fotos (ProductImageUp
     const oversizedFile = createMockFile(
       "inyector-pesado.png",
       5253360, // 5.01 MB
-      "image/png"
+      "image/png",
     );
 
     await act(async () => {
@@ -77,9 +77,7 @@ describe("Componente de Carga y Validación Client-Side de Fotos (ProductImageUp
     // Mensaje de error exacto de la especificación
     const errorEl = screen.getByTestId("image-upload-error");
     expect(errorEl).toBeDefined();
-    expect(errorEl.textContent).toContain(
-      "El archivo excede el tamaño máximo permitido de 5 MB"
-    );
+    expect(errorEl.textContent).toContain("El archivo excede el tamaño máximo permitido de 5 MB");
 
     // No debe emitir cambio ni mostrar preview
     expect(handleChange).not.toHaveBeenCalled();
@@ -101,7 +99,7 @@ describe("Componente de Carga y Validación Client-Side de Fotos (ProductImageUp
     const errorEl = screen.getByTestId("image-upload-error");
     expect(errorEl).toBeDefined();
     expect(errorEl.textContent).toContain(
-      "Solo se permiten imágenes en formato .jpg, .png o .webp"
+      "Solo se permiten imágenes en formato .jpg, .png o .webp",
     );
     expect(handleChange).not.toHaveBeenCalled();
   });
@@ -114,7 +112,7 @@ describe("Componente de Carga y Validación Client-Side de Fotos (ProductImageUp
     const webpFile = createMockFile(
       "tobera.webp",
       1024 * 500, // 500 KB
-      "image/webp"
+      "image/webp",
     );
 
     await act(async () => {
@@ -124,9 +122,7 @@ describe("Componente de Carga y Validación Client-Side de Fotos (ProductImageUp
 
     expect(screen.queryByTestId("image-upload-error")).toBeNull();
     const previewImg = screen.getByTestId("image-upload-preview");
-    expect(previewImg.getAttribute("src")).toBe(
-      "data:image/webp;base64,mock-data-url-tobera.webp"
-    );
+    expect(previewImg.getAttribute("src")).toBe("data:image/webp;base64,mock-data-url-tobera.webp");
   });
 
   it("debe sobrescribir limpiamente la selección previa ante un nuevo archivo (CA-08.4, CL-03)", async () => {
@@ -144,9 +140,7 @@ describe("Componente de Carga y Validación Client-Side de Fotos (ProductImageUp
 
     let previewImg = screen.getByTestId("image-upload-preview");
     expect(previewImg.getAttribute("src")).toContain("primera-foto.jpg");
-    expect(handleChange).toHaveBeenCalledWith(
-      expect.stringContaining("primera-foto.jpg")
-    );
+    expect(handleChange).toHaveBeenCalledWith(expect.stringContaining("primera-foto.jpg"));
 
     // 2. Segunda selección (reemplazo)
     const file2 = createMockFile("segunda-foto.png", 1024 * 400, "image/png");
@@ -158,19 +152,12 @@ describe("Componente de Carga y Validación Client-Side de Fotos (ProductImageUp
     previewImg = screen.getByTestId("image-upload-preview");
     expect(previewImg.getAttribute("src")).toContain("segunda-foto.png");
     expect(previewImg.getAttribute("src")).not.toContain("primera-foto.jpg");
-    expect(handleChange).toHaveBeenLastCalledWith(
-      expect.stringContaining("segunda-foto.png")
-    );
+    expect(handleChange).toHaveBeenLastCalledWith(expect.stringContaining("segunda-foto.png"));
   });
 
   it("debe permitir quitar la imagen seleccionada y volver al estado inicial", async () => {
     const handleChange = vi.fn();
-    render(
-      <ProductImageUpload
-        value="/uploads/existente.webp"
-        onChange={handleChange}
-      />
-    );
+    render(<ProductImageUpload value="/uploads/existente.webp" onChange={handleChange} />);
 
     expect(screen.getByTestId("image-upload-preview")).toBeDefined();
 

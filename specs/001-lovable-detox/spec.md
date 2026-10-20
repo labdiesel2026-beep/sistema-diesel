@@ -5,9 +5,10 @@
 **Autores:** Equipo GEPI  
 **Estado:** BORRADOR v2 — Revisión QA integrada  
 **Documento de diseño:** Esta spec actúa formalmente como el SDD (Software Design Document) para esta fase de refactorización de infraestructura, en conformidad con la Constitución #1 (SDD-First). No se requiere un documento SDD separado.  
-**Documentos de referencia:**  
-- [SRS.md](file:///f:/INGENIERIA/GEPI/InyectoresDiesel/docs/SRS.md)  
-- [constitution.md](file:///f:/INGENIERIA/GEPI/InyectoresDiesel/docs/constitution.md)  
+**Documentos de referencia:**
+
+- [SRS.md](file:///f:/INGENIERIA/GEPI/InyectoresDiesel/docs/SRS.md)
+- [constitution.md](file:///f:/INGENIERIA/GEPI/InyectoresDiesel/docs/constitution.md)
 - [AGENTS.MD](file:///f:/INGENIERIA/GEPI/InyectoresDiesel/AGENTS.MD)
 
 ---
@@ -28,32 +29,32 @@ Extraer el código útil a la raíz del repositorio, erradicar todo rastro del g
 
 ### 1.3 Inventario de Contaminación Lovable (Hallazgos del Audit)
 
-| Archivo / Directorio | Tipo | Acción |
-|:---|:---|:---|
-| `.lovable/project.json` | Config interna Lovable | **Eliminar** |
-| `src/lib/lovable-error-reporting.ts` | Telemetría a `window.__lovableEvents` | **Eliminar** |
-| `src/lib/error-capture.ts` | Monkey-patch de `console.error` + captura global | **Eliminar** (utilidad `describeError()` descartada intencionalmente; se implementará logging estructurado con Pino/Winston en Fase 4) |
-| `src/routes/__root.tsx` (L14, L43) | Importa y llama a `reportLovableError` | **Refactorizar** |
-| `src/server.ts` (L1, L3) | Importa `consumeLastCapturedError` de `error-capture.ts` | **Refactorizar** |
-| `vite.config.ts` | Importa `defineConfig` de `@lovable.dev/vite-tanstack-config` | **Reescribir** |
-| `package.json` → devDeps | `@lovable.dev/vite-tanstack-config: "2.25.3"` | **Eliminar dep** |
-| `package.json` → name | `"tanstack_start_ts"` (nombre genérico de template) | **Renombrar** a `"laboratorio-diesel-mvp"` |
-| `package.json` → overrides | `{ "rolldown": "1.2.1" }` (fijación propietaria) | **Eliminar** |
-| `AGENTS.md` (interno) | Marcadores `<!-- LOVABLE:BEGIN -->` / `<!-- LOVABLE:END -->` | **Descartar** (no se promueve) |
-| `README.md` (interno) | Referencias a Lovable editor y sync | **Descartar** (no se promueve) |
-| `roadmap.md` | Roadmap generado por Lovable | **Descartar** |
-| `bun.lock` | Lockfile de Bun | **Eliminar** |
-| `bunfig.toml` | Configuración de Bun | **Eliminar** |
+| Archivo / Directorio                 | Tipo                                                          | Acción                                                                                                                                 |
+| :----------------------------------- | :------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------- |
+| `.lovable/project.json`              | Config interna Lovable                                        | **Eliminar**                                                                                                                           |
+| `src/lib/lovable-error-reporting.ts` | Telemetría a `window.__lovableEvents`                         | **Eliminar**                                                                                                                           |
+| `src/lib/error-capture.ts`           | Monkey-patch de `console.error` + captura global              | **Eliminar** (utilidad `describeError()` descartada intencionalmente; se implementará logging estructurado con Pino/Winston en Fase 4) |
+| `src/routes/__root.tsx` (L14, L43)   | Importa y llama a `reportLovableError`                        | **Refactorizar**                                                                                                                       |
+| `src/server.ts` (L1, L3)             | Importa `consumeLastCapturedError` de `error-capture.ts`      | **Refactorizar**                                                                                                                       |
+| `vite.config.ts`                     | Importa `defineConfig` de `@lovable.dev/vite-tanstack-config` | **Reescribir**                                                                                                                         |
+| `package.json` → devDeps             | `@lovable.dev/vite-tanstack-config: "2.25.3"`                 | **Eliminar dep**                                                                                                                       |
+| `package.json` → name                | `"tanstack_start_ts"` (nombre genérico de template)           | **Renombrar** a `"laboratorio-diesel-mvp"`                                                                                             |
+| `package.json` → overrides           | `{ "rolldown": "1.2.1" }` (fijación propietaria)              | **Eliminar**                                                                                                                           |
+| `AGENTS.md` (interno)                | Marcadores `<!-- LOVABLE:BEGIN -->` / `<!-- LOVABLE:END -->`  | **Descartar** (no se promueve)                                                                                                         |
+| `README.md` (interno)                | Referencias a Lovable editor y sync                           | **Descartar** (no se promueve)                                                                                                         |
+| `roadmap.md`                         | Roadmap generado por Lovable                                  | **Descartar**                                                                                                                          |
+| `bun.lock`                           | Lockfile de Bun                                               | **Eliminar**                                                                                                                           |
+| `bunfig.toml`                        | Configuración de Bun                                          | **Eliminar**                                                                                                                           |
 
 ### 1.4 Diferimientos Explícitos (Decisiones Arquitectónicas)
 
 Las siguientes reglas de la Constitución y AGENTS.MD **no se implementan en esta fase** por decisión del Tech Lead:
 
-| Regla | Diferida a | Justificación |
-|:---|:---|:---|
+| Regla                                                                | Diferida a               | Justificación                                                                                                                               |
+| :------------------------------------------------------------------- | :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
 | Constitución #6 — Errores Opacos (`{ error: "Referencia: <uuid>" }`) | Fase 4 (Backend + Admin) | Esta fase solo remueve wrappers propietarios. El manejo estricto de errores HTTP con UUID se implementará cuando exista el backend Express. |
-| AGENTS.MD #3 — Crash early con Zod para `process.env` | Fase 4 (Backend) | Al ser frontend puro con SSR, no hay variables de entorno críticas en esta fase. Se creará un `.env.example` como placeholder. |
-| Logging estructurado (Pino/Winston reemplazando `describeError()`) | Fase 4 (Backend) | En esta fase, `console.error` estándar es suficiente. |
+| AGENTS.MD #3 — Crash early con Zod para `process.env`                | Fase 4 (Backend)         | Al ser frontend puro con SSR, no hay variables de entorno críticas en esta fase. Se creará un `.env.example` como placeholder.              |
+| Logging estructurado (Pino/Winston reemplazando `describeError()`)   | Fase 4 (Backend)         | En esta fase, `console.error` estándar es suficiente.                                                                                       |
 
 ---
 
@@ -83,6 +84,7 @@ Las siguientes reglas de la Constitución y AGENTS.MD **no se implementan en est
 - **Archivos de configuración:** `package.json`, `tsconfig.json`, `vite.config.ts`, `vitest.config.ts`, `eslint.config.js`, `.prettierrc`, `.prettierignore`, `components.json`
 
 **Criterios de aceptación:**
+
 - `src/`, `public/` y todos los archivos listados son hijos directos de la raíz del repositorio.
 - Las carpetas `docs/` y `specs/` pre-existentes en la raíz permanecen intactas.
 - El `routeTree.gen.ts` se regenera automáticamente al ejecutar `npm run dev` y está excluido de Git (ver RF-01b).
@@ -103,6 +105,7 @@ Las siguientes reglas de la Constitución y AGENTS.MD **no se implementan en est
 4. **Garantizar que NO se ignoren:** Las carpetas `docs/` y `specs/` DEBEN versionarse en Git obligatoriamente como la columna vertebral de conocimiento del proyecto.
 
 **Criterios de aceptación:**
+
 - `.gitignore` no contiene referencias a Wrangler ni Cloudflare.
 - `routeTree.gen.ts` y `.lovable/` están listados en `.gitignore`.
 - `docs/` y `specs/` NO están en `.gitignore` y permanecen versionados.
@@ -115,6 +118,7 @@ Las siguientes reglas de la Constitución y AGENTS.MD **no se implementan en est
 **CUANDO** exista un archivo en la raíz del repositorio con el mismo nombre que uno dentro de `diesel-blue-spark-main/` (casos conocidos: `README.md`, `AGENTS.MD`), el sistema deberá conservar exclusivamente la versión de la raíz, descartando la de Lovable sin migración de contenido.
 
 **Criterios de aceptación:**
+
 - El contenido de `README.md` y `AGENTS.MD` en la raíz es idéntico al que existía antes de la reestructuración.
 - No existen archivos `AGENTS.md` (Lovable), `README.md` (Lovable) ni `roadmap.md` (Lovable) residuales en ninguna ubicación del repositorio.
 
@@ -125,6 +129,7 @@ Las siguientes reglas de la Constitución y AGENTS.MD **no se implementan en est
 El sistema deberá eliminar permanentemente el directorio `.lovable/` y todo su contenido (`project.json`).
 
 **Criterios de aceptación:**
+
 - El directorio `.lovable/` no existe en ninguna ubicación del repositorio.
 - Ningún archivo del proyecto contiene una referencia de importación o ruta hacia `.lovable/`.
 
@@ -138,6 +143,7 @@ El sistema deberá eliminar permanentemente los siguientes archivos de telemetr�
 2. `src/lib/error-capture.ts` — Módulo que hace monkey-patch de `console.error` y captura errores globales. **Nota:** La función utilitaria `describeError()` contenida en este archivo se descarta intencionalmente en esta fase. El logging estructurado con expansión de cause-chains se implementará en la Fase 4 con Pino/Winston.
 
 **Criterios de aceptación:**
+
 - Ninguno de los dos archivos existe en el repositorio.
 - `grep -ri "lovable" src/` devuelve cero resultados.
 - `grep -ri "error-capture" src/` devuelve cero resultados (excluyendo este documento de spec).
@@ -154,6 +160,7 @@ El sistema deberá eliminar permanentemente los siguientes archivos de telemetr�
 4. Conservar intactos: el componente `NotFoundComponent`, el `RootShell`, el `RootComponent`, la metadata SEO, y las Google Fonts.
 
 **Criterios de aceptación:**
+
 - El `ErrorComponent` no referencia ningún módulo de Lovable.
 - Los errores de renderizado se registran en la consola del navegador vía `console.error`.
 - La página de error mantiene su funcionalidad de "Try again" y "Go home".
@@ -170,6 +177,7 @@ El sistema deberá eliminar permanentemente los siguientes archivos de telemetr�
 4. Conservar intacta la lógica de detección de errores h3 swallowed (`isH3SwallowedErrorBody`) y el renderizado de `error-page.ts`.
 
 **Criterios de aceptación:**
+
 - `server.ts` no importa ni referencia `error-capture.ts`.
 - Los errores SSR catastróficos siguen siendo interceptados y renderizan la página de error estática.
 - Los errores se registran en `console.error` del servidor.
@@ -187,6 +195,7 @@ El sistema deberá conservar los siguientes archivos sin modificaciones funciona
 4. `src/lib/utils.ts` — Utilidad `cn()` de shadcn/ui. Estándar.
 
 **Criterios de aceptación:**
+
 - Los cuatro archivos existen en la raíz del proyecto bajo `src/`.
 - `start.ts` conserva el `errorMiddleware` y el `csrfMiddleware` funcionales.
 - `error-page.ts` sigue exportando `renderErrorPage()`.
@@ -198,26 +207,27 @@ El sistema deberá conservar los siguientes archivos sin modificaciones funciona
 
 El sistema deberá reescribir `vite.config.ts` reemplazando la importación propietaria `@lovable.dev/vite-tanstack-config` con plugins estándar equivalentes:
 
-| Funcionalidad requerida | Plugin estándar |
-|:---|:---|
-| TanStack Start integration | `@tanstack/react-start/plugin` (o API pública de TanStack Start para Vite) |
-| React transform | `@vitejs/plugin-react` |
-| Tailwind CSS v4 | `@tailwindcss/vite` |
-| tsconfig paths (`@/` alias) | `vite-tsconfig-paths` |
-| TanStack Devtools (dev-only) | `@tanstack/devtools-vite` |
-| File-based routing generation | `@tanstack/router-vite-plugin` + `@tanstack/router-generator` |
-| Server entry override | `tanstackStart({ server: { entry: "server" } })` (o equivalente) |
+| Funcionalidad requerida       | Plugin estándar                                                            |
+| :---------------------------- | :------------------------------------------------------------------------- |
+| TanStack Start integration    | `@tanstack/react-start/plugin` (o API pública de TanStack Start para Vite) |
+| React transform               | `@vitejs/plugin-react`                                                     |
+| Tailwind CSS v4               | `@tailwindcss/vite`                                                        |
+| tsconfig paths (`@/` alias)   | `vite-tsconfig-paths`                                                      |
+| TanStack Devtools (dev-only)  | `@tanstack/devtools-vite`                                                  |
+| File-based routing generation | `@tanstack/router-vite-plugin` + `@tanstack/router-generator`              |
+| Server entry override         | `tanstackStart({ server: { entry: "server" } })` (o equivalente)           |
 
 **Funcionalidades del paquete Lovable descartadas intencionalmente:**
 
-| Funcionalidad propietaria | Decisión |
-|:---|:---|
-| React/TanStack dedupe | **Descartada** — Vite resuelve deduplicación nativamente. |
-| `VITE_*` env injection personalizada | **Descartada** — Se usa el comportamiento nativo de Vite para `import.meta.env`. |
+| Funcionalidad propietaria                | Decisión                                                                                       |
+| :--------------------------------------- | :--------------------------------------------------------------------------------------------- |
+| React/TanStack dedupe                    | **Descartada** — Vite resuelve deduplicación nativamente.                                      |
+| `VITE_*` env injection personalizada     | **Descartada** — Se usa el comportamiento nativo de Vite para `import.meta.env`.               |
 | Sandbox detection (port/host/strictPort) | **Descartada** — Configuración específica del editor Lovable, irrelevante en desarrollo local. |
-| Error logger plugins propietarios | **Descartada** — Reemplazada por `console.error` estándar. |
+| Error logger plugins propietarios        | **Descartada** — Reemplazada por `console.error` estándar.                                     |
 
 **Criterios de aceptación:**
+
 - `vite.config.ts` no contiene ninguna referencia a `@lovable.dev`.
 - `npm run dev` levanta el servidor de desarrollo con hot reload funcional.
 - `npm run build` produce un bundle SSR sin errores.
@@ -240,6 +250,7 @@ El sistema deberá modificar `package.json` para:
 6. Conservar todas las `dependencies` de producción intactas (Radix, TanStack, Zod, Tailwind, shadcn/ui, etc.).
 
 **Criterios de aceptación:**
+
 - `grep "lovable" package.json` devuelve cero resultados.
 - `"name"` es `"laboratorio-diesel-mvp"` y `"version"` es `"1.0.0"`.
 - No existe la sección `"overrides"`.
@@ -257,6 +268,7 @@ El sistema deberá:
 2. Generar `package-lock.json` mediante `npm install`.
 
 **Criterios de aceptación:**
+
 - No existen `bun.lock` ni `bunfig.toml` en el repositorio.
 - Existe un `package-lock.json` válido en la raíz.
 - `npm install` ejecuta limpiamente sin errores.
@@ -268,6 +280,7 @@ El sistema deberá:
 El sistema deberá crear un archivo `.env.example` en la raíz del repositorio como placeholder para las variables de entorno que se definirán en fases posteriores.
 
 **Contenido mínimo:**
+
 ```env
 # Variables de entorno — Laboratorio Diésel MVP
 # Copiar este archivo como .env y completar los valores.
@@ -277,6 +290,7 @@ El sistema deberá crear un archivo `.env.example` en la raíz del repositorio c
 ```
 
 **Criterios de aceptación:**
+
 - El archivo `.env.example` existe en la raíz del repositorio.
 - `.env` está listado en `.gitignore` (no se versiona el archivo real).
 
@@ -287,6 +301,7 @@ El sistema deberá crear un archivo `.env.example` en la raíz del repositorio c
 El sistema deberá auditar el directorio `src/components/ui/` (46 archivos) y `src/components/` (5 archivos) en busca de tracking oculto o comunicación con dominios externos que Lovable pudiera haber inyectado.
 
 **Criterios de aceptación:**
+
 - `grep -rEi "(fetch|XMLHttpRequest|navigator\.sendBeacon|new Image)" src/components/` devuelve cero resultados sospechosos (excluyendo usos legítimos documentados).
 - `grep -rEi "lovable|lovable\.dev|sentry|analytics|telemetry|tracking" src/components/` devuelve cero resultados.
 - Si se detecta tracking, el archivo afectado se limpia en esta spec antes de marcar la tarea como completa.
@@ -300,6 +315,7 @@ El sistema deberá auditar el directorio `src/components/ui/` (46 archivos) y `s
 **Contexto técnico:** El archivo usa `path.resolve(__dirname, "./src")` para resolver el alias. Dado que `__dirname` apuntará a la nueva raíz (un nivel arriba de antes), y `src/` sigue siendo hijo directo de la raíz, la resolución **debería** ser correcta sin cambios. Verificar empíricamente.
 
 **Criterios de aceptación:**
+
 - `npm run test` ejecuta sin errores de resolución de módulos.
 - Los tests existentes (`app-routing.test.tsx`, `catalog.test.ts`) pasan. Si se rompen por el movimiento de carpetas, deben corregirse en esta spec.
 
@@ -310,6 +326,7 @@ El sistema deberá auditar el directorio `src/components/ui/` (46 archivos) y `s
 **CUANDO** se hayan completado todos los requisitos anteriores (RF-01 a RF-13), el sistema deberá eliminar permanentemente el directorio `diesel-blue-spark-main/` y todo su contenido residual.
 
 **Criterios de aceptación:**
+
 - El directorio `diesel-blue-spark-main/` no existe en el repositorio.
 - Ningún archivo del proyecto contiene una referencia a `diesel-blue-spark-main`.
 
@@ -317,27 +334,27 @@ El sistema deberá auditar el directorio `src/components/ui/` (46 archivos) y `s
 
 ## 4. Requisitos No Funcionales
 
-| ID | Categoría | Requisito |
-|:---|:---|:---|
-| **RNF-01** | Integridad de stack | TanStack Start, TanStack Router, React 19, Tailwind CSS v4 y shadcn/ui (Radix) deben conservarse funcionales tras la reestructuración. |
-| **RNF-02** | Alias de rutas | El alias `@/*` → `./src/*` definido en `tsconfig.json`, `components.json` y `vitest.config.ts` debe seguir resolviendo correctamente tras mover los archivos a la raíz. |
-| **RNF-03** | Zero telemetría | Tras la purga, ningún código del repositorio debe transmitir datos a dominios externos no explícitamente autorizados. Esto incluye componentes UI (RF-12). |
-| **RNF-04** | Reproducibilidad | Un desarrollador debe poder clonar el repo, ejecutar `npm install` y `npm run dev`, y tener el proyecto corriendo sin pasos manuales adicionales. |
-| **RNF-05** | Datos mock preservados | Los datos mock de `catalog-data.ts` deben permanecer intactos para servir como fixture de maquetación en las Fases 2 y 3. |
+| ID         | Categoría              | Requisito                                                                                                                                                               |
+| :--------- | :--------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **RNF-01** | Integridad de stack    | TanStack Start, TanStack Router, React 19, Tailwind CSS v4 y shadcn/ui (Radix) deben conservarse funcionales tras la reestructuración.                                  |
+| **RNF-02** | Alias de rutas         | El alias `@/*` → `./src/*` definido en `tsconfig.json`, `components.json` y `vitest.config.ts` debe seguir resolviendo correctamente tras mover los archivos a la raíz. |
+| **RNF-03** | Zero telemetría        | Tras la purga, ningún código del repositorio debe transmitir datos a dominios externos no explícitamente autorizados. Esto incluye componentes UI (RF-12).              |
+| **RNF-04** | Reproducibilidad       | Un desarrollador debe poder clonar el repo, ejecutar `npm install` y `npm run dev`, y tener el proyecto corriendo sin pasos manuales adicionales.                       |
+| **RNF-05** | Datos mock preservados | Los datos mock de `catalog-data.ts` deben permanecer intactos para servir como fixture de maquetación en las Fases 2 y 3.                                               |
 
 ---
 
 ## 5. Casos Límite
 
-| # | Caso | Mitigación |
-|:---|:---|:---|
-| CL-01 | `routeTree.gen.ts` queda desactualizado tras mover `src/routes/` | El plugin de TanStack Router (`@tanstack/router-vite-plugin`) lo regenera automáticamente al ejecutar `npm run dev`. Se agrega a `.gitignore` (RF-01b). |
-| CL-02 | Imports con rutas relativas rotas al promover (`../lib/`, `../components/`) | Las rutas relativas internas a `src/` no cambian porque la estructura interna se preserva íntegra. Solo cambia el padre de `src/`. Verificar con `tsc --noEmit`. |
-| CL-03 | `components.json` (shadcn) contiene paths relativos (`src/styles.css`) | El path es relativo al project root. Al promover `components.json` a la nueva raíz, la relación con `src/styles.css` se preserva porque `src/` también se promueve al mismo nivel. |
-| CL-04 | Dependencias peer del paquete Lovable removido dejan de satisfacerse | Se agregan las dependencias que antes eran transitivas como devDeps explícitas (RF-09): `@tanstack/router-generator`, `@tanstack/router-vite-plugin`, `@tanstack/devtools-vite`. Verificar con `npm ls`. |
-| CL-05 | `error-page.ts` tiene textos en inglés ("This page didn't load") | Fuera de alcance de esta spec. Se localizará a español en la Fase 2 (Landing). |
-| CL-06 | Tests rotos tras el movimiento de carpetas | Si `npm run test` falla, los tests deben corregirse dentro de esta misma spec (RF-13). No es aceptable diferir tests rotos. |
-| CL-07 | `vitest.config.ts` usa `__dirname` para resolver alias `@/` | `__dirname` apunta al directorio del archivo. Al mover `vitest.config.ts` a la raíz con `src/` como hijo directo, `path.resolve(__dirname, "./src")` sigue resolviendo correctamente. Verificar empíricamente con `npm run test`. |
+| #     | Caso                                                                        | Mitigación                                                                                                                                                                                                                        |
+| :---- | :-------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CL-01 | `routeTree.gen.ts` queda desactualizado tras mover `src/routes/`            | El plugin de TanStack Router (`@tanstack/router-vite-plugin`) lo regenera automáticamente al ejecutar `npm run dev`. Se agrega a `.gitignore` (RF-01b).                                                                           |
+| CL-02 | Imports con rutas relativas rotas al promover (`../lib/`, `../components/`) | Las rutas relativas internas a `src/` no cambian porque la estructura interna se preserva íntegra. Solo cambia el padre de `src/`. Verificar con `tsc --noEmit`.                                                                  |
+| CL-03 | `components.json` (shadcn) contiene paths relativos (`src/styles.css`)      | El path es relativo al project root. Al promover `components.json` a la nueva raíz, la relación con `src/styles.css` se preserva porque `src/` también se promueve al mismo nivel.                                                |
+| CL-04 | Dependencias peer del paquete Lovable removido dejan de satisfacerse        | Se agregan las dependencias que antes eran transitivas como devDeps explícitas (RF-09): `@tanstack/router-generator`, `@tanstack/router-vite-plugin`, `@tanstack/devtools-vite`. Verificar con `npm ls`.                          |
+| CL-05 | `error-page.ts` tiene textos en inglés ("This page didn't load")            | Fuera de alcance de esta spec. Se localizará a español en la Fase 2 (Landing).                                                                                                                                                    |
+| CL-06 | Tests rotos tras el movimiento de carpetas                                  | Si `npm run test` falla, los tests deben corregirse dentro de esta misma spec (RF-13). No es aceptable diferir tests rotos.                                                                                                       |
+| CL-07 | `vitest.config.ts` usa `__dirname` para resolver alias `@/`                 | `__dirname` apunta al directorio del archivo. Al mover `vitest.config.ts` a la raíz con `src/` como hijo directo, `path.resolve(__dirname, "./src")` sigue resolviendo correctamente. Verificar empíricamente con `npm run test`. |
 
 ---
 
@@ -364,26 +381,26 @@ Los siguientes ítems **NO** forman parte de esta especificación:
 
 La Fase 1 se considera **completada** cuando se cumplen **todos** los siguientes checks:
 
-| # | Check | Comando de verificación |
-|:---|:---|:---|
-| ✅ 1 | `npm install` ejecuta sin errores | `npm install` |
-| ✅ 2 | Servidor de desarrollo levanta | `npm run dev` → responde en `localhost` |
-| ✅ 3 | Rutas existentes renderizan sin crash | Navegar a `/`, `/catalogo`, `/admin` en el navegador |
-| ✅ 4 | Build de producción compila | `npm run build` → exit code 0 |
-| ✅ 5 | TypeScript sin errores de tipos | `npx tsc --noEmit` → exit code 0 |
-| ✅ 6 | Lint sin warnings críticos | `npm run lint` → exit code 0 |
-| ✅ 7 | Tests pasan | `npm run test` → exit code 0 |
-| ✅ 8 | Cero referencias textuales a Lovable | `grep -ri "lovable" . --include="*.ts" --include="*.tsx" --include="*.json" --exclude-dir=node_modules --exclude-dir=.git` → 0 resultados |
-| ✅ 9 | Cero tracking oculto en componentes | `grep -rEi "fetch\|XMLHttpRequest\|sendBeacon\|new Image" src/components/` → 0 sospechosos |
-| ✅ 10 | Carpeta contenedora eliminada | `diesel-blue-spark-main/` no existe |
-| ✅ 11 | Archivos Bun eliminados | `bun.lock` y `bunfig.toml` no existen |
-| ✅ 12 | `.env.example` existe | Archivo presente en la raíz |
-| ✅ 13 | `package.json` limpio | `name` = `"laboratorio-diesel-mvp"`, sin `overrides`, sin deps de Lovable |
+| #     | Check                                 | Comando de verificación                                                                                                                   |
+| :---- | :------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| ✅ 1  | `npm install` ejecuta sin errores     | `npm install`                                                                                                                             |
+| ✅ 2  | Servidor de desarrollo levanta        | `npm run dev` → responde en `localhost`                                                                                                   |
+| ✅ 3  | Rutas existentes renderizan sin crash | Navegar a `/`, `/catalogo`, `/admin` en el navegador                                                                                      |
+| ✅ 4  | Build de producción compila           | `npm run build` → exit code 0                                                                                                             |
+| ✅ 5  | TypeScript sin errores de tipos       | `npx tsc --noEmit` → exit code 0                                                                                                          |
+| ✅ 6  | Lint sin warnings críticos            | `npm run lint` → exit code 0                                                                                                              |
+| ✅ 7  | Tests pasan                           | `npm run test` → exit code 0                                                                                                              |
+| ✅ 8  | Cero referencias textuales a Lovable  | `grep -ri "lovable" . --include="*.ts" --include="*.tsx" --include="*.json" --exclude-dir=node_modules --exclude-dir=.git` → 0 resultados |
+| ✅ 9  | Cero tracking oculto en componentes   | `grep -rEi "fetch\|XMLHttpRequest\|sendBeacon\|new Image" src/components/` → 0 sospechosos                                                |
+| ✅ 10 | Carpeta contenedora eliminada         | `diesel-blue-spark-main/` no existe                                                                                                       |
+| ✅ 11 | Archivos Bun eliminados               | `bun.lock` y `bunfig.toml` no existen                                                                                                     |
+| ✅ 12 | `.env.example` existe                 | Archivo presente en la raíz                                                                                                               |
+| ✅ 13 | `package.json` limpio                 | `name` = `"laboratorio-diesel-mvp"`, sin `overrides`, sin deps de Lovable                                                                 |
 
 ---
 
 ## 8. Dudas Abiertas
 
-| # | Duda | Estado |
-|:---|:---|:---|
+| #     | Duda                                                                 | Estado                                                                                                                                                              |
+| :---- | :------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | DA-01 | `.gitignore`: ¿Deben versionarse los directorios `specs/` y `docs/`? | **[RESUELTO]** — Ambos directorios (`docs/`, `specs/`) DEBEN versionarse en Git como columna vertebral de conocimiento del proyecto. NO se agregan al `.gitignore`. |

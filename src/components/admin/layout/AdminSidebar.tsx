@@ -62,10 +62,7 @@ export function AdminSidebar({ collapsed }: AdminSidebarProps) {
       )}
 
       {/* Navegación Principal */}
-      <nav
-        className="space-y-1.5 px-2 py-4"
-        aria-label="Secciones del panel de administración"
-      >
+      <nav className="space-y-1.5 px-2 py-4" aria-label="Secciones del panel de administración">
         {navItems.map((item) => {
           const active = isItemActive(item.to, "exact" in item ? item.exact : false);
           const Icon = item.icon;
@@ -88,9 +85,7 @@ export function AdminSidebar({ collapsed }: AdminSidebarProps) {
                 className="flex items-center gap-3"
               >
                 <Icon className="size-5 shrink-0" />
-                {!collapsed && (
-                  <span className="hidden md:inline truncate">{item.label}</span>
-                )}
+                {!collapsed && <span className="hidden md:inline truncate">{item.label}</span>}
               </Link>
             </Button>
           );
@@ -106,9 +101,7 @@ export function AdminSidebar({ collapsed }: AdminSidebarProps) {
         >
           <Link to="/catalogo" title="Ver catálogo público en tienda">
             <ArrowUpRight className="size-5 shrink-0" />
-            {!collapsed && (
-              <span className="hidden md:inline truncate">Ver tienda</span>
-            )}
+            {!collapsed && <span className="hidden md:inline truncate">Ver tienda</span>}
           </Link>
         </Button>
       </div>

@@ -36,7 +36,9 @@ export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as 
 
 export const imageMetadataSchema = z
   .object({
-    name: z.string({ required_error: "Nombre de archivo requerido" }).min(1, "Nombre de archivo requerido"),
+    name: z
+      .string({ required_error: "Nombre de archivo requerido" })
+      .min(1, "Nombre de archivo requerido"),
     size: z
       .number({ required_error: "Tamaño de archivo requerido" })
       .max(MAX_IMAGE_SIZE_BYTES, "El archivo excede el tamaño máximo permitido de 5 MB"),
@@ -58,11 +60,7 @@ export const categoryFormSchema = z
       .string({ required_error: "El nombre de la categoría es obligatorio" })
       .trim()
       .min(2, "El nombre de la categoría debe tener al menos 2 caracteres"),
-    parentId: z
-      .string()
-      .uuid("Identificador de categoría padre inválido")
-      .nullable()
-      .default(null),
+    parentId: z.string().uuid("Identificador de categoría padre inválido").nullable().default(null),
   })
   .strict();
 

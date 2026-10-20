@@ -25,13 +25,7 @@ router.get("/", getBrands);
 router.get("/:id", validate({ params: uuidParamSchema }), getBrandById);
 
 // Crear marca (Autenticado, Anti-CSRF, Zod .strict())
-router.post(
-  "/",
-  requireAuth,
-  csrfProtection,
-  validate(brandFormSchema),
-  createBrand
-);
+router.post("/", requireAuth, csrfProtection, validate(brandFormSchema), createBrand);
 
 // Actualizar marca (Autenticado, Anti-CSRF, Zod .strict())
 router.put(
@@ -39,7 +33,7 @@ router.put(
   requireAuth,
   csrfProtection,
   validate({ params: uuidParamSchema, body: brandFormSchema }),
-  updateBrand
+  updateBrand,
 );
 
 // Eliminar marca (Autenticado, Anti-CSRF, captura de restricción referencial onDelete: Restrict)
@@ -48,7 +42,7 @@ router.delete(
   requireAuth,
   csrfProtection,
   validate({ params: uuidParamSchema }),
-  deleteBrand
+  deleteBrand,
 );
 
 export default router;

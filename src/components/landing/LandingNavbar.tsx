@@ -25,9 +25,7 @@ export function LandingNavbar({ className = "" }: LandingNavbarProps) {
         >
           <span className="font-display">
             Laboratorio{" "}
-            <span className="text-primary transition-colors group-hover:text-blue-500">
-              Diésel
-            </span>
+            <span className="text-primary transition-colors group-hover:text-blue-500">Diésel</span>
           </span>
         </a>
 

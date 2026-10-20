@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildWhatsAppUrl,
-  formatContactMessage,
-  sanitizePhoneNumber,
-} from "@/lib/whatsapp-utils";
+import { buildWhatsAppUrl, formatContactMessage, sanitizePhoneNumber } from "@/lib/whatsapp-utils";
 
 describe("Utilidades de WhatsApp (whatsapp-utils.ts)", () => {
   describe("sanitizePhoneNumber", () => {
@@ -15,13 +11,9 @@ describe("Utilidades de WhatsApp (whatsapp-utils.ts)", () => {
     });
 
     it("lanza un error descriptivo si el número tiene menos de 8 dígitos", () => {
-      expect(() => sanitizePhoneNumber("12345")).toThrowError(
-        /inválido \(mínimo 8 dígitos\)/i,
-      );
+      expect(() => sanitizePhoneNumber("12345")).toThrowError(/inválido \(mínimo 8 dígitos\)/i);
       expect(() => sanitizePhoneNumber("")).toThrowError(/cadena no vacía/i);
-      expect(() => sanitizePhoneNumber("   ---   ")).toThrowError(
-        /inválido \(mínimo 8 dígitos\)/i,
-      );
+      expect(() => sanitizePhoneNumber("   ---   ")).toThrowError(/inválido \(mínimo 8 dígitos\)/i);
     });
   });
 
@@ -41,7 +33,9 @@ describe("Utilidades de WhatsApp (whatsapp-utils.ts)", () => {
       const message = "Línea 1\nLínea 2\nLínea 3";
       const url = buildWhatsAppUrl(validPhone, message);
 
-      expect(url).toBe("https://wa.me/5491112345678?text=L%C3%ADnea%201%0AL%C3%ADnea%202%0AL%C3%ADnea%203");
+      expect(url).toBe(
+        "https://wa.me/5491112345678?text=L%C3%ADnea%201%0AL%C3%ADnea%202%0AL%C3%ADnea%203",
+      );
     });
 
     it("preserva y codifica emojis y caracteres especiales sin romper la URI (CL-04)", () => {

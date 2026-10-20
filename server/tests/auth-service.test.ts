@@ -97,7 +97,9 @@ describe("Esquemas Zod y Servicio Criptográfico de Autenticación (Tarea 3.1)",
       const tampered = token.slice(0, -5) + "abcde";
 
       expect(() => authService.verifyToken(tampered)).toThrow(AppError);
-      expect(() => authService.verifyToken("token_invalido")).toThrow("Sesión no válida o expirada");
+      expect(() => authService.verifyToken("token_invalido")).toThrow(
+        "Sesión no válida o expirada",
+      );
     });
   });
 });

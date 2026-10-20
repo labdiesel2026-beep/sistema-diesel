@@ -29,12 +29,7 @@ export interface BrandDeleteModalProps {
  * - Si la marca está libre de productos, presenta confirmación explícita con botón
  *   rojo destructivo (CA-12.5).
  */
-export function BrandDeleteModal({
-  open,
-  onOpenChange,
-  brand,
-  onSuccess,
-}: BrandDeleteModalProps) {
+export function BrandDeleteModal({ open, onOpenChange, brand, onSuccess }: BrandDeleteModalProps) {
   const { canDeleteBrand, deleteBrand } = useAdmin();
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,9 +83,7 @@ export function BrandDeleteModal({
               className="text-lg font-bold font-display"
               data-testid="brand-delete-modal-title"
             >
-              {isBlocked
-                ? "No se puede eliminar la marca"
-                : "¿Eliminar marca permanentemente?"}
+              {isBlocked ? "No se puede eliminar la marca" : "¿Eliminar marca permanentemente?"}
             </DialogTitle>
           </div>
 
@@ -122,9 +115,7 @@ export function BrandDeleteModal({
               <span>Bloqueo Impeditivo de Integridad</span>
             </div>
 
-            <p className="text-xs text-muted-foreground">
-              {integrity.reason}
-            </p>
+            <p className="text-xs text-muted-foreground">{integrity.reason}</p>
 
             {integrity.affectedProducts && integrity.affectedProducts.length > 0 && (
               <div className="mt-2 space-y-1.5 border-t border-destructive/20 pt-2">

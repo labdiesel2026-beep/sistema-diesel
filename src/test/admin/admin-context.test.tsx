@@ -51,9 +51,7 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       });
 
       // Verifica que no fue removida
-      expect(
-        result.current.categories.some((c) => c.id === categoryIdWithProducts)
-      ).toBe(true);
+      expect(result.current.categories.some((c) => c.id === categoryIdWithProducts)).toBe(true);
     });
 
     it("debe bloquear la eliminación de una categoría padre con subcategorías asociadas", async () => {
@@ -105,9 +103,7 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       });
 
       expect(deleteRes?.success).toBe(true);
-      expect(
-        result.current.categories.some((c) => c.id === newCatId)
-      ).toBe(false);
+      expect(result.current.categories.some((c) => c.id === newCatId)).toBe(false);
     });
 
     it("debe impedir convertir una categoría padre con hijas en una subcategoría (Prevención de ciclos CL-05)", async () => {
@@ -128,7 +124,7 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
 
       expect(updateRes?.success).toBe(false);
       expect(updateRes?.reason).toContain(
-        "No se puede convertir una categoría padre con subcategorías asociadas"
+        "No se puede convertir una categoría padre con subcategorías asociadas",
       );
     });
 
@@ -149,7 +145,7 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
 
       expect(createRes?.success).toBe(false);
       expect(createRes?.reason).toContain(
-        "solo puede tener como padre una categoría principal de nivel raíz"
+        "solo puede tener como padre una categoría principal de nivel raíz",
       );
     });
   });
@@ -243,16 +239,12 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       expect(updatedBrand?.name).toBe("Bosch Rexroth Motorsport");
 
       // Comprobar que los productos vinculados resuelven el nuevo nombre sin cambiar su brandId (cero desnormalización)
-      const linkedProducts = result.current.products.filter(
-        (p) => p.brandId === boschId
-      );
+      const linkedProducts = result.current.products.filter((p) => p.brandId === boschId);
       expect(linkedProducts.length).toBeGreaterThan(0);
 
       linkedProducts.forEach((product) => {
         expect(product.brandId).toBe(boschId);
-        const resolvedBrandName = result.current.getBrandById(
-          product.brandId
-        )?.name;
+        const resolvedBrandName = result.current.getBrandById(product.brandId)?.name;
         expect(resolvedBrandName).toBe("Bosch Rexroth Motorsport");
       });
     });
@@ -299,9 +291,7 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
         expect(res.product?.visible).toBe(!initialVisibility);
       });
 
-      const toggledProduct = result.current.products.find(
-        (p) => p.id === product.id
-      );
+      const toggledProduct = result.current.products.find((p) => p.id === product.id);
       expect(toggledProduct?.visible).toBe(!initialVisibility);
 
       // 2. Conmutar de vuelta al estado original
@@ -309,9 +299,7 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
         await result.current.toggleProductVisibility(product.id);
       });
 
-      const restoredProduct = result.current.products.find(
-        (p) => p.id === product.id
-      );
+      const restoredProduct = result.current.products.find((p) => p.id === product.id);
       expect(restoredProduct?.visible).toBe(initialVisibility);
     });
 
@@ -343,9 +331,7 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
         createdProductId = res.product?.id ?? "";
       });
 
-      expect(
-        result.current.products.some((p) => p.id === createdProductId)
-      ).toBe(true);
+      expect(result.current.products.some((p) => p.id === createdProductId)).toBe(true);
 
       // 2. Editar producto
       await act(async () => {
@@ -364,9 +350,7 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
         expect(deleteRes.success).toBe(true);
       });
 
-      expect(
-        result.current.products.some((p) => p.id === createdProductId)
-      ).toBe(false);
+      expect(result.current.products.some((p) => p.id === createdProductId)).toBe(false);
     });
   });
 

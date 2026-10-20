@@ -56,7 +56,7 @@ describe("Servicio de Tubería CDR con Sharp y Prevención de Pixel Flood (Tarea
 
       await expect(validateImageMagicBytes(fakeBuffer)).rejects.toThrow(ValidationError);
       await expect(validateImageMagicBytes(fakeBuffer)).rejects.toThrow(
-        /no corresponde a una imagen válida/i
+        /no corresponde a una imagen válida/i,
       );
     });
   });
@@ -79,27 +79,41 @@ describe("Servicio de Tubería CDR con Sharp y Prevención de Pixel Flood (Tarea
     it("bloquea y arroja ValidationError ante imágenes que superen 4096px en ancho", async () => {
       // Generar imagen de 4097 x 50 px (excede MAX_DIMENSION_PX en ancho)
       const wideBuffer = await sharp({
-        create: { width: MAX_DIMENSION_PX + 1, height: 50, channels: 3, background: { r: 255, g: 255, b: 0 } },
+        create: {
+          width: MAX_DIMENSION_PX + 1,
+          height: 50,
+          channels: 3,
+          background: { r: 255, g: 255, b: 0 },
+        },
       })
         .png()
         .toBuffer();
 
       const imageInstance = sharp(wideBuffer);
       await expect(inspectImageDimensions(imageInstance)).rejects.toThrow(ValidationError);
-      await expect(inspectImageDimensions(imageInstance)).rejects.toThrow(/Dimensiones de imagen excesivas/i);
+      await expect(inspectImageDimensions(imageInstance)).rejects.toThrow(
+        /Dimensiones de imagen excesivas/i,
+      );
     });
 
     it("bloquea y arroja ValidationError ante imágenes que superen 4096px en alto", async () => {
       // Generar imagen de 50 x 4097 px (excede MAX_DIMENSION_PX en alto)
       const tallBuffer = await sharp({
-        create: { width: 50, height: MAX_DIMENSION_PX + 1, channels: 3, background: { r: 255, g: 255, b: 0 } },
+        create: {
+          width: 50,
+          height: MAX_DIMENSION_PX + 1,
+          channels: 3,
+          background: { r: 255, g: 255, b: 0 },
+        },
       })
         .png()
         .toBuffer();
 
       const imageInstance = sharp(tallBuffer);
       await expect(inspectImageDimensions(imageInstance)).rejects.toThrow(ValidationError);
-      await expect(inspectImageDimensions(imageInstance)).rejects.toThrow(/Dimensiones de imagen excesivas/i);
+      await expect(inspectImageDimensions(imageInstance)).rejects.toThrow(
+        /Dimensiones de imagen excesivas/i,
+      );
     });
   });
 
@@ -151,7 +165,9 @@ describe("Servicio de Tubería CDR con Sharp y Prevención de Pixel Flood (Tarea
       const publicPath = await processImageUpload(validBuffer, testUploadsDir);
 
       // Comprobar formato de retorno /uploads/<uuid>.webp
-      expect(publicPath).toMatch(/^\/uploads\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.webp$/i);
+      expect(publicPath).toMatch(
+        /^\/uploads\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.webp$/i,
+      );
 
       // Comprobar que el archivo se persistió físicamente en el directorio configurado
       const filename = path.basename(publicPath);
@@ -174,7 +190,9 @@ describe("Servicio de Tubería CDR con Sharp y Prevención de Pixel Flood (Tarea
     it("aborta la tubería y no escribe ningún archivo en disco si Magic Bytes son inválidos", async () => {
       const maliciousBuffer = Buffer.from("<?php echo 'malware'; ?>");
 
-      await expect(processImageUpload(maliciousBuffer, testUploadsDir)).rejects.toThrow(ValidationError);
+      await expect(processImageUpload(maliciousBuffer, testUploadsDir)).rejects.toThrow(
+        ValidationError,
+      );
 
       // Verificar que ningún archivo con extensión .php o similar se escribió
       const files = await fs.readdir(testUploadsDir).catch(() => []);
@@ -189,7 +207,9 @@ describe("Servicio de Tubería CDR con Sharp y Prevención de Pixel Flood (Tarea
         .toBuffer();
 
       await expect(processImageUpload(bombBuffer, testUploadsDir)).rejects.toThrow(ValidationError);
-      await expect(processImageUpload(bombBuffer, testUploadsDir)).rejects.toThrow(/Dimensiones de imagen excesivas/i);
+      await expect(processImageUpload(bombBuffer, testUploadsDir)).rejects.toThrow(
+        /Dimensiones de imagen excesivas/i,
+      );
     });
   });
 });

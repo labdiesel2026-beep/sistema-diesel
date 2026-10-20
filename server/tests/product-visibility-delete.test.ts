@@ -196,7 +196,12 @@ describe("Endpoints de Visibilidad (PATCH) y Eliminación (DELETE) de Productos 
       await fs.writeFile(filePath, Buffer.from("dummy-image-to-be-deleted"));
 
       // Verificar que el archivo existe
-      expect(await fs.access(filePath).then(() => true).catch(() => false)).toBe(true);
+      expect(
+        await fs
+          .access(filePath)
+          .then(() => true)
+          .catch(() => false),
+      ).toBe(true);
 
       // 2. Crear producto en DB vinculado a ese archivo y categoría
       const product = await prisma.product.create({
@@ -236,7 +241,10 @@ describe("Endpoints de Visibilidad (PATCH) y Eliminación (DELETE) de Productos 
       expect(pivotRows.length).toBe(0);
 
       // 6. Verificar que el archivo .webp fue eliminado físicamente de uploads/
-      const fileStillExists = await fs.access(filePath).then(() => true).catch(() => false);
+      const fileStillExists = await fs
+        .access(filePath)
+        .then(() => true)
+        .catch(() => false);
       expect(fileStillExists).toBe(false);
     });
 

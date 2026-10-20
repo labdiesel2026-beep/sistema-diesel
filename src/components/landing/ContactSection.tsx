@@ -27,8 +27,8 @@ export function ContactSection({ className = "" }: ContactSectionProps) {
             Comunícate con Nosotros
           </h2>
           <p className="mt-4 text-base text-slate-600 dark:text-slate-400">
-            Envía tu consulta o solicita turno. Al enviar el formulario se abrirá
-            automáticamente una conversación de WhatsApp con tus datos cargados.
+            Envía tu consulta o solicita turno. Al enviar el formulario se abrirá automáticamente
+            una conversación de WhatsApp con tus datos cargados.
           </p>
         </div>
 
@@ -41,8 +41,8 @@ export function ContactSection({ className = "" }: ContactSectionProps) {
                 Atención Inmediata
               </h3>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                Respondemos consultas técnicas y presupuestos en el día durante
-                nuestro horario comercial.
+                Respondemos consultas técnicas y presupuestos en el día durante nuestro horario
+                comercial.
               </p>
 
               <div className="mt-8 space-y-5">
@@ -62,9 +62,8 @@ export function ContactSection({ className = "" }: ContactSectionProps) {
               </div>
 
               <div className="mt-8 rounded-xl border border-blue-200/60 bg-blue-50/50 p-4 text-xs text-blue-900 dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-blue-300">
-                💡 <strong>Nota:</strong> No almacenamos tus datos en servidores
-                externos. El formulario solo compone el mensaje directo hacia tu
-                app de WhatsApp.
+                💡 <strong>Nota:</strong> No almacenamos tus datos en servidores externos. El
+                formulario solo compone el mensaje directo hacia tu app de WhatsApp.
               </div>
             </div>
           </div>

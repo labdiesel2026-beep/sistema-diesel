@@ -156,7 +156,9 @@ export class BrandService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2003" || error.code === "P2014") {
-          throw AppError.conflict("No se puede eliminar la marca porque tiene productos vinculados");
+          throw AppError.conflict(
+            "No se puede eliminar la marca porque tiene productos vinculados",
+          );
         }
         if (error.code === "P2025") {
           throw AppError.notFound("Marca no encontrada");

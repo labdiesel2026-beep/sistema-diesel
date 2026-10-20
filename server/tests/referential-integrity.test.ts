@@ -113,7 +113,9 @@ describe("Suite de Integración: Integridad Referencial y Reglas onDelete: Restr
         .set("X-Requested-With", "XMLHttpRequest");
 
       expect(res.status).toBe(409);
-      expect(res.body.error).toContain("No se puede eliminar la marca porque tiene productos vinculados");
+      expect(res.body.error).toContain(
+        "No se puede eliminar la marca porque tiene productos vinculados",
+      );
 
       // La marca sigue intacta en la base de datos
       const stillInDb = await prisma.brand.findUnique({ where: { id: brand.id } });

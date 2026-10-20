@@ -1,11 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import path from "node:path";
 import fs from "node:fs/promises";
-import {
-  saveBuffer,
-  deleteFile,
-  safelyDeleteImage,
-} from "../src/services/file-storage.service.js";
+import { saveBuffer, deleteFile, safelyDeleteImage } from "../src/services/file-storage.service.js";
 
 describe("Servicio de Almacenamiento Local y Limpieza Física Resiliente (Tarea 4.3)", () => {
   const testUploadsDir = path.resolve(process.cwd(), "test-uploads-storage");
@@ -56,20 +52,30 @@ describe("Servicio de Almacenamiento Local y Limpieza Física Resiliente (Tarea 
       await fs.writeFile(filePath, Buffer.from("to-be-deleted"));
 
       // Verificar existencia inicial
-      expect(await fs.access(filePath).then(() => true).catch(() => false)).toBe(true);
+      expect(
+        await fs
+          .access(filePath)
+          .then(() => true)
+          .catch(() => false),
+      ).toBe(true);
 
       // Invocar deleteFile
       await deleteFile(`/uploads/${filename}`, testUploadsDir);
 
       // Verificar que fue eliminado
-      expect(await fs.access(filePath).then(() => true).catch(() => false)).toBe(false);
+      expect(
+        await fs
+          .access(filePath)
+          .then(() => true)
+          .catch(() => false),
+      ).toBe(false);
     });
 
     it("no lanza excepción si el archivo a eliminar no existe (resiliencia ENOENT)", async () => {
       const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
       await expect(
-        deleteFile("/uploads/non-existent-image.webp", testUploadsDir)
+        deleteFile("/uploads/non-existent-image.webp", testUploadsDir),
       ).resolves.not.toThrow();
 
       expect(warnSpy).toHaveBeenCalled();
@@ -87,7 +93,12 @@ describe("Servicio de Almacenamiento Local y Limpieza Física Resiliente (Tarea 
       await deleteFile("", testUploadsDir);
 
       // El archivo sigue intacto
-      expect(await fs.access(placeholderFile).then(() => true).catch(() => false)).toBe(true);
+      expect(
+        await fs
+          .access(placeholderFile)
+          .then(() => true)
+          .catch(() => false),
+      ).toBe(true);
     });
 
     it("mitiga Path Traversal aislando la eliminación estrictamente a path.basename", async () => {
@@ -100,7 +111,10 @@ describe("Servicio de Almacenamiento Local y Limpieza Física Resiliente (Tarea 
         await deleteFile("../../safe-outside-test.webp", testUploadsDir);
 
         // El archivo fuera de uploads debe seguir intacto
-        const stillExists = await fs.access(outsideFile).then(() => true).catch(() => false);
+        const stillExists = await fs
+          .access(outsideFile)
+          .then(() => true)
+          .catch(() => false);
         expect(stillExists).toBe(true);
       } finally {
         await fs.unlink(outsideFile).catch(() => {});
@@ -114,7 +128,12 @@ describe("Servicio de Almacenamiento Local y Limpieza Física Resiliente (Tarea 
 
       await safelyDeleteImage(`/uploads/${filename}`, testUploadsDir);
 
-      expect(await fs.access(filePath).then(() => true).catch(() => false)).toBe(false);
+      expect(
+        await fs
+          .access(filePath)
+          .then(() => true)
+          .catch(() => false),
+      ).toBe(false);
     });
   });
 });

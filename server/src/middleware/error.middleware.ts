@@ -56,7 +56,7 @@ export const errorHandler: ErrorRequestHandler = (
   err: any,
   _req: Request,
   res: Response,
-  _next: NextFunction
+  _next: NextFunction,
 ): void => {
   // 1. Errores operativos conocidos
   if (err instanceof AppError) {
@@ -80,7 +80,8 @@ export const errorHandler: ErrorRequestHandler = (
     }
     if (err.code === "P2003" || err.code === "P2014") {
       res.status(409).json({
-        error: "Conflicto: No se puede eliminar o modificar el recurso debido a restricciones de integridad referencial",
+        error:
+          "Conflicto: No se puede eliminar o modificar el recurso debido a restricciones de integridad referencial",
       });
       return;
     }

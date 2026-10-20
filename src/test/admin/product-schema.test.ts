@@ -27,7 +27,9 @@ describe("Esquema de Validación de Producto (Zod Fail-Fast) — Tarea 2.4", () 
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.name).toBe("Inyector Amarok 2.0 TDI");
-      expect(result.data.description).toBe("Inyector Common Rail nuevo calibrado en banco de prueba.");
+      expect(result.data.description).toBe(
+        "Inyector Common Rail nuevo calibrado en banco de prueba.",
+      );
       expect(result.data.oem).toBe("0445110369");
     }
   });

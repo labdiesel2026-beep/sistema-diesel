@@ -6,11 +6,7 @@ import { metricsService } from "../services/metrics.service.js";
  * Endpoint protegido con autenticación de administrador (RF-10, CA-10.1).
  * Retorna las métricas agregadas del catálogo de productos, categorías y marcas.
  */
-export async function getMetrics(
-  _req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export async function getMetrics(_req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const metrics = await metricsService.getMetrics();
     res.status(200).json(metrics);

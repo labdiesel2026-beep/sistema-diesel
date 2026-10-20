@@ -41,8 +41,6 @@ describe("Sección de Garantías (WarrantySection.tsx)", () => {
     // Decodificar el mensaje para verificar contenido exacto
     const encodedText = href.split("?text=")[1] || "";
     const decodedMessage = decodeURIComponent(encodedText);
-    expect(decodedMessage).toContain(
-      "Motivo: Consulta por garantía / soporte post-venta.",
-    );
+    expect(decodedMessage).toContain("Motivo: Consulta por garantía / soporte post-venta.");
   });
 });

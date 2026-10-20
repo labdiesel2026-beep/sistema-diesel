@@ -71,17 +71,9 @@ function AdminMarcasPage() {
       <BrandList onEdit={handleEdit} onDelete={handleDelete} />
 
       {/* Modales de Gestión de Marca */}
-      <BrandFormModal
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        brandToEdit={brandToEdit}
-      />
+      <BrandFormModal open={formOpen} onOpenChange={setFormOpen} brandToEdit={brandToEdit} />
 
-      <BrandDeleteModal
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        brand={brandToDelete}
-      />
+      <BrandDeleteModal open={deleteOpen} onOpenChange={setDeleteOpen} brand={brandToDelete} />
     </div>
   );
 }

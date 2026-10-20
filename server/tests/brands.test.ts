@@ -167,7 +167,9 @@ describe("CRUD de Marcas con Integridad Referencial (/api/brands) — Tarea 5.1"
         .set("X-Requested-With", "XMLHttpRequest");
 
       expect(res.status).toBe(409);
-      expect(res.body.error).toContain("No se puede eliminar la marca porque tiene productos vinculados");
+      expect(res.body.error).toContain(
+        "No se puede eliminar la marca porque tiene productos vinculados",
+      );
 
       // Verificar que la marca sigue existiendo en la base de datos
       const stillExists = await prisma.brand.findUnique({ where: { id: brand.id } });

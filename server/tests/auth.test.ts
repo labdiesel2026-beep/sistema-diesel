@@ -57,12 +57,10 @@ describe("Suite de Integración: Módulo de Autenticación y Sesiones (server/te
     });
 
     it("intento de login sin cabecera anti-CSRF es rechazado con 403 Forbidden", async () => {
-      const res = await request(app)
-        .post("/api/auth/login")
-        .send({
-          email: TEST_ADMIN_EMAIL,
-          password: TEST_ADMIN_PASSWORD,
-        });
+      const res = await request(app).post("/api/auth/login").send({
+        email: TEST_ADMIN_EMAIL,
+        password: TEST_ADMIN_PASSWORD,
+      });
 
       expect(res.status).toBe(403);
       expect(res.body.error).toBe("Petición rechazada: encabezado anti-CSRF ausente");
@@ -83,9 +81,7 @@ describe("Suite de Integración: Módulo de Autenticación y Sesiones (server/te
       const cookies = loginRes.headers["set-cookie"];
 
       // Consulta a /me
-      const meRes = await request(app)
-        .get("/api/auth/me")
-        .set("Cookie", cookies);
+      const meRes = await request(app).get("/api/auth/me").set("Cookie", cookies);
 
       expect(meRes.status).toBe(200);
       expect(meRes.body).toEqual({
@@ -105,7 +101,7 @@ describe("Suite de Integración: Módulo de Autenticación y Sesiones (server/te
       const expiredToken = jwt.sign(
         { id: "00000000-0000-0000-0000-000000000000", email: "expired@test.com", role: "admin" },
         ENV.JWT_SECRET,
-        { expiresIn: "-1s", algorithm: "HS256" }
+        { expiresIn: "-1s", algorithm: "HS256" },
       );
 
       const expiredRes = await request(app)
@@ -146,9 +142,7 @@ describe("Suite de Integración: Módulo de Autenticación y Sesiones (server/te
       expect(sessionCookie).toMatch(/Max-Age=0/i);
 
       // Verificación posterior de que la cookie purgada no permite acceder a /me
-      const afterLogoutRes = await request(app)
-        .get("/api/auth/me")
-        .set("Cookie", logoutCookies);
+      const afterLogoutRes = await request(app).get("/api/auth/me").set("Cookie", logoutCookies);
 
       expect(afterLogoutRes.status).toBe(401);
     });

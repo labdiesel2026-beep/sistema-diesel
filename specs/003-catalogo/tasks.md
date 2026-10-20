@@ -1,83 +1,119 @@
 # Tasks — Spec 003: Catálogo de Productos y Repuestos
 
-Las tareas están ordenadas por dependencia y acotadas para una ejecución aproximada de 20–30 minutos cada una. Cada tarea debe completarse de forma atómica y verificarse antes de iniciar la siguiente. Si una tarea bloqueante no se puede completar, detener la secuencia.
+Las tareas están organizadas en bloques lógicos secuenciales según su orden de dependencia técnica, con una estimación de **20–30 minutos** cada una. Cada tarea debe completarse de forma atómica y verificarse mediante su comando exacto antes de continuar con la siguiente.
 
-## Prerrequisito
+---
 
-- La fuente autoritativa debe ser PostgreSQL mediante Prisma. El `package.json` revisado no declara actualmente `prisma` ni `@prisma/client`; por eso T-01 es una puerta de verificación **actualmente bloqueante**. No sustituir persistencia por datos mock en producción. Si no existe una integración PostgreSQL/Prisma disponible, detenerse y resolver ese prerequisito antes de avanzar.
-- Para los tests nuevos se usarán Vitest y Testing Library ya configurados. Los nombres de pruebas indicados abajo son los nombres exactos que deberán asignarse al escribirlas.
-- Las marcas múltiples se implementarán con OR entre marcas, tal como supone el plan; esa semántica no está especificada en la Spec y deberá confirmarse si difiere de la intención del producto.
+## Prerrequisitos de Ejecución
 
-## Tareas
+1. **Backend y API REST Operativos (Fase 005):** El backend Express en `/server` ya provee los endpoints `/api/products`, `/api/categories` y `/api/brands` respaldados por PostgreSQL y Prisma. El frontend interactúa **exclusivamente** mediante el cliente HTTP centralizado (`src/lib/api.ts`). No se debe instalar ni referenciar Prisma en el paquete raíz del frontend.
+2. **Entorno de Testing:** Las pruebas unitarias y de componentes se ejecutan con Vitest y `@testing-library/react` desde la raíz del proyecto (`npx vitest run ...`).
+3. **Persistencia y Caché Efímera:** El almacenamiento en `localStorage` no es autoritativo (Principio 5 de `docs/constitution.md`). Todo precio o visibilidad debe ser contrastado contra los datos frescos del backend.
 
-- [ ] **T-01 — Verificar la frontera de lectura PostgreSQL/Prisma (BLOQUEANTE)** (20–30 min) — RF: RF-02, RF-07, RF-10, RF-11, RF-12. Confirma si existe un cliente Prisma, configuración de PostgreSQL y acceso seguro desde servidor; identifica el punto de integración de lecturas. No avanzar con persistencia simulada si falta esta base.
-  - **Hecho cuando:** `npm ls prisma @prisma/client` confirma los paquetes requeridos y `npx vitest run src/test/catalog/catalog-repository.test.ts -t "consulta solo productos visibles y resuelve productos por lote"` pasa. Si no existe integración PostgreSQL/Prisma, mantener T-01 sin completar y detener la secuencia para resolver el prerequisito.
+---
 
-- [ ] **T-02 — Definir DTO público del catálogo** (20–30 min) — RF: RF-02, RF-06, RF-07, RF-11, RF-12. Crear los tipos de producto público, categoría, compatibilidad y precio; omitir del DTO cualquier dato de stock y campos administrativos.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/public-product.test.ts -t "expone solo campos públicos y excluye stock"` pasa y `npx tsc --noEmit` termina sin errores.
+## Bloque 1: Contratos, Tipos y Capa de Consumo de API REST
 
-- [ ] **T-03 — Validar search params e identificadores** (20–30 min) — RF: RF-03, RF-04. Definir esquemas Zod `.strict()` para `q`, marcas, categorías y el identificador de producto. Rechazar formas y tipos no admitidos sin coerción silenciosa.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-search-schema.test.ts -t "valida estrictamente texto marcas categorías y productId"` pasa, incluyendo claves desconocidas y tipos inválidos.
+- [x] **T-01 — Definir tipos TypeScript y DTOs del catálogo público** (20–30 min) — RF: RF-02, RF-06, RF-07, RF-12.  
+      Crear el archivo `src/types/catalog.ts` declarando las interfaces de dominio público (`CatalogProduct`, `CatalogBrand`, `CatalogCategory`, `CartItemCache`, `CartCacheV1`, `EnrichedCartItem`). Asegurar total correspondencia con los DTOs devueltos por el backend (`server/src/services/product.service.ts` y `src/types/admin.ts`), excluyendo estrictamente cualquier campo de inventario o stock.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-types.test.ts -t "tipos del catalogo coinciden con DTOs y excluyen stock"` pasa y `npx tsc --noEmit` termina sin errores.
 
-- [ ] **T-04 — Normalizar términos de búsqueda** (20–30 min) — RF: RF-03. Implementar normalización para búsqueda parcial insensible a mayúsculas y acentos en términos y campos buscables.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-search.test.ts -t "normaliza mayúsculas acentos y coincidencias parciales"` pasa para nombre, OEM, marca y compatibilidad.
+- [x] **T-02 — Implementar servicio de consumo HTTP del catálogo** (20–30 min) — RF: RF-02, RF-04, RF-10, RF-11.  
+      Crear `src/services/catalog-service.ts` encapsulando las peticiones a la API mediante `api.get` de `src/lib/api.ts`: `getVisibleProducts()` (filtra `visible: true`), `getAllProductsForValidation()` (para revalidación del carrito), `getCategories()`, `getBrands()` y `getProductById(id)`. Manejar errores devolviendo excepciones tipadas `ApiError`.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-service.test.ts -t "consume endpoints de api.ts y filtra visible true para catalogo"` pasa mockeando `src/lib/api.ts`.
 
-- [ ] **T-05 — Implementar búsqueda parcial y prioridad OEM** (20–30 min) — RF: RF-03. Buscar por cualquiera de los campos acordados y ordenar primero los productos que coinciden por código OEM, sin excluir las demás coincidencias válidas.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-search.test.ts -t "prioriza OEM sin excluir coincidencias en otros campos"` pasa.
+---
 
-- [ ] **T-06 — Implementar filtrado cruzado** (20–30 min) — RF: RF-02, RF-04. Aplicar visibilidad primero; combinar AND entre texto, marca y grupo de categorías; combinar categorías seleccionadas con OR. Aplicar OR a marcas múltiples según el supuesto documentado.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-filter.test.ts -t "aplica visibilidad AND entre grupos y OR dentro de categorías"` pasa e incluye el caso de varias marcas.
+## Bloque 2: Algoritmos de Búsqueda, Filtrado Jerárquico y Search Params
 
-- [ ] **T-07 — Crear servicio de lectura pública** (20–30 min) — RF: RF-02, RF-03, RF-04, RF-07, RF-12. Consultar los productos desde el repositorio PostgreSQL/Prisma, construir DTO públicos y devolver opciones de marcas/categorías sin exponer productos no visibles ni stock.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-repository.test.ts -t "lista DTOs públicos visibles con opciones de filtro"` pasa con repositorio controlado y no aparece stock en el resultado.
+- [x] **T-03 — Esquemas Zod para Search Params e Identificadores UUID** (20–30 min) — RF: RF-03, RF-04, RNF-05.  
+      Crear `src/schemas/catalog-schemas.ts` con esquemas Zod estrictos (`.strict()`) para validar los parámetros de búsqueda en URL (`catalogSearchParamsSchema`: `q`, `brand`, `category`) e identificadores UUID de producto (`uuidParamSchema`). Rechazar tipos no admitidos o campos desconocidos sin coerción silenciosa.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-schemas.test.ts -t "valida estrictamente search params de URL y UUIDs"` pasa.
 
-- [ ] **T-08 — Sincronizar filtros con search params** (20–30 min) — RF: RF-03, RF-04. Integrar búsqueda y filtros en la ruta `/catalogo`; mantenerlos al recargar, compartir URL, navegar atrás/adelante y limpiar uno sin borrar los demás.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-route.test.tsx -t "restaura y actualiza q brand y category desde search params"` pasa para carga directa, cambios, historial y limpieza selectiva.
+- [x] **T-04 — Implementar normalización y búsqueda técnica con priorización OEM** (20–30 min) — RF: RF-03.  
+      Crear `src/lib/catalog-search.ts` con la función de normalización Unicode NFD (eliminación de acentos y minúsculas) y búsqueda parcial en nombre (`name`), código OEM (`oem`), marca del repuesto y compatibilidad vehicular (`vehicleCompatibility`). Si el término coincide con el código OEM, ordenar los productos resultantes con prioridad máxima sobre otros campos.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-search.test.ts -t "normaliza acentos y prioriza resultados coincidentes por OEM"` pasa.
 
-- [ ] **T-09 — Implementar estados de catálogo y consulta sin resultados** (20–30 min) — RF: RF-02, RF-05. Distinguir catálogo sin productos publicados de una búsqueda sin coincidencias. Preparar el contexto de WhatsApp con el término y los filtros activos.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-empty-states.test.tsx -t "distingue catálogo vacío de búsqueda vacía y contextualiza WhatsApp"` pasa.
+- [x] **T-05 — Implementar resolución de árbol de categorías y filtrado cruzado** (20–30 min) — RF: RF-02, RF-04.  
+      Crear `src/lib/catalog-filter.ts` con el algoritmo de resolución jerárquica de categorías: si se selecciona una categoría padre, expandir automáticamente la búsqueda para incluir todas sus subcategorías hijas; aplicar `OR` entre categorías y marcas seleccionadas, y combinar `AND` entre búsqueda de texto, marcas y categorías.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-filter.test.ts -t "expande categorias padre a hijas y aplica AND entre dimensiones"` pasa.
 
-- [ ] **T-10 — Crear placeholder de imagen accesible** (20–30 min) — RF: RF-06. Mostrar el SVG local genérico “Imagen no disponible” ante ausencia o fallo de imagen, con alternativa accesible.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/product-image.test.tsx -t "muestra placeholder local accesible si falta o falla la imagen"` pasa.
+---
 
-- [ ] **T-11 — Construir tarjetas y navegación a ficha** (20–30 min) — RF: RF-01, RF-06, RF-07. Renderizar imagen/placeholder, nombre, OEM opcional, precio o “Consultar precio” y CTA; conservar layout público institucional.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/product-card.test.tsx -t "muestra campos mínimos y navega a la ficha"` pasa.
+## Bloque 3: Estado del Carrito y Revalidación contra Backend
 
-- [ ] **T-12 — Implementar loader y pantalla de ficha técnica** (20–30 min) — RF: RF-06, RF-07. Cargar datos vigentes del producto visible y representar sus atributos opcionales sin inventar valores.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/product-detail.test.tsx -t "muestra atributos disponibles y omite opcionales ausentes"` pasa.
+- [x] **T-06 — Esquema Zod y persistencia efímera en localStorage** (20–30 min) — RF: RF-08, RNF-05, RNF-07, Principio 5.  
+      Crear `src/lib/cart-storage.ts` con el esquema Zod `cartCacheSchema` (`CartCacheV1`). Implementar lectura y escritura en `localStorage` almacenando únicamente `productId`, `quantity` (enteros >= 1) y `lastKnown` (`name`, `oem`). Si la clave contiene JSON corrupto o versión no reconocida, limpiar la clave y devolver un carrito vacío sin romper la ejecución.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/cart-storage.test.ts -t "valida e hidrata cache efimera descartando datos corruptos"` pasa.
 
-- [ ] **T-13 — Manejar productos no disponibles en enlace directo** (20–30 min) — RF: RF-02, RF-11, RF-12. Para producto oculto, eliminado o inexistente, no renderizar ficha ni CTA de selección; presentar “Producto no disponible”.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/product-detail.test.tsx -t "muestra Producto no disponible para ocultos eliminados o inexistentes"` pasa.
+- [x] **T-07 — Contexto y máquina de estado del carrito** (20–30 min) — RF: RF-08, RF-12.  
+      Crear `src/context/catalog-cart-context.tsx` (`CatalogCartProvider` y hook `useCatalogCart`). Proveer funciones `add` (si ya existe, incrementa cantidad en una sola fila), `updateQuantity` (asegura mínimo 1 unidad), `remove` y `clear`. No imponer límites de existencias ni simulaciones de stock.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-cart-context.test.tsx -t "gestiona operaciones del carrito sin restricciones de inventario"` pasa.
 
-- [ ] **T-14 — Validar e hidratar el caché efímero del carrito** (20–30 min) — RF: RF-08, RF-11. Definir esquema estricto versionado con IDs, cantidades positivas y `lastKnown`; ignorar precio y stock. Recuperarse de datos corruptos o versiones incompatibles.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/cart-cache.test.ts -t "hidrata solo caché versionado válido y rechaza datos corruptos"` pasa.
+- [x] **T-08 — Servicio de enriquecimiento y revalidación del carrito con el backend** (20–30 min) — RF: RF-07, RF-08, RF-10, RF-11, Principio 5.  
+      Crear `src/lib/cart-revalidation.ts` con la función `revalidateCartItems()`. Al recibir los ítems del carrito, consultar los datos frescos de la base de datos mediante `catalogService.getAllProductsForValidation()`. Marcar como `requiresReconfirmation: true` aquellos ítems con `visible: false` o cuyo registro haya sido eliminado, rotulando su precio como “A cotizar”.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/cart-revalidation.test.ts -t "detecta productos no visibles y actualiza precios autoritativos"` pasa.
 
-- [ ] **T-15 — Implementar operaciones del estado del carrito** (20–30 min) — RF: RF-08. Agregar productos, incrementar duplicados en una sola línea, cambiar cantidades, quitar y vaciar sin límites basados en stock ni máximo de ítems.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-cart.test.ts -t "consolida producto repetido incrementa cantidad y permite editar o quitar"` pasa.
+---
 
-- [ ] **T-16 — Resolver vigencia de ítems del carrito** (20–30 min) — RF: RF-08, RF-11, RF-12. Volver a resolver IDs contra el catálogo al hidratar; mantener ítems ocultos/eliminados con advertencia “Vigencia en catálogo”, no con indicador de disponibilidad.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/cart-resolution.test.ts -t "mantiene productos no visibles con vigencia pendiente sin exponer stock"` pasa.
+## Bloque 4: Generación de Consultas a WhatsApp
 
-- [ ] **T-17 — Presentar el carrito y sus estados** (20–30 min) — RF: RF-08, RF-11, RF-12. Mostrar cantidades, controles accesibles, estado vacío, advertencias de vigencia y confirmación de que la consulta no reserva existencias.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/cart-drawer.test.tsx -t "muestra cantidades estado vacío y vigencia sin indicar stock"` pasa.
+- [x] **T-09 — Generador de consulta directa de producto por WhatsApp** (20–30 min) — RF: RF-06, RF-07, RF-09.  
+      Crear en `src/lib/catalog-whatsapp.ts` la función `generateDirectProductWhatsAppUrl(product, brandName)`. Utilizar el número centralizado `SITE_CONFIG.phone` y `buildWhatsAppUrl()` de `src/lib/whatsapp-utils.ts`. Generar mensaje con cantidad asumida de 1 unidad, nombre, marca, OEM y precio público en ARS o leyenda “A cotizar”.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-whatsapp.test.ts -t "genera consulta directa con telefono oficial cantidad uno y precio correcto"` pasa.
 
-- [ ] **T-18 — Generar consulta directa por WhatsApp** (20–30 min) — RF: RF-07, RF-09, RF-12. Usar el teléfono de `SITE_CONFIG.phone`; incluir identificación del producto, OEM si existe, precio vigente o “A cotizar”, consulta informativa y cantidad asumida de una unidad.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/whatsapp-quote.test.ts -t "genera consulta directa con teléfono central cantidad uno y precio correcto"` pasa, incluidos caracteres especiales codificados.
+- [x] **T-10 — Generador de mensaje de pedido del carrito** (20–30 min) — RF: RF-07, RF-08, RF-10, RF-11, RF-12.  
+      Crear en `src/lib/catalog-whatsapp.ts` la función `generateCartWhatsAppUrl(enrichedItems)`. Generar mensaje pre-estructurado enumerando productos, cantidades, marcas, OEM y precios unitarios o "A cotizar". Incluir subtotal de ítems con precio público, advertencias de reconfirmación cuando apliquen y leyenda de solicitud de presupuesto sin reserva de existencias.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-whatsapp.test.ts -t "genera mensaje de carrito con items subtotal y notas de reconfirmacion"` pasa.
 
-- [ ] **T-19 — Generar consulta contextual sin resultados** (20–30 min) — RF: RF-05, RF-12. Incluir término de búsqueda cuando exista y las marcas/categorías filtradas que originaron el resultado vacío.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/whatsapp-quote.test.ts -t "incluye búsqueda y filtros activos en consulta sin resultados"` pasa.
+- [x] **T-11 — Generador de consulta asistida para estado sin resultados** (20–30 min) — RF: RF-05.  
+      Crear en `src/lib/catalog-whatsapp.ts` la función `generateNoResultsWhatsAppUrl(searchQuery, activeBrandNames, activeCategoryNames)`. Generar mensaje contextualizado indicando la pieza buscada y los filtros aplicados para asistir al cliente desde WhatsApp.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-whatsapp.test.ts -t "genera consulta contextualizada para estado sin resultados"` pasa.
 
-- [ ] **T-20 — Preparar el mensaje vigente del carrito** (20–30 min) — RF: RF-07, RF-08, RF-10, RF-11, RF-12. Resolver productos por lote al iniciar el envío; incluir cantidad, OEM opcional, precio unitario público vigente o “A cotizar”; no usar precios de `localStorage`. Conservar el carrito y no generar enlace si falla la lectura autoritativa.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/whatsapp-quote.test.ts -t "usa datos vigentes y nunca reutiliza precio local al enviar carrito"` pasa, incluidos ítems ocultos/eliminados y error recuperable de lectura.
+---
 
-- [ ] **T-21 — Conectar CTA y apertura externa de WhatsApp** (20–30 min) — RF: RF-05, RF-09, RF-10. Conectar las acciones de tarjeta/ficha, estado sin resultados y carrito al generador validado; no declarar entrega, compra ni reserva.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-whatsapp-actions.test.tsx -t "abre borrador de WhatsApp y no afirma envío compra ni reserva"` pasa.
+## Bloque 5: Componentes de UI, Skeletons y Placeholders
 
-- [ ] **T-22 — Implementar Error Boundary recuperable del catálogo** (20–30 min) — RF: RF-02. Capturar errores de carga, mostrar “Error temporal al cargar el catálogo” y reintentar sin filtrar detalles internos.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-error-boundary.test.tsx -t "muestra error amigable y reintenta sin exponer excepción"` pasa.
+- [x] **T-12 — Componente ProductImageWithFallback con SVG accesible** (20–30 min) — RF: RF-06.  
+      Crear `src/components/catalog/ProductImageWithFallback.tsx`. Resolver URLs de imagen mediante `resolveImageUrl()` de `src/lib/api.ts`. En caso de imagen ausente o fallo en el evento `onError`, renderizar un SVG vectorial local accesible con `role="img"` y leyenda _“Imagen no disponible”_.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/product-image.test.tsx -t "renderiza imagen resuelta o placeholder SVG local accesible ante fallo"` pasa.
 
-- [ ] **T-23 — Verificar integración de rutas y accesibilidad responsive** (20–30 min) — RF: RF-01, RF-06, RF-08; RNF-01, RNF-02, RNF-04, RNF-06. Verificar continuidad del layout público, navegación entre listado/ficha, uso por teclado, nombres accesibles y textos en español.
-  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-routes.test.tsx -t "integra listado ficha layout navegación y controles accesibles"` pasa; la revisión en viewport de 320 px y escritorio no presenta desbordamiento horizontal.
+- [x] **T-13 — Componente ProductCard y esqueleto de carga** (20–30 min) — RF: RF-06, RF-07, RF-08, RF-09.  
+      Crear `src/components/catalog/ProductCard.tsx` y `ProductGridSkeleton.tsx`. Renderizar imagen con fallback, nombre del repuesto, marca, OEM, badge de condición ('Nuevo' | 'Reacondicionado' | 'Usado'), precio formateado en ARS o "Consultar precio", botón de agregar/remover del carrito y botón de WhatsApp directo.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/product-card.test.tsx -t "renderiza tarjeta completa precios condicionales y acciones"` pasa.
 
-- [ ] **T-24 — Ejecutar verificación de aceptación y regresión** (20–30 min) — RF: RF-01–RF-12; RNF-01–RNF-07. Revisar criterios de finalización de la Spec, rendimiento de búsqueda/filtros, calidad y regresiones del sistema.
-  - **Hecho cuando:** pasan `npm test`, `npx tsc --noEmit`, `npm run lint` y `npm run build`; la medición repetible de búsqueda y filtros cumple menos de 2 segundos bajo las condiciones normales acordadas.
+- [x] **T-14 — Componente CatalogFilters con árbol jerárquico** (20–30 min) — RF: RF-04.  
+      Crear `src/components/catalog/CatalogFilters.tsx`. Desplegar selector de marcas con conteo dinámico de piezas y árbol de categorías con indentación visual para subcategorías hijas; incluir drawer deslizable para vista móvil y botón de limpieza de filtros.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-filters.test.tsx -t "renderiza arbol de categorias y marcas con conteos dinamicos"` pasa.
+
+- [x] **T-15 — Componente CartDrawer con revalidación activa** (20–30 min) — RF: RF-08, RF-10, RF-11, RF-12.  
+      Crear `src/components/catalog/CartDrawer.tsx` (reemplazando la versión previa acoplada a mocks). Conectar con `CatalogCartContext`, ejecutar `revalidateCartItems()` al abrir el drawer, mostrar ítems enriquecidos, controles de cantidad, advertencias visuales de vigencia para ítems ocultos y botón de checkout hacia WhatsApp.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/cart-drawer.test.tsx -t "despliega items enriquecidos advertencias de vigencia y checkout"` pasa.
+
+---
+
+## Bloque 6: Vistas de Ruta, Integración y Error Boundary
+
+- [x] **T-16 — Componente CatalogErrorBoundary** (20–30 min) — RF: RF-02, Principio 6.  
+      Crear `src/components/catalog/CatalogErrorBoundary.tsx`. Capturar fallos de red (`ApiError`), presentar al usuario el mensaje amigable _“Error temporal al cargar el catálogo”_ y un botón de reintento que vuelva a disparar las peticiones a la API sin filtrar datos internos.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-error-boundary.test.tsx -t "atrapa errores de carga y ofrece reintento sin exponer detalles"` pasa.
+
+- [x] **T-17 — Actualizar ruta principal /catalogo** (20–30 min) — RF: RF-01, RF-02, RF-03, RF-04, RF-05, RNF-01, RNF-02.  
+      Actualizar `src/routes/catalogo.tsx` integrando `LandingNavbar` y `LandingFooter` de `src/components/landing/`, sincronizando search params con TanStack Router (`q`, `brand`, `category`), renderizando `CatalogFilters`, `ProductCard`, `ProductGridSkeleton`, estados vacíos y el botón flotante del carrito.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/catalogo-route.test.tsx -t "integra layout institucional search params y estados del catalogo"` pasa.
+
+- [x] **T-18 — Implementar ruta de ficha detallada /catalogo/$productId** (20–30 min) — RF: RF-06, RF-07, RF-09, RF-11.  
+      Crear `src/routes/catalogo.$productId.tsx`. Consumir `catalogService.getProductById(id)`. Si el producto no existe o tiene `visible: false`, mostrar la vista de _“Producto no disponible”_ con botón para volver al catálogo. Si es visible, renderizar la ficha técnica completa con galería, especificaciones y acciones de compra/consulta.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/product-detail-route.test.tsx -t "muestra ficha tecnica para producto visible y estado no disponible para oculto"` pasa.
+
+---
+
+## Bloque 7: Verificación Integral de Aceptación y Calidad
+
+- [x] **T-19 — Pruebas de integración E2E de flujos de usuario del catálogo** (20–30 min) — RF: RF-01 a RF-12; RNF-01 a RNF-07.  
+      Crear `src/test/catalog/catalog-integration.test.tsx` simulando el flujo completo de navegación: carga inicial con skeletons -> búsqueda por código OEM -> filtrado por categoría padre -> agregado al carrito -> revalidación contra backend -> apertura de WhatsApp con mensaje estructurado.
+  - **Hecho cuando:** `npx vitest run src/test/catalog/catalog-integration.test.tsx -t "flujo completo de navegacion busqueda carrito y checkout"` pasa.
+
+- [x] **T-20 — Verificación final de tipado estricto, calidad de código y compilación** (20–30 min) — RF: Todos los RF y RNF de la Spec 003.  
+      Ejecutar el chequeo completo de TypeScript en modo estricto, linter y suite completa de tests unitarios del catálogo.
+  - **Hecho cuando:** `npx tsc --noEmit` termina con 0 errores y `npx vitest run src/test/catalog/` aprueba el 100% de las suites de prueba.

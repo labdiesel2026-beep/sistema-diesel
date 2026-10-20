@@ -37,14 +37,11 @@ describe("Botón Flotante de WhatsApp (FloatingWhatsApp.tsx)", () => {
 
     const encodedText = href.split("?text=")[1] || "";
     const decodedMessage = decodeURIComponent(encodedText);
-    expect(decodedMessage).toContain(
-      "Motivo: Consulta general / solicitar turno.",
-    );
+    expect(decodedMessage).toContain("Motivo: Consulta general / solicitar turno.");
   });
 
   it("responde al IntersectionObserver ocultándose en vista móvil ante solapamiento (RF-07)", () => {
-    let observerCallback: (entries: Partial<IntersectionObserverEntry>[]) => void =
-      () => {};
+    let observerCallback: (entries: Partial<IntersectionObserverEntry>[]) => void = () => {};
 
     // Mock de IntersectionObserver
     class MockIntersectionObserver {
@@ -66,9 +63,7 @@ describe("Botón Flotante de WhatsApp (FloatingWhatsApp.tsx)", () => {
     contactoSection.id = "contacto";
     document.body.appendChild(contactoSection);
 
-    const { container } = render(
-      <FloatingWhatsApp targetSectionIds={["contacto"]} />,
-    );
+    const { container } = render(<FloatingWhatsApp targetSectionIds={["contacto"]} />);
     const aside = container.querySelector("aside");
 
     // Inicialmente visible

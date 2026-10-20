@@ -34,11 +34,7 @@ export function ProductTable({
   onDelete,
   onToggleVisibility,
 }: ProductTableProps) {
-  const {
-    products: contextProducts,
-    getBrandById,
-    toggleVisibility,
-  } = useAdmin();
+  const { products: contextProducts, getBrandById, toggleVisibility } = useAdmin();
 
   // Permite operar con productos pasados por prop o directamente del Context
   const baseProducts = propProducts ?? contextProducts;
@@ -85,9 +81,7 @@ export function ProductTable({
           <Package className="size-6" />
         </div>
         <h3 className="mt-4 font-display text-lg font-semibold text-foreground">
-          {searchQuery
-            ? "No se encontraron repuestos"
-            : "No hay repuestos registrados"}
+          {searchQuery ? "No se encontraron repuestos" : "No hay repuestos registrados"}
         </h3>
         <p className="mt-1 text-sm text-muted-foreground">
           {searchQuery
@@ -113,15 +107,11 @@ export function ProductTable({
               <TableHead className="min-w-[220px] px-4 py-4 font-semibold text-foreground">
                 Repuesto / OEM
               </TableHead>
-              <TableHead className="px-4 py-4 font-semibold text-foreground">
-                Marca
-              </TableHead>
+              <TableHead className="px-4 py-4 font-semibold text-foreground">Marca</TableHead>
               <TableHead className="min-w-[180px] px-4 py-4 font-semibold text-foreground">
                 Compatibilidad
               </TableHead>
-              <TableHead className="px-4 py-4 font-semibold text-foreground">
-                Precio
-              </TableHead>
+              <TableHead className="px-4 py-4 font-semibold text-foreground">Precio</TableHead>
               <TableHead className="px-4 py-4 text-center font-semibold text-foreground">
                 Visibilidad
               </TableHead>
@@ -164,10 +154,7 @@ export function ProductTable({
                         >
                           {product.name}
                         </span>
-                        <Badge
-                          variant="secondary"
-                          className="text-[10px] font-normal"
-                        >
+                        <Badge variant="secondary" className="text-[10px] font-normal">
                           {product.condition}
                         </Badge>
                       </div>

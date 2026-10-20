@@ -10,7 +10,7 @@ import { AppError } from "../middleware/error.middleware.js";
 export async function uploadProductImage(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> {
   try {
     if (!req.file || !req.file.buffer) {

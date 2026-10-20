@@ -38,9 +38,7 @@ function ProductsModuleHarness() {
   const [productToEdit, setProductToEdit] = useState<AdminProduct | null>(null);
 
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<AdminProduct | null>(
-    null
-  );
+  const [productToDelete, setProductToDelete] = useState<AdminProduct | null>(null);
 
   const { products } = useAdmin();
 
@@ -68,11 +66,7 @@ function ProductsModuleHarness() {
         }}
       />
 
-      <ProductFormModal
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        productToEdit={productToEdit}
-      />
+      <ProductFormModal open={formOpen} onOpenChange={setFormOpen} productToEdit={productToEdit} />
 
       <ProductDeleteModal
         open={deleteOpen}
@@ -97,7 +91,7 @@ describe("Módulo de Productos (Integración Completa) — Tarea 8.5", () => {
     render(
       <AdminProvider>
         <ProductsModuleHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     // 1. Abrir modal de nuevo producto
@@ -141,8 +135,7 @@ describe("Módulo de Productos (Integración Completa) — Tarea 8.5", () => {
       });
       fireEvent.change(screen.getByTestId("product-description-input"), {
         target: {
-          value:
-            "Inyector diésel common rail Bosch para motores Cummins ISF 2.8.",
+          value: "Inyector diésel common rail Bosch para motores Cummins ISF 2.8.",
         },
       });
       fireEvent.change(screen.getByTestId("product-price-input"), {
@@ -152,7 +145,7 @@ describe("Módulo de Productos (Integración Completa) — Tarea 8.5", () => {
 
     // 4. Seleccionar al menos una categoría
     const categoryCheckbox = screen.getByTestId(
-      "category-checkbox-e4b6d812-7a2b-4f51-b8f3-0a567c891001"
+      "category-checkbox-e4b6d812-7a2b-4f51-b8f3-0a567c891001",
     );
     await act(async () => {
       categoryCheckbox.click();
@@ -179,14 +172,12 @@ describe("Módulo de Productos (Integración Completa) — Tarea 8.5", () => {
     render(
       <AdminProvider>
         <ProductsModuleHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     // Producto inicial Amarok (a0f1e2d3-1111-4000-8000-111111111111) es visible: true
     const amarokId = "a0f1e2d3-1111-4000-8000-111111111111";
-    const switchBtn = screen.getByTestId(
-      `product-visibility-switch-${amarokId}`
-    );
+    const switchBtn = screen.getByTestId(`product-visibility-switch-${amarokId}`);
     const badge = screen.getByTestId(`product-status-badge-${amarokId}`);
 
     expect(badge.textContent).toBe("Visible");
@@ -213,7 +204,7 @@ describe("Módulo de Productos (Integración Completa) — Tarea 8.5", () => {
     render(
       <AdminProvider>
         <ProductsModuleHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     const searchInput = screen.getByTestId("product-search-input");
@@ -262,18 +253,16 @@ describe("Módulo de Productos (Integración Completa) — Tarea 8.5", () => {
     render(
       <AdminProvider>
         <ProductsModuleHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     // Sprinter (a0f1e2d3-4444-4000-8000-444444444444) en datos semilla tiene price: 0
-    const sprinterPrice = screen.getByTestId(
-      "product-price-a0f1e2d3-4444-4000-8000-444444444444"
-    );
+    const sprinterPrice = screen.getByTestId("product-price-a0f1e2d3-4444-4000-8000-444444444444");
     expect(sprinterPrice.textContent).toBe("$0 ARS");
 
     // Editar Amarok para establecer precio $0
     const amarokEditBtn = screen.getByTestId(
-      "product-edit-btn-a0f1e2d3-1111-4000-8000-111111111111"
+      "product-edit-btn-a0f1e2d3-1111-4000-8000-111111111111",
     );
     await act(async () => {
       amarokEditBtn.click();
@@ -289,9 +278,9 @@ describe("Módulo de Productos (Integración Completa) — Tarea 8.5", () => {
     });
 
     expect(screen.getByTestId("product-price-field-error")).toBeDefined();
-    expect(
-      screen.getByTestId("product-price-field-error").textContent
-    ).toContain("no puede ser negativo");
+    expect(screen.getByTestId("product-price-field-error").textContent).toContain(
+      "no puede ser negativo",
+    );
 
     // Corregir a precio válido $0
     await act(async () => {
@@ -305,7 +294,7 @@ describe("Módulo de Productos (Integración Completa) — Tarea 8.5", () => {
     // Modal se cierra y la tabla refleja $0 ARS para Amarok
     await waitFor(() => {
       const amarokUpdatedPrice = screen.getByTestId(
-        "product-price-a0f1e2d3-1111-4000-8000-111111111111"
+        "product-price-a0f1e2d3-1111-4000-8000-111111111111",
       );
       expect(amarokUpdatedPrice.textContent).toBe("$0 ARS");
     });
@@ -318,7 +307,7 @@ describe("Módulo de Productos (Integración Completa) — Tarea 8.5", () => {
     render(
       <AdminProvider>
         <ProductsModuleHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     // Hilux ID: a0f1e2d3-3333-4000-8000-333333333333
@@ -333,9 +322,7 @@ describe("Módulo de Productos (Integración Completa) — Tarea 8.5", () => {
 
     // 2. Verificar modal de confirmación con botón rojo destructivo (CA-07.1)
     expect(screen.getByTestId("product-delete-modal")).toBeDefined();
-    expect(
-      screen.getByText("¿Eliminar repuesto permanentemente?")
-    ).toBeDefined();
+    expect(screen.getByText("¿Eliminar repuesto permanentemente?")).toBeDefined();
 
     const confirmDeleteBtn = screen.getByTestId("product-delete-confirm-btn");
     expect(confirmDeleteBtn).toBeDefined();

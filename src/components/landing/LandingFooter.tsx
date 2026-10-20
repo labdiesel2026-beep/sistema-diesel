@@ -28,9 +28,8 @@ export function LandingFooter({ className = "" }: LandingFooterProps) {
               </span>
             </a>
             <p className="max-w-sm text-sm leading-relaxed text-slate-400">
-              Especialistas en diagnóstico, reparación y calibración de sistemas
-              de inyección Common Rail. Tecnología de precisión y respaldo técnico
-              para su motor.
+              Especialistas en diagnóstico, reparación y calibración de sistemas de inyección Common
+              Rail. Tecnología de precisión y respaldo técnico para su motor.
             </p>
             <div className="flex items-start gap-2.5 pt-2 text-xs text-slate-400">
               <MapPin className="mt-0.5 size-4 shrink-0 text-blue-500" />
@@ -46,10 +45,7 @@ export function LandingFooter({ className = "" }: LandingFooterProps) {
             <ul className="mt-4 space-y-2.5 text-sm">
               {SITE_CONFIG.navLinks.map((link) => (
                 <li key={link.href}>
-                  <a
-                    href={link.href}
-                    className="transition-colors hover:text-white"
-                  >
+                  <a href={link.href} className="transition-colors hover:text-white">
                     {link.label}
                   </a>
                 </li>
@@ -72,18 +68,12 @@ export function LandingFooter({ className = "" }: LandingFooterProps) {
                 </Link>
               </li>
               <li>
-                <a
-                  href="#garantias"
-                  className="transition-colors hover:text-white"
-                >
+                <a href="#garantias" className="transition-colors hover:text-white">
                   Condiciones de Garantía
                 </a>
               </li>
               <li>
-                <a
-                  href="#contacto"
-                  className="transition-colors hover:text-white"
-                >
+                <a href="#contacto" className="transition-colors hover:text-white">
                   Solicitar Turno / Consulta
                 </a>
               </li>

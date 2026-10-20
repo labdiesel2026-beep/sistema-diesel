@@ -1,12 +1,4 @@
-import {
-  Folder,
-  CornerDownRight,
-  Pencil,
-  Trash2,
-  Package,
-  Layers,
-  Tags,
-} from "lucide-react";
+import { Folder, CornerDownRight, Pencil, Trash2, Package, Layers, Tags } from "lucide-react";
 import type { AdminCategory } from "@/types/admin";
 import { useAdmin } from "@/context/admin-context";
 import { Button } from "@/components/ui/button";
@@ -23,12 +15,7 @@ export interface CategoryListProps {
  * (RF-10, CA-10.1, CA-10.2)
  */
 export function CategoryList({ onEdit, onDelete }: CategoryListProps) {
-  const {
-    categories,
-    getRootCategories,
-    getChildCategories,
-    getCategoryProductCount,
-  } = useAdmin();
+  const { categories, getRootCategories, getChildCategories, getCategoryProductCount } = useAdmin();
 
   const rootCategories = getRootCategories();
 
@@ -58,15 +45,11 @@ export function CategoryList({ onEdit, onDelete }: CategoryListProps) {
     >
       <div className="border-b border-border bg-muted/40 px-6 py-4">
         <div className="grid grid-cols-12 text-xs font-semibold text-foreground uppercase tracking-wider">
-          <div className="col-span-12 sm:col-span-6">
-            Jerarquía / Nombre de Categoría
-          </div>
+          <div className="col-span-12 sm:col-span-6">Jerarquía / Nombre de Categoría</div>
           <div className="hidden sm:block sm:col-span-3 text-center sm:text-left">
             Repuestos Asociados
           </div>
-          <div className="hidden sm:block sm:col-span-3 text-right">
-            Acciones
-          </div>
+          <div className="hidden sm:block sm:col-span-3 text-right">Acciones</div>
         </div>
       </div>
 
@@ -98,19 +81,13 @@ export function CategoryList({ onEdit, onDelete }: CategoryListProps) {
                       >
                         {root.name}
                       </span>
-                      <Badge
-                        variant="outline"
-                        className="text-[10px] font-semibold uppercase"
-                      >
+                      <Badge variant="outline" className="text-[10px] font-semibold uppercase">
                         Raíz
                       </Badge>
                       {children.length > 0 && (
                         <span className="text-xs text-muted-foreground font-mono">
                           ({children.length}{" "}
-                          {children.length === 1
-                            ? "subcategoría"
-                            : "subcategorías"}
-                          )
+                          {children.length === 1 ? "subcategoría" : "subcategorías"})
                         </span>
                       )}
                     </div>
@@ -128,8 +105,7 @@ export function CategoryList({ onEdit, onDelete }: CategoryListProps) {
                   >
                     <Package className="size-3 text-muted-foreground" />
                     <span>
-                      {rootProductCount}{" "}
-                      {rootProductCount === 1 ? "repuesto" : "repuestos"}
+                      {rootProductCount} {rootProductCount === 1 ? "repuesto" : "repuestos"}
                     </span>
                   </Badge>
                 </div>
@@ -203,18 +179,14 @@ export function CategoryList({ onEdit, onDelete }: CategoryListProps) {
 
                         <div className="col-span-6 sm:col-span-3">
                           <Badge
-                            variant={
-                              childProductCount > 0 ? "secondary" : "outline"
-                            }
+                            variant={childProductCount > 0 ? "secondary" : "outline"}
                             className="gap-1.5 font-medium"
                             data-testid={`category-count-${child.id}`}
                           >
                             <Package className="size-3 text-muted-foreground" />
                             <span>
                               {childProductCount}{" "}
-                              {childProductCount === 1
-                                ? "repuesto"
-                                : "repuestos"}
+                              {childProductCount === 1 ? "repuesto" : "repuestos"}
                             </span>
                           </Badge>
                         </div>

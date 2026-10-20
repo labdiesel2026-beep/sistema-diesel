@@ -98,7 +98,7 @@ describe("Suite Integral de Integración: CRUD del Catálogo de Productos y Mét
       expect(res.body).toHaveProperty("id");
       expect(res.body.name).toBe("Inyector Bosch 0445110273");
       expect(res.body.categoryIds).toEqual(
-        expect.arrayContaining([catInyectoresId, subcatToberasId])
+        expect.arrayContaining([catInyectoresId, subcatToberasId]),
       );
       expect(res.body.productCategories).toBeUndefined();
 
@@ -187,7 +187,12 @@ describe("Suite Integral de Integración: CRUD del Catálogo de Productos y Mét
       const oldFilename = `old-img-${testUuid}.webp`;
       const oldFilePath = path.join(DEFAULT_UPLOADS_DIR, oldFilename);
       await fs.writeFile(oldFilePath, Buffer.from("imagen-anterior-bytes"));
-      expect(await fs.access(oldFilePath).then(() => true).catch(() => false)).toBe(true);
+      expect(
+        await fs
+          .access(oldFilePath)
+          .then(() => true)
+          .catch(() => false),
+      ).toBe(true);
 
       // 2. Crear producto en BD
       const product = await prisma.product.create({
@@ -226,13 +231,16 @@ describe("Suite Integral de Integración: CRUD del Catálogo de Productos y Mét
       expect(res.body.name).toBe("Inyector Modificado");
       expect(res.body.imageUrl).toBe(newImageUrl);
       expect(res.body.categoryIds).toEqual(
-        expect.arrayContaining([catInyectoresId, subcatToberasId])
+        expect.arrayContaining([catInyectoresId, subcatToberasId]),
       );
 
       // 4. Esperar purga física asíncrona post-commit
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      const oldFileStillExists = await fs.access(oldFilePath).then(() => true).catch(() => false);
+      const oldFileStillExists = await fs
+        .access(oldFilePath)
+        .then(() => true)
+        .catch(() => false);
       expect(oldFileStillExists).toBe(false);
     });
   });
@@ -288,7 +296,12 @@ describe("Suite Integral de Integración: CRUD del Catálogo de Productos y Mét
       const filename = `delete-target-${testUuid}.webp`;
       const filePath = path.join(DEFAULT_UPLOADS_DIR, filename);
       await fs.writeFile(filePath, Buffer.from("foto-para-borrar"));
-      expect(await fs.access(filePath).then(() => true).catch(() => false)).toBe(true);
+      expect(
+        await fs
+          .access(filePath)
+          .then(() => true)
+          .catch(() => false),
+      ).toBe(true);
 
       // 2. Crear producto
       const product = await prisma.product.create({
@@ -324,7 +337,10 @@ describe("Suite Integral de Integración: CRUD del Catálogo de Productos y Mét
       expect(pivotRows.length).toBe(0);
 
       // 5. Comprobar que el archivo fue eliminado físicamente
-      const fileStillExists = await fs.access(filePath).then(() => true).catch(() => false);
+      const fileStillExists = await fs
+        .access(filePath)
+        .then(() => true)
+        .catch(() => false);
       expect(fileStillExists).toBe(false);
     });
   });
@@ -374,9 +390,7 @@ describe("Suite Integral de Integración: CRUD del Catálogo de Productos y Mét
         },
       });
 
-      const res = await request(app)
-        .get("/api/admin/metrics")
-        .set("Cookie", [adminCookie]);
+      const res = await request(app).get("/api/admin/metrics").set("Cookie", [adminCookie]);
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual({
@@ -384,7 +398,7 @@ describe("Suite Integral de Integración: CRUD del Catálogo de Productos y Mét
         visibleProducts: 2,
         hiddenProducts: 1,
         totalCategories: 3, // Inyectores, Bombas de Inyección, Toberas
-        totalBrands: 2,     // Bosch, Delphi
+        totalBrands: 2, // Bosch, Delphi
       });
     });
   });

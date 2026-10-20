@@ -6,9 +6,10 @@
 **Especificación:** [specs/004-admin-panel/spec.md](file:///f:/INGENIERIA/GEPI/InyectoresDiesel/specs/004-admin-panel/spec.md)  
 **Plan Técnico:** [specs/004-admin-panel/plan.md](file:///f:/INGENIERIA/GEPI/InyectoresDiesel/specs/004-admin-panel/plan.md)  
 **Marco Normativo:** [docs/constitution.md](file:///f:/INGENIERIA/GEPI/InyectoresDiesel/docs/constitution.md) y [AGENTS.MD](file:///f:/INGENIERIA/GEPI/InyectoresDiesel/AGENTS.MD)  
-**Estado:** Listo para Ejecución  
+**Estado:** Listo para Ejecución
 
 > **Reglas Inquebrantables de Ejecución:**
+>
 > - Se ejecuta **estrictamente una sola tarea a la vez** respetando el orden secuencial de dependencias.
 > - Cada tarea debe estar completada y validada según su criterio **"Hecho cuando:"** antes de marcar su checkbox `[x]` y avanzar a la siguiente.
 > - Ningún criterio de finalización es subjetivo: todos deben ser verificables de forma binaria mediante la terminal (códigos de salida, comandos de test o inspección) o aserciones de pruebas automatizadas sobre el DOM.
@@ -226,4 +227,4 @@
 
 ---
 
-*Fin de la lista de tareas de implementación.*
+_Fin de la lista de tareas de implementación._

@@ -31,13 +31,7 @@ router.get("/", validate({ query: productQuerySchema }), getProducts);
 router.get("/:id", validate({ params: uuidParamSchema }), getProductById);
 
 // Alta de producto (Autenticado, Anti-CSRF, Zod .strict(), Transacción Prisma)
-router.post(
-  "/",
-  requireAuth,
-  csrfProtection,
-  validate(productFormSchema),
-  createProduct
-);
+router.post("/", requireAuth, csrfProtection, validate(productFormSchema), createProduct);
 
 // Edición de producto (Autenticado, Anti-CSRF, Zod .strict(), Purgado de imagen previa)
 router.put(
@@ -45,7 +39,7 @@ router.put(
   requireAuth,
   csrfProtection,
   validate({ params: uuidParamSchema, body: productFormSchema }),
-  updateProduct
+  updateProduct,
 );
 
 // Alternar visibilidad de producto (Autenticado, Anti-CSRF, Zod .strict())
@@ -54,7 +48,7 @@ router.patch(
   requireAuth,
   csrfProtection,
   validate({ params: uuidParamSchema, body: visibilityPatchSchema }),
-  updateProductVisibility
+  updateProductVisibility,
 );
 
 // Eliminación de producto (Autenticado, Anti-CSRF, Cascada BD y purga física de archivo)
@@ -63,7 +57,7 @@ router.delete(
   requireAuth,
   csrfProtection,
   validate({ params: uuidParamSchema }),
-  deleteProduct
+  deleteProduct,
 );
 
 export default router;

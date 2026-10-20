@@ -37,10 +37,7 @@ function AdminLayout() {
                     collapsed={collapsed}
                     onToggleSidebar={() => setCollapsed((prev) => !prev)}
                   />
-                  <main
-                    id="admin-main-content"
-                    className="min-w-0 flex-1 p-4 py-7 md:p-8 lg:p-10"
-                  >
+                  <main id="admin-main-content" className="min-w-0 flex-1 p-4 py-7 md:p-8 lg:p-10">
                     <Outlet />
                   </main>
                 </div>

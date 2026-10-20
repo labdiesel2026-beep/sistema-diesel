@@ -66,13 +66,19 @@ describe("Middleware Defensivo Anti-CSRF (Tarea 2.3)", () => {
     // PUT
     const putFail = await request(app).put("/test").send({});
     expect(putFail.status).toBe(403);
-    const putOk = await request(app).put("/test").set("X-Requested-With", "XMLHttpRequest").send({});
+    const putOk = await request(app)
+      .put("/test")
+      .set("X-Requested-With", "XMLHttpRequest")
+      .send({});
     expect(putOk.status).toBe(200);
 
     // PATCH
     const patchFail = await request(app).patch("/test").send({});
     expect(patchFail.status).toBe(403);
-    const patchOk = await request(app).patch("/test").set("X-Requested-With", "XMLHttpRequest").send({});
+    const patchOk = await request(app)
+      .patch("/test")
+      .set("X-Requested-With", "XMLHttpRequest")
+      .send({});
     expect(patchOk.status).toBe(200);
 
     // DELETE

@@ -27,8 +27,8 @@ export function LocationSection({ className = "" }: LocationSectionProps) {
             Ubicación y Horarios de Atención
           </h2>
           <p className="mt-4 text-base text-slate-600 dark:text-slate-400">
-            Estamos ubicados estratégicamente para recibir tu vehículo, maquinaria
-            o coordinar envíos de repuestos e inyectores.
+            Estamos ubicados estratégicamente para recibir tu vehículo, maquinaria o coordinar
+            envíos de repuestos e inyectores.
           </p>
         </div>
 

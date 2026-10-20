@@ -11,7 +11,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { CatalogCartProvider } from "@/components/catalog-cart";
+import { CatalogCartProvider } from "@/context/catalog-cart-context";
 
 function NotFoundComponent() {
   return (

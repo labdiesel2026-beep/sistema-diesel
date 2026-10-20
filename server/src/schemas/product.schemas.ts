@@ -19,16 +19,11 @@ export const productFormSchema = z
       .trim()
       .min(1, "La descripción es obligatoria")
       .min(5, "La descripción debe contener al menos 5 caracteres"),
-    imageUrl: z
-      .string()
-      .trim()
-      .min(1, "Debe seleccionar una foto para el producto"),
+    imageUrl: z.string().trim().min(1, "Debe seleccionar una foto para el producto"),
     categoryIds: z
       .array(z.string().uuid("Identificador de categoría inválido"))
       .min(1, "Debe seleccionar al menos una categoría"),
-    brandId: z
-      .string()
-      .uuid("Debe seleccionar una marca válida"),
+    brandId: z.string().uuid("Debe seleccionar una marca válida"),
     vehicleCompatibility: z.string().trim().optional().default(""),
     condition: z.enum(PRODUCT_CONDITIONS, {
       error: "Condición debe ser 'Nuevo', 'Reacondicionado' o 'Usado'",

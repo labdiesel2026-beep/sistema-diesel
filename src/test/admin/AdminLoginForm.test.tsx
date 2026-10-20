@@ -1,6 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { AdminAuthProvider, DEMO_ADMIN_EMAIL, DEMO_ADMIN_PASSWORD } from "@/context/admin-auth-context";
+import {
+  AdminAuthProvider,
+  DEMO_ADMIN_EMAIL,
+  DEMO_ADMIN_PASSWORD,
+} from "@/context/admin-auth-context";
 import { AdminLoginForm } from "@/components/admin/auth/AdminLoginForm";
 
 function renderWithAuthProvider(ui: React.ReactElement) {

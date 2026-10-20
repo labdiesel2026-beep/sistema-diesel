@@ -21,16 +21,11 @@ export function useHashNavigation() {
 
     const scheduleInitialScroll = () => {
       if (typeof window.requestAnimationFrame === "function") {
-        const frameId = window.requestAnimationFrame(() =>
-          scrollToHash(window.location.hash),
-        );
+        const frameId = window.requestAnimationFrame(() => scrollToHash(window.location.hash));
         return () => window.cancelAnimationFrame(frameId);
       }
 
-      const timeoutId = window.setTimeout(
-        () => scrollToHash(window.location.hash),
-        0,
-      );
+      const timeoutId = window.setTimeout(() => scrollToHash(window.location.hash), 0);
       return () => window.clearTimeout(timeoutId);
     };
 

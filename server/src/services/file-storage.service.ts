@@ -15,7 +15,7 @@ export const DEFAULT_UPLOADS_DIR = path.resolve(process.cwd(), "uploads");
 export async function saveBuffer(
   filename: string,
   buffer: Buffer,
-  uploadsDir: string = DEFAULT_UPLOADS_DIR
+  uploadsDir: string = DEFAULT_UPLOADS_DIR,
 ): Promise<string> {
   const safeFilename = path.basename(filename);
   await fs.mkdir(uploadsDir, { recursive: true });
@@ -39,7 +39,7 @@ export async function saveBuffer(
  */
 export async function deleteFile(
   imageUrl: string,
-  uploadsDir: string = DEFAULT_UPLOADS_DIR
+  uploadsDir: string = DEFAULT_UPLOADS_DIR,
 ): Promise<void> {
   if (!imageUrl || typeof imageUrl !== "string") {
     return;
@@ -58,7 +58,7 @@ export async function deleteFile(
   } catch (error: any) {
     // Aislamiento de fallos de I/O, EBUSY en Windows o archivos ya inexistentes (CA-06.4, D-10)
     console.warn(
-      `[FileStorage Warning] No se pudo eliminar físicamente el archivo ${basename}: ${error?.message || error}`
+      `[FileStorage Warning] No se pudo eliminar físicamente el archivo ${basename}: ${error?.message || error}`,
     );
   }
 }

@@ -33,7 +33,7 @@ describe("Route Guard con Denegación por Defecto (AdminGuard) — Tarea 3.4", (
         <AdminGuard>
           <div data-testid="protected-dashboard">Panel de Control Confidencial</div>
         </AdminGuard>
-      </AdminAuthProvider>
+      </AdminAuthProvider>,
     );
 
     // No debe renderizar el contenido protegido
@@ -53,7 +53,7 @@ describe("Route Guard con Denegación por Defecto (AdminGuard) — Tarea 3.4", (
         <AdminGuard>
           <span data-testid="protected-content">Datos de Productos</span>
         </AdminGuard>
-      </AdminAuthProvider>
+      </AdminAuthProvider>,
     );
 
     expect(screen.queryByTestId("protected-content")).toBeNull();
@@ -92,7 +92,7 @@ describe("Route Guard con Denegación por Defecto (AdminGuard) — Tarea 3.4", (
         <AuthenticatedHarness>
           <div data-testid="protected-content">Área de Gestión Segura</div>
         </AuthenticatedHarness>
-      </AdminAuthProvider>
+      </AdminAuthProvider>,
     );
 
     // Inicialmente bloqueado
@@ -140,7 +140,7 @@ describe("Route Guard con Denegación por Defecto (AdminGuard) — Tarea 3.4", (
     render(
       <AdminAuthProvider>
         <LogoutHarness />
-      </AdminAuthProvider>
+      </AdminAuthProvider>,
     );
 
     // Login

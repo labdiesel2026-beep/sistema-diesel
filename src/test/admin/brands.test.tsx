@@ -41,17 +41,9 @@ function BrandsModuleHarness() {
         }}
       />
 
-      <BrandFormModal
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        brandToEdit={brandToEdit}
-      />
+      <BrandFormModal open={formOpen} onOpenChange={setFormOpen} brandToEdit={brandToEdit} />
 
-      <BrandDeleteModal
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        brand={brandToDelete}
-      />
+      <BrandDeleteModal open={deleteOpen} onOpenChange={setDeleteOpen} brand={brandToDelete} />
     </div>
   );
 }
@@ -68,7 +60,7 @@ describe("Módulo de Marcas (Integración ABM) — Tarea 6.3", () => {
     render(
       <AdminProvider>
         <BrandsModuleHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     // Abrir modal de nueva marca
@@ -103,7 +95,7 @@ describe("Módulo de Marcas (Integración ABM) — Tarea 6.3", () => {
     render(
       <AdminProvider>
         <BrandsModuleHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     // 1. Abrir modal
@@ -121,7 +113,7 @@ describe("Módulo de Marcas (Integración ABM) — Tarea 6.3", () => {
 
     expect(screen.getByTestId("brand-name-field-error")).toBeDefined();
     expect(screen.getByTestId("brand-name-field-error").textContent).toContain(
-      "al menos 2 caracteres"
+      "al menos 2 caracteres",
     );
 
     // Probar duplicado case-insensitive: "  bosch  " existe en las semillas
@@ -136,7 +128,7 @@ describe("Módulo de Marcas (Integración ABM) — Tarea 6.3", () => {
     // El modal debe permanecer abierto y mostrar alerta de unicidad
     expect(screen.getByTestId("brand-form-alert-error")).toBeDefined();
     expect(screen.getByTestId("brand-form-alert-error").textContent).toContain(
-      "Ya existe una marca con este nombre"
+      "Ya existe una marca con este nombre",
     );
   });
 
@@ -147,12 +139,12 @@ describe("Módulo de Marcas (Integración ABM) — Tarea 6.3", () => {
     render(
       <AdminProvider>
         <BrandsModuleHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     // Bosch tiene UUID "b1a2c3d4-0001-4000-8000-000000000001" y tiene repuestos asociados
     const boschDeleteBtn = screen.getByTestId(
-      "brand-delete-btn-b1a2c3d4-0001-4000-8000-000000000001"
+      "brand-delete-btn-b1a2c3d4-0001-4000-8000-000000000001",
     );
 
     await act(async () => {
@@ -161,15 +153,13 @@ describe("Módulo de Marcas (Integración ABM) — Tarea 6.3", () => {
 
     // Modal de confirmación con bloqueo impeditivo
     expect(screen.getByTestId("brand-delete-modal")).toBeDefined();
-    expect(
-      screen.getByText("No se puede eliminar la marca")
-    ).toBeDefined();
+    expect(screen.getByText("No se puede eliminar la marca")).toBeDefined();
 
     // Alerta de bloqueo y lista de productos
     const alertBox = screen.getByTestId("brand-deletion-blocked-alert");
     expect(alertBox).toBeDefined();
     expect(alertBox.textContent).toContain(
-      "No se puede eliminar la marca porque contiene productos asociados"
+      "No se puede eliminar la marca porque contiene productos asociados",
     );
 
     const affectedList = screen.getByTestId("brand-affected-products-list");
@@ -198,7 +188,7 @@ describe("Módulo de Marcas (Integración ABM) — Tarea 6.3", () => {
     render(
       <AdminProvider>
         <BrandsModuleHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     // 1. Crear una marca sin productos
@@ -231,9 +221,7 @@ describe("Módulo de Marcas (Integración ABM) — Tarea 6.3", () => {
     });
 
     // 3. El modal debe mostrar diálogo de confirmación (no bloqueo)
-    expect(
-      screen.getByText("¿Eliminar marca permanentemente?")
-    ).toBeDefined();
+    expect(screen.getByText("¿Eliminar marca permanentemente?")).toBeDefined();
     expect(screen.queryByTestId("brand-deletion-blocked-alert")).toBeNull();
 
     const confirmBtn = screen.getByTestId("brand-delete-confirm-btn");
@@ -255,13 +243,11 @@ describe("Módulo de Marcas (Integración ABM) — Tarea 6.3", () => {
     render(
       <AdminProvider>
         <BrandsModuleHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     // Delphi ID: "b1a2c3d4-0002-4000-8000-000000000002"
-    const editBtn = screen.getByTestId(
-      "brand-edit-btn-b1a2c3d4-0002-4000-8000-000000000002"
-    );
+    const editBtn = screen.getByTestId("brand-edit-btn-b1a2c3d4-0002-4000-8000-000000000002");
 
     await act(async () => {
       editBtn.click();
@@ -285,8 +271,6 @@ describe("Módulo de Marcas (Integración ABM) — Tarea 6.3", () => {
     // Nombre actualizado en la tabla
     expect(screen.getByText("Delphi Technologies")).toBeDefined();
     // Y el ID sigue siendo el original
-    expect(
-      screen.getByText("b1a2c3d4-0002-4000-8000-000000000002")
-    ).toBeDefined();
+    expect(screen.getByText("b1a2c3d4-0002-4000-8000-000000000002")).toBeDefined();
   });
 });

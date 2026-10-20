@@ -6,11 +6,7 @@ import { brandService } from "../services/brand.service.js";
  * (RF-09, D-04)
  */
 
-export async function getBrands(
-  _req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export async function getBrands(_req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const brands = await brandService.getAllBrands();
     res.status(200).json(brands);
@@ -19,11 +15,7 @@ export async function getBrands(
   }
 }
 
-export async function getBrandById(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export async function getBrandById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const brand = await brandService.getBrandById(req.params.id as string);
     res.status(200).json(brand);
@@ -32,11 +24,7 @@ export async function getBrandById(
   }
 }
 
-export async function createBrand(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export async function createBrand(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const brand = await brandService.createBrand(req.body);
     res.status(201).json(brand);
@@ -45,11 +33,7 @@ export async function createBrand(
   }
 }
 
-export async function updateBrand(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export async function updateBrand(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const updated = await brandService.updateBrand(req.params.id as string, req.body);
     res.status(200).json(updated);
@@ -58,11 +42,7 @@ export async function updateBrand(
   }
 }
 
-export async function deleteBrand(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export async function deleteBrand(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     await brandService.deleteBrand(req.params.id as string);
     res.status(200).json({

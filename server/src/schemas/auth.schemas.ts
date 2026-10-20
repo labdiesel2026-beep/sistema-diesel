@@ -13,9 +13,7 @@ export const loginSchema = z
       .trim()
       .min(1, "El correo electrónico es obligatorio")
       .email("Formato de correo electrónico inválido"),
-    password: z
-      .string()
-      .min(1, "La contraseña es obligatoria"),
+    password: z.string().min(1, "La contraseña es obligatoria"),
   })
   .strict();
 

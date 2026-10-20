@@ -102,8 +102,7 @@ export function BrandList({ onEdit, onDelete }: BrandListProps) {
                     >
                       <Package className="size-3 text-muted-foreground" />
                       <span>
-                        {productCount}{" "}
-                        {productCount === 1 ? "repuesto" : "repuestos"}
+                        {productCount} {productCount === 1 ? "repuesto" : "repuestos"}
                       </span>
                     </Badge>
                   </div>

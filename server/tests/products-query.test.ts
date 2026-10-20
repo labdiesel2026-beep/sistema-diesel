@@ -20,7 +20,9 @@ describe("DTO Serializer y Controlador de Listado (GET /api/products) — Tarea 
     const cat1 = await prisma.category.create({ data: { name: "Inyectores" } });
     categoryId1 = cat1.id;
 
-    const cat2 = await prisma.category.create({ data: { name: "Piezoeléctricos", parentId: cat1.id } });
+    const cat2 = await prisma.category.create({
+      data: { name: "Piezoeléctricos", parentId: cat1.id },
+    });
     categoryId2 = cat2.id;
 
     // Crear producto visible
@@ -106,9 +108,7 @@ describe("DTO Serializer y Controlador de Listado (GET /api/products) — Tarea 
 
       expect(res.status).toBe(200);
       expect(res.body.id).toBe(createdProductId);
-      expect(res.body.categoryIds).toEqual(
-        expect.arrayContaining([categoryId1, categoryId2])
-      );
+      expect(res.body.categoryIds).toEqual(expect.arrayContaining([categoryId1, categoryId2]));
       expect(res.body.productCategories).toBeUndefined();
     });
 

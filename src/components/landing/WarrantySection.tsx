@@ -8,10 +8,7 @@ interface WarrantySectionProps {
 }
 
 export function WarrantySection({ className = "" }: WarrantySectionProps) {
-  const warrantyUrl = buildWhatsAppUrl(
-    SITE_CONFIG.phone,
-    SITE_CONFIG.whatsappMessages.warranty,
-  );
+  const warrantyUrl = buildWhatsAppUrl(SITE_CONFIG.phone, SITE_CONFIG.whatsappMessages.warranty);
 
   return (
     <section
@@ -63,11 +60,7 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
                 asChild
                 className="h-13 w-full px-6 text-sm font-bold shadow-md sm:w-auto"
               >
-                <a
-                  href={warrantyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={warrantyUrl} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="mr-2 size-5" />
                   Solicitar Garantía / Soporte
                 </a>

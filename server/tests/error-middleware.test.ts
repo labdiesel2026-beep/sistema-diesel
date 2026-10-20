@@ -4,8 +4,7 @@ import request from "supertest";
 import { Prisma } from "@prisma/client";
 import { AppError, errorHandler } from "../src/middleware/error.middleware.js";
 
-const UUIDV4_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUIDV4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 describe("Middleware Global de Manejo de Errores (Tarea 2.4)", () => {
   const setupAppWithRoutes = () => {
@@ -14,7 +13,9 @@ describe("Middleware Global de Manejo de Errores (Tarea 2.4)", () => {
 
     // Rutas que provocan diferentes tipos de error
     app.get("/operational-bad-request", () => {
-      throw AppError.badRequest("Parámetros de consulta incorrectos", [{ field: "code", message: "Requerido" }]);
+      throw AppError.badRequest("Parámetros de consulta incorrectos", [
+        { field: "code", message: "Requerido" },
+      ]);
     });
 
     app.get("/operational-unauthorized", () => {
@@ -33,7 +34,9 @@ describe("Middleware Global de Manejo de Errores (Tarea 2.4)", () => {
     });
 
     app.get("/unhandled-crash", () => {
-      throw new Error("DB Crash: connection pool exhausted at postgresql://postgres:secret@db:5432");
+      throw new Error(
+        "DB Crash: connection pool exhausted at postgresql://postgres:secret@db:5432",
+      );
     });
 
     app.use(errorHandler);

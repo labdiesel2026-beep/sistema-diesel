@@ -30,9 +30,7 @@ describe("Servicio y Endpoint de Métricas del Dashboard (GET /api/admin/metrics
   });
 
   it("retorna contadores en 0 cuando la base de datos está vacía", async () => {
-    const res = await request(app)
-      .get("/api/admin/metrics")
-      .set("Cookie", [adminCookie]);
+    const res = await request(app).get("/api/admin/metrics").set("Cookie", [adminCookie]);
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({
@@ -118,9 +116,7 @@ describe("Servicio y Endpoint de Métricas del Dashboard (GET /api/admin/metrics
     });
 
     // 4. Solicitar métricas
-    const res = await request(app)
-      .get("/api/admin/metrics")
-      .set("Cookie", [adminCookie]);
+    const res = await request(app).get("/api/admin/metrics").set("Cookie", [adminCookie]);
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({

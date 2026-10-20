@@ -56,16 +56,16 @@ export function validateEnv(customEnv?: Record<string, unknown>): EnvConfig {
     whatsapp.trim() === "";
 
   if (!isProd && hasMissingRequired) {
-    console.warn("[AppSec ENV] Operando con variables de entorno por defecto para desarrollo local.");
+    console.warn(
+      "[AppSec ENV] Operando con variables de entorno por defecto para desarrollo local.",
+    );
     return {
       VITE_API_URL:
         typeof apiUrl === "string" && apiUrl.trim() !== ""
           ? apiUrl.trim()
           : "http://localhost:3000/api",
       VITE_CONTACT_WHATSAPP:
-        typeof whatsapp === "string" && whatsapp.trim() !== ""
-          ? whatsapp.trim()
-          : "5492657659108",
+        typeof whatsapp === "string" && whatsapp.trim() !== "" ? whatsapp.trim() : "5492657659108",
       MODE: typeof mode === "string" ? mode : "development",
       PROD: false,
     };
@@ -73,7 +73,9 @@ export function validateEnv(customEnv?: Record<string, unknown>): EnvConfig {
 
   const result = envSchema.safeParse(rawEnv);
   if (!result.success) {
-    const errorDetails = result.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join("\n");
+    const errorDetails = result.error.errors
+      .map((e) => `${e.path.join(".")}: ${e.message}`)
+      .join("\n");
     console.error("FATAL: Variables de entorno inválidas o ausentes:\n", errorDetails);
     throw new Error(`[Crash Early] Faltan variables de entorno requeridas:\n${errorDetails}`);
   }

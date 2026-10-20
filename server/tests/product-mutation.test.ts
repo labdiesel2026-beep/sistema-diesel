@@ -134,9 +134,7 @@ describe("Endpoints de Creación (POST) y Edición (PUT) de Productos — Tarea 
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty("id");
       expect(res.body.name).toBe("Inyector Common Rail Bosch 0445110");
-      expect(res.body.categoryIds).toEqual(
-        expect.arrayContaining([categoryId1, categoryId2])
-      );
+      expect(res.body.categoryIds).toEqual(expect.arrayContaining([categoryId1, categoryId2]));
       expect(res.body.productCategories).toBeUndefined();
 
       // Verificar persistencia en base de datos
@@ -208,7 +206,12 @@ describe("Endpoints de Creación (POST) y Edición (PUT) de Productos — Tarea 
       await fs.writeFile(oldFilePath, Buffer.from("dummy-old-image-bytes"));
 
       // Verificar que el archivo existe en disco
-      expect(await fs.access(oldFilePath).then(() => true).catch(() => false)).toBe(true);
+      expect(
+        await fs
+          .access(oldFilePath)
+          .then(() => true)
+          .catch(() => false),
+      ).toBe(true);
 
       // Crear el producto vinculado a esa imagen
       const product = await prisma.product.create({
@@ -252,7 +255,10 @@ describe("Endpoints de Creación (POST) y Edición (PUT) de Productos — Tarea 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Comprobar que el archivo anterior fue eliminado físicamente del disco
-      const oldFileStillExists = await fs.access(oldFilePath).then(() => true).catch(() => false);
+      const oldFileStillExists = await fs
+        .access(oldFilePath)
+        .then(() => true)
+        .catch(() => false);
       expect(oldFileStillExists).toBe(false);
     });
   });

@@ -101,7 +101,12 @@ export function AdminLoginForm({ onSuccess }: AdminLoginFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-5" aria-label="Formulario de inicio de sesión">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="space-y-5"
+      aria-label="Formulario de inicio de sesión"
+    >
       {formError && (
         <div
           role="alert"
@@ -148,7 +153,9 @@ export function AdminLoginForm({ onSuccess }: AdminLoginFormProps) {
           onChange={handleChange("password")}
           onBlur={handleBlur("password")}
           disabled={isSubmitting}
-          className={fieldErrors.password ? "border-destructive focus-visible:ring-destructive" : ""}
+          className={
+            fieldErrors.password ? "border-destructive focus-visible:ring-destructive" : ""
+          }
           aria-invalid={Boolean(fieldErrors.password)}
           aria-describedby={fieldErrors.password ? "admin-password-error" : undefined}
         />

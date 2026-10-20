@@ -13,13 +13,10 @@ import { CategoryDeleteModal } from "@/components/admin/categories/CategoryDelet
  */
 function CategoriesModuleHarness() {
   const [formOpen, setFormOpen] = useState(false);
-  const [categoryToEdit, setCategoryToEdit] = useState<AdminCategory | null>(
-    null
-  );
+  const [categoryToEdit, setCategoryToEdit] = useState<AdminCategory | null>(null);
 
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] =
-    useState<AdminCategory | null>(null);
+  const [categoryToDelete, setCategoryToDelete] = useState<AdminCategory | null>(null);
 
   return (
     <div className="p-4">
@@ -71,7 +68,7 @@ describe("Módulo de Categorías (Integración ABM) — Tarea 7.3", () => {
     render(
       <AdminProvider>
         <CategoriesModuleHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     // 1. Crear categoría raíz
@@ -80,9 +77,7 @@ describe("Módulo de Categorías (Integración ABM) — Tarea 7.3", () => {
     });
 
     expect(screen.getByTestId("category-form-modal")).toBeDefined();
-    expect(
-      screen.getByRole("heading", { name: "Nueva Categoría" })
-    ).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Nueva Categoría" })).toBeDefined();
 
     const nameInput = screen.getByTestId("category-name-input");
     await act(async () => {
@@ -104,13 +99,11 @@ describe("Módulo de Categorías (Integración ABM) — Tarea 7.3", () => {
     });
 
     const subNameInput = screen.getByTestId("category-name-input");
-    const parentSelect = screen.getByTestId(
-      "category-parent-select"
-    ) as HTMLSelectElement;
+    const parentSelect = screen.getByTestId("category-parent-select") as HTMLSelectElement;
 
     // Buscar la opción con el nombre de la raíz creada
     const rootOption = Array.from(parentSelect.options).find(
-      (opt) => opt.text === "Sistemas Hidráulicos Diésel"
+      (opt) => opt.text === "Sistemas Hidráulicos Diésel",
     );
     expect(rootOption).toBeDefined();
     if (!rootOption) return;
@@ -139,35 +132,27 @@ describe("Módulo de Categorías (Integración ABM) — Tarea 7.3", () => {
     render(
       <AdminProvider>
         <CategoriesModuleHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     // "Inyección Common Rail" tiene ID "e4b6d812-7a2b-4f51-b8f3-0a567c891001" y tiene subcategorías hijas
-    const editBtn = screen.getByTestId(
-      "category-edit-btn-e4b6d812-7a2b-4f51-b8f3-0a567c891001"
-    );
+    const editBtn = screen.getByTestId("category-edit-btn-e4b6d812-7a2b-4f51-b8f3-0a567c891001");
 
     await act(async () => {
       editBtn.click();
     });
 
-    expect(
-      screen.getByRole("heading", { name: "Editar Categoría" })
-    ).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Editar Categoría" })).toBeDefined();
 
     // El selector de padre debe estar deshabilitado
-    const parentSelect = screen.getByTestId(
-      "category-parent-select"
-    ) as HTMLSelectElement;
+    const parentSelect = screen.getByTestId("category-parent-select") as HTMLSelectElement;
     expect(parentSelect.disabled).toBe(true);
 
     // Debe mostrar la advertencia visual descriptiva
-    const disabledHint = screen.getByTestId(
-      "category-parent-disabled-hint"
-    );
+    const disabledHint = screen.getByTestId("category-parent-disabled-hint");
     expect(disabledHint).toBeDefined();
     expect(disabledHint.textContent).toContain(
-      "Esta categoría posee subcategorías vinculadas y no puede transformarse en subcategoría hija"
+      "Esta categoría posee subcategorías vinculadas y no puede transformarse en subcategoría hija",
     );
   });
 
@@ -178,12 +163,12 @@ describe("Módulo de Categorías (Integración ABM) — Tarea 7.3", () => {
     render(
       <AdminProvider>
         <CategoriesModuleHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     // "Inyectores Common Rail" (ID: "e4b6d812-7a2b-4f51-b8f3-0a567c891002") tiene productos asociados (Amarok, Ranger, Hilux)
     const deleteBtn = screen.getByTestId(
-      "category-delete-btn-e4b6d812-7a2b-4f51-b8f3-0a567c891002"
+      "category-delete-btn-e4b6d812-7a2b-4f51-b8f3-0a567c891002",
     );
 
     await act(async () => {
@@ -191,28 +176,20 @@ describe("Módulo de Categorías (Integración ABM) — Tarea 7.3", () => {
     });
 
     expect(screen.getByTestId("category-delete-modal")).toBeDefined();
-    expect(
-      screen.getByText("No se puede eliminar la categoría")
-    ).toBeDefined();
+    expect(screen.getByText("No se puede eliminar la categoría")).toBeDefined();
 
     // Comprobar alerta de bloqueo y productos afectados
-    const blockedAlert = screen.getByTestId(
-      "category-deletion-blocked-alert"
-    );
+    const blockedAlert = screen.getByTestId("category-deletion-blocked-alert");
     expect(blockedAlert).toBeDefined();
     expect(blockedAlert.textContent).toContain(
-      "No se puede eliminar la categoría porque contiene productos asociados"
+      "No se puede eliminar la categoría porque contiene productos asociados",
     );
 
-    const affectedList = screen.getByTestId(
-      "category-affected-products-list"
-    );
+    const affectedList = screen.getByTestId("category-affected-products-list");
     expect(affectedList.textContent).toContain("Inyector Amarok 2.0 TDI");
 
     // Botón destructivo debe estar ausente
-    expect(
-      screen.queryByTestId("category-delete-confirm-btn")
-    ).toBeNull();
+    expect(screen.queryByTestId("category-delete-confirm-btn")).toBeNull();
 
     // Botón Entendido cierra el modal sin alterar los datos
     const closeBtn = screen.getByTestId("category-delete-close-btn");
@@ -227,12 +204,12 @@ describe("Módulo de Categorías (Integración ABM) — Tarea 7.3", () => {
     render(
       <AdminProvider>
         <CategoriesModuleHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     // "Inyección Common Rail" (ID: "e4b6d812-7a2b-4f51-b8f3-0a567c891001") tiene 2 subcategorías
     const deleteBtn = screen.getByTestId(
-      "category-delete-btn-e4b6d812-7a2b-4f51-b8f3-0a567c891001"
+      "category-delete-btn-e4b6d812-7a2b-4f51-b8f3-0a567c891001",
     );
 
     await act(async () => {
@@ -240,19 +217,11 @@ describe("Módulo de Categorías (Integración ABM) — Tarea 7.3", () => {
     });
 
     expect(screen.getByTestId("category-delete-modal")).toBeDefined();
-    expect(
-      screen.getByText("No se puede eliminar la categoría")
-    ).toBeDefined();
+    expect(screen.getByText("No se puede eliminar la categoría")).toBeDefined();
 
-    const blockedAlert = screen.getByTestId(
-      "category-deletion-blocked-alert"
-    );
-    expect(blockedAlert.textContent).toContain(
-      "posee subcategorías vinculadas"
-    );
-    expect(
-      screen.queryByTestId("category-delete-confirm-btn")
-    ).toBeNull();
+    const blockedAlert = screen.getByTestId("category-deletion-blocked-alert");
+    expect(blockedAlert.textContent).toContain("posee subcategorías vinculadas");
+    expect(screen.queryByTestId("category-delete-confirm-btn")).toBeNull();
   });
 
   // -------------------------------------------------------------------------
@@ -262,7 +231,7 @@ describe("Módulo de Categorías (Integración ABM) — Tarea 7.3", () => {
     render(
       <AdminProvider>
         <CategoriesModuleHarness />
-      </AdminProvider>
+      </AdminProvider>,
     );
 
     // 1. Crear categoría limpia sin productos ni hijas
@@ -280,9 +249,7 @@ describe("Módulo de Categorías (Integración ABM) — Tarea 7.3", () => {
       screen.getByTestId("category-form-submit-btn").click();
     });
 
-    expect(
-      screen.getByText("Categoría Temporal Para Borrar")
-    ).toBeDefined();
+    expect(screen.getByText("Categoría Temporal Para Borrar")).toBeDefined();
 
     // 2. Abrir modal de eliminación
     const deleteButtons = screen.getAllByRole("button", {
@@ -297,12 +264,8 @@ describe("Módulo de Categorías (Integración ABM) — Tarea 7.3", () => {
     });
 
     // 3. Confirmación destructiva permitida
-    expect(
-      screen.getByText("¿Eliminar categoría permanentemente?")
-    ).toBeDefined();
-    expect(
-      screen.queryByTestId("category-deletion-blocked-alert")
-    ).toBeNull();
+    expect(screen.getByText("¿Eliminar categoría permanentemente?")).toBeDefined();
+    expect(screen.queryByTestId("category-deletion-blocked-alert")).toBeNull();
 
     const confirmBtn = screen.getByTestId("category-delete-confirm-btn");
     expect(confirmBtn).toBeDefined();
@@ -313,8 +276,6 @@ describe("Módulo de Categorías (Integración ABM) — Tarea 7.3", () => {
     });
 
     // 5. La categoría ya no está presente
-    expect(
-      screen.queryByText("Categoría Temporal Para Borrar")
-    ).toBeNull();
+    expect(screen.queryByText("Categoría Temporal Para Borrar")).toBeNull();
   });
 });

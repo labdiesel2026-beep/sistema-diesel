@@ -25,13 +25,7 @@ router.get("/", getCategories);
 router.get("/:id", validate({ params: uuidParamSchema }), getCategoryById);
 
 // Crear categoría (Autenticado, Anti-CSRF, Zod .strict(), validación de 1 nivel)
-router.post(
-  "/",
-  requireAuth,
-  csrfProtection,
-  validate(categoryFormSchema),
-  createCategory
-);
+router.post("/", requireAuth, csrfProtection, validate(categoryFormSchema), createCategory);
 
 // Actualizar categoría (Autenticado, Anti-CSRF, Zod .strict(), prevención de ciclos)
 router.put(
@@ -39,7 +33,7 @@ router.put(
   requireAuth,
   csrfProtection,
   validate({ params: uuidParamSchema, body: categoryFormSchema }),
-  updateCategory
+  updateCategory,
 );
 
 // Eliminar categoría (Autenticado, Anti-CSRF, bloqueo por subcategorías o productos vinculados)
@@ -48,7 +42,7 @@ router.delete(
   requireAuth,
   csrfProtection,
   validate({ params: uuidParamSchema }),
-  deleteCategory
+  deleteCategory,
 );
 
 export default router;

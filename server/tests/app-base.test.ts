@@ -21,9 +21,7 @@ describe("Servidor Express Base y Cabeceras de Seguridad (Tarea 2.1)", () => {
   });
 
   it("permite peticiones con el origen autorizado en CORS_ORIGIN y emite Access-Control-Allow-Credentials", async () => {
-    const res = await request(app)
-      .get("/health")
-      .set("Origin", "http://localhost:5173");
+    const res = await request(app).get("/health").set("Origin", "http://localhost:5173");
 
     expect(res.status).toBe(200);
     expect(res.headers["access-control-allow-origin"]).toBe("http://localhost:5173");
@@ -31,9 +29,7 @@ describe("Servidor Express Base y Cabeceras de Seguridad (Tarea 2.1)", () => {
   });
 
   it("bloquea o rechaza peticiones con orígenes no autorizados", async () => {
-    const res = await request(app)
-      .get("/health")
-      .set("Origin", "http://sitio-malicioso.com");
+    const res = await request(app).get("/health").set("Origin", "http://sitio-malicioso.com");
 
     expect(res.headers["access-control-allow-origin"]).toBeUndefined();
   });

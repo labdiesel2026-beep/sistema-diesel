@@ -1,10 +1,4 @@
-import {
-  useState,
-  useEffect,
-  type FormEvent,
-  type ChangeEvent,
-  type FocusEvent,
-} from "react";
+import { useState, useEffect, type FormEvent, type ChangeEvent, type FocusEvent } from "react";
 import { Loader2, AlertCircle, FolderPlus, Info } from "lucide-react";
 import type { AdminCategory } from "@/types/admin";
 import { useAdmin } from "@/context/admin-context";
@@ -45,23 +39,16 @@ export function CategoryFormModal({
   categoryToEdit,
   onSuccess,
 }: CategoryFormModalProps) {
-  const {
-    createCategory,
-    updateCategory,
-    getRootCategories,
-    hasChildren,
-  } = useAdmin();
+  const { createCategory, updateCategory, getRootCategories, hasChildren } = useAdmin();
 
   const isEditing = Boolean(categoryToEdit);
 
   // Si se está editando una categoría que ya posee hijas, se inhabilita el selector de padre (CL-05)
-  const categoryHasChildren = Boolean(
-    categoryToEdit && hasChildren(categoryToEdit.id)
-  );
+  const categoryHasChildren = Boolean(categoryToEdit && hasChildren(categoryToEdit.id));
 
   // Selector solo lista categorías raíz excluyéndose a sí misma si se está editando (CA-10.3, CL-04)
   const availableParents = getRootCategories().filter(
-    (root) => !categoryToEdit || root.id !== categoryToEdit.id
+    (root) => !categoryToEdit || root.id !== categoryToEdit.id,
   );
 
   const [name, setName] = useState<string>("");
@@ -133,11 +120,7 @@ export function CategoryFormModal({
 
     try {
       // Si la categoría tiene hijas vinculadas, forzar parentId a null (prevención CL-05)
-      const finalParentId = categoryHasChildren
-        ? null
-        : parentId.trim()
-          ? parentId.trim()
-          : null;
+      const finalParentId = categoryHasChildren ? null : parentId.trim() ? parentId.trim() : null;
 
       if (isEditing && categoryToEdit) {
         const result = await updateCategory(categoryToEdit.id, {
@@ -222,15 +205,9 @@ export function CategoryFormModal({
               onBlur={handleBlur}
               disabled={isSubmitting}
               autoFocus
-              className={
-                fieldError
-                  ? "border-destructive focus-visible:ring-destructive"
-                  : ""
-              }
+              className={fieldError ? "border-destructive focus-visible:ring-destructive" : ""}
               aria-invalid={Boolean(fieldError)}
-              aria-describedby={
-                fieldError ? "category-name-error" : undefined
-              }
+              aria-describedby={fieldError ? "category-name-error" : undefined}
               data-testid="category-name-input"
             />
             {fieldError && (
@@ -264,14 +241,10 @@ export function CategoryFormModal({
               onChange={handleParentChange}
               disabled={isSubmitting || categoryHasChildren}
               data-testid="category-parent-select"
-              aria-describedby={
-                categoryHasChildren ? "category-parent-disabled-hint" : undefined
-              }
+              aria-describedby={categoryHasChildren ? "category-parent-disabled-hint" : undefined}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
             >
-              <option value="">
-                Ninguna (Categoría Principal / Nivel Raíz)
-              </option>
+              <option value="">Ninguna (Categoría Principal / Nivel Raíz)</option>
               {availableParents.map((parent) => (
                 <option key={parent.id} value={parent.id}>
                   {parent.name}
@@ -285,13 +258,12 @@ export function CategoryFormModal({
                 data-testid="category-parent-disabled-hint"
                 className="text-xs text-muted-foreground bg-muted/30 p-2 rounded border border-border"
               >
-                Esta categoría posee subcategorías vinculadas y no puede
-                transformarse en subcategoría hija (regla CL-05).
+                Esta categoría posee subcategorías vinculadas y no puede transformarse en
+                subcategoría hija (regla CL-05).
               </p>
             ) : (
               <p className="text-[11px] text-muted-foreground">
-                Seleccione una categoría raíz para crear una subcategoría de 1 nivel
-                (CA-10.3).
+                Seleccione una categoría raíz para crear una subcategoría de 1 nivel (CA-10.3).
               </p>
             )}
           </div>

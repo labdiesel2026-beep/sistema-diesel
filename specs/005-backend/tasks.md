@@ -29,7 +29,7 @@
   - **Hecho cuando:** Una prueba de ejecución de `env.ts` sin variables falla de inmediato con código de salida 1, y con variables válidas inicializa el cliente Prisma sin excepciones.
 
 - [x] **Tarea 1.5: Script de Aprovisionamiento Inicial (Seed) con Argon2id y Catálogo** (Cubre: RF-11, D-08)
-  - **Acción:** Implementar `server/prisma/seed.ts` para leer `ADMIN_INITIAL_EMAIL` y `ADMIN_INITIAL_PASSWORD` del entorno, aplicar hashing estricto con `argon2.hash(..., { type: argon2.argon2id })`, realizar un *upsert* del usuario `AdminUser`, e insertar de forma idempotente las categorías, marcas y productos semilla iniciales basados en `src/lib/admin-seed-data.ts`.
+  - **Acción:** Implementar `server/prisma/seed.ts` para leer `ADMIN_INITIAL_EMAIL` y `ADMIN_INITIAL_PASSWORD` del entorno, aplicar hashing estricto con `argon2.hash(..., { type: argon2.argon2id })`, realizar un _upsert_ del usuario `AdminUser`, e insertar de forma idempotente las categorías, marcas y productos semilla iniciales basados en `src/lib/admin-seed-data.ts`.
   - **Hecho cuando:** El comando `npx prisma db seed` se ejecuta sin errores, y una consulta a la base de datos confirma la existencia del usuario administrador con hash Argon2id (`$argon2id$...`), 3 marcas, 6 categorías y 4 productos vinculados.
 
 ---
@@ -222,4 +222,4 @@
 
 ---
 
-*Fin del desglose de tareas de implementación técnica.*
+_Fin del desglose de tareas de implementación técnica._

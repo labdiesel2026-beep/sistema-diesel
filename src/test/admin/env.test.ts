@@ -33,7 +33,7 @@ describe("Validación de Variables de Entorno (Crash Early) — Tarea 1.1", () =
     });
 
     expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("[AppSec ENV] Operando con variables de entorno por defecto")
+      expect.stringContaining("[AppSec ENV] Operando con variables de entorno por defecto"),
     );
     expect(config.VITE_API_URL).toBe("http://localhost:3000/api");
     expect(config.VITE_CONTACT_WHATSAPP).toBe("5492657659108");
@@ -44,12 +44,12 @@ describe("Validación de Variables de Entorno (Crash Early) — Tarea 1.1", () =
     expect(() =>
       validateEnv({
         PROD: true,
-      })
+      }),
     ).toThrowError(/\[Crash Early\] Faltan variables de entorno requeridas/);
 
     expect(errorSpy).toHaveBeenCalledWith(
       expect.stringContaining("FATAL: Variables de entorno inválidas o ausentes"),
-      expect.any(String)
+      expect.any(String),
     );
   });
 

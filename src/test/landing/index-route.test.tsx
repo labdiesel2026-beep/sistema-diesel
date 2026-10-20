@@ -23,8 +23,7 @@ describe("Ruta principal de Landing Page", () => {
   it("desplaza a la sección al hacer clic en un enlace áncora y actualiza el hash", () => {
     window.history.replaceState(null, "", "/");
     const { container } = render(<LandingPage />);
-    const servicesSection =
-      container.querySelector<HTMLElement>("#servicios")!;
+    const servicesSection = container.querySelector<HTMLElement>("#servicios")!;
     const scrollIntoView = vi.fn();
     servicesSection.scrollIntoView = scrollIntoView;
     const mainNavigation = screen.getByRole("navigation", {
@@ -59,17 +58,9 @@ describe("Ruta principal de Landing Page", () => {
     window.history.replaceState(null, "", "/");
     const { container } = render(<LandingPage />);
 
-    expect(
-      screen.getByRole("navigation", { name: "Navegación principal" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Navegación principal" })).toBeInTheDocument();
 
-    for (const sectionId of [
-      "inicio",
-      "servicios",
-      "garantias",
-      "ubicacion",
-      "contacto",
-    ]) {
+    for (const sectionId of ["inicio", "servicios", "garantias", "ubicacion", "contacto"]) {
       expect(container.querySelector(`#${sectionId}`)).toBeInTheDocument();
     }
 

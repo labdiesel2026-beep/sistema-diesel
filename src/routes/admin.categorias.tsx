@@ -19,13 +19,10 @@ export const Route = createFileRoute("/admin/categorias")({
 
 function AdminCategoriasPage() {
   const [formOpen, setFormOpen] = useState(false);
-  const [categoryToEdit, setCategoryToEdit] = useState<AdminCategory | null>(
-    null
-  );
+  const [categoryToEdit, setCategoryToEdit] = useState<AdminCategory | null>(null);
 
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] =
-    useState<AdminCategory | null>(null);
+  const [categoryToDelete, setCategoryToDelete] = useState<AdminCategory | null>(null);
 
   const handleCreate = () => {
     setCategoryToEdit(null);

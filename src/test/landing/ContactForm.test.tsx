@@ -51,7 +51,9 @@ describe("Formulario de Contacto (ContactForm.tsx)", () => {
     render(<ContactForm />);
 
     const nombreInput = screen.getByLabelText(/Nombre completo/i) as HTMLInputElement;
-    const contactoInput = screen.getByLabelText(/Teléfono o Correo electrónico/i) as HTMLInputElement;
+    const contactoInput = screen.getByLabelText(
+      /Teléfono o Correo electrónico/i,
+    ) as HTMLInputElement;
     const mensajeInput = screen.getByLabelText(/Detalle de la consulta/i) as HTMLTextAreaElement;
     const submitButton = screen.getByRole("button", {
       name: /Enviar consulta a WhatsApp/i,

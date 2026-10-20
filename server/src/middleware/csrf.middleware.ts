@@ -13,7 +13,7 @@ const MUTABLE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 export const csrfProtection: RequestHandler = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   if (!MUTABLE_METHODS.has(req.method.toUpperCase())) {
     return next();

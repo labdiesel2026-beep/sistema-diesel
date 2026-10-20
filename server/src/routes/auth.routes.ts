@@ -14,26 +14,12 @@ const router = Router();
  */
 
 // Iniciar sesión (Login con Rate Limit, Anti-CSRF y Zod)
-router.post(
-  "/login",
-  authRateLimiter,
-  csrfProtection,
-  validate(loginSchema),
-  login
-);
+router.post("/login", authRateLimiter, csrfProtection, validate(loginSchema), login);
 
 // Cerrar sesión (Logout con Anti-CSRF y destrucción de cookie)
-router.post(
-  "/logout",
-  csrfProtection,
-  logout
-);
+router.post("/logout", csrfProtection, logout);
 
 // Sesión silenciosa / Perfil actual (Rehidratación protegida por cookie HttpOnly)
-router.get(
-  "/me",
-  requireAuth,
-  me
-);
+router.get("/me", requireAuth, me);
 
 export default router;

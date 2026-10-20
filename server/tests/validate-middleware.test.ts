@@ -33,9 +33,7 @@ describe("Middleware Genérico de Validación Fail-Fast (Zod) — Tarea 2.2", ()
     app.use(express.json());
     app.post("/test", validate(testSchema), nextHandler);
 
-    const res = await request(app)
-      .post("/test")
-      .send({ name: "Inyector Bosch", price: 150000 });
+    const res = await request(app).post("/test").send({ name: "Inyector Bosch", price: 150000 });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
@@ -88,11 +86,7 @@ describe("Middleware Genérico de Validación Fail-Fast (Zod) — Tarea 2.2", ()
 
     const app = express();
     app.use(express.json());
-    app.put(
-      "/test/:id",
-      validate({ params: uuidParamsSchema, body: testSchema }),
-      nextHandler
-    );
+    app.put("/test/:id", validate({ params: uuidParamsSchema, body: testSchema }), nextHandler);
 
     const res = await request(app)
       .put("/test/id-invalido-no-uuid")

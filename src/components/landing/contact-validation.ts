@@ -5,11 +5,7 @@
  * (RF-06, CL-03)
  */
 
-import {
-  FORM_VALIDATION_RULES,
-  type ContactFormData,
-  type ContactFormErrors,
-} from "./types";
+import { FORM_VALIDATION_RULES, type ContactFormData, type ContactFormErrors } from "./types";
 
 export interface ValidationResult {
   isValid: boolean;

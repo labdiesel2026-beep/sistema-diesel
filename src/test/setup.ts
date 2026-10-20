@@ -41,16 +41,8 @@ Object.defineProperty(window, "matchMedia", {
 const originalFetch = globalThis.fetch;
 
 // Interceptor de llamadas API REST para entorno jsdom en tests unitarios
-globalThis.fetch = async (
-  input: RequestInfo | URL,
-  init?: RequestInit
-): Promise<Response> => {
-  const url =
-    typeof input === "string"
-      ? input
-      : input instanceof URL
-        ? input.href
-        : input.url;
+globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+  const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
   const method = init?.method?.toUpperCase() || "GET";
 
   if (url.includes("/api/")) {
@@ -80,7 +72,7 @@ globalThis.fetch = async (
           {
             status: 201,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       }
       if (method === "PUT") {
@@ -94,7 +86,7 @@ globalThis.fetch = async (
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       }
       if (method === "DELETE") {
@@ -106,7 +98,7 @@ globalThis.fetch = async (
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       }
     }
@@ -129,7 +121,7 @@ globalThis.fetch = async (
           {
             status: 201,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       }
       if (method === "PUT") {
@@ -144,7 +136,7 @@ globalThis.fetch = async (
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       }
       if (method === "DELETE") {
@@ -156,7 +148,7 @@ globalThis.fetch = async (
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       }
     }
@@ -171,7 +163,7 @@ globalThis.fetch = async (
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       }
       if (method === "GET") {
@@ -190,7 +182,7 @@ globalThis.fetch = async (
           {
             status: 201,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       }
       if (method === "PUT") {
@@ -205,7 +197,7 @@ globalThis.fetch = async (
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       }
       if (method === "DELETE") {
@@ -217,7 +209,7 @@ globalThis.fetch = async (
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       }
     }
@@ -235,7 +227,7 @@ globalThis.fetch = async (
         {
           status: 200,
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     }
   }

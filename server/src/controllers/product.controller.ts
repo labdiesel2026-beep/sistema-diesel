@@ -12,11 +12,7 @@ import { deleteFile } from "../services/file-storage.service.js";
  * Transforma la relación de base de datos aplanando `productCategories`
  * en un array simple `categoryIds: string[]` compatible con el frontend.
  */
-export async function getProducts(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export async function getProducts(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const visibleOnly = req.query.visibleOnly === "true";
     const products = await productService.getAllProducts({ visibleOnly });
@@ -33,7 +29,7 @@ export async function getProducts(
 export async function getProductById(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> {
   try {
     const product = await productService.getProductById(req.params.id as string);
@@ -52,7 +48,7 @@ export async function getProductById(
 export async function createProduct(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> {
   try {
     const product = await productService.createProduct(req.body);
@@ -72,18 +68,21 @@ export async function createProduct(
 export async function updateProduct(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> {
   try {
     const { product, previousImageUrl } = await productService.updateProduct(
       req.params.id as string,
-      req.body
+      req.body,
     );
 
     // Limpieza física asíncrona post-commit de la foto anterior si fue reemplazada
     if (previousImageUrl && previousImageUrl !== product.imageUrl) {
       deleteFile(previousImageUrl).catch((err) => {
-        console.warn(`[FileStorage Warning] Error en purga de imagen anterior ${previousImageUrl}:`, err);
+        console.warn(
+          `[FileStorage Warning] Error en purga de imagen anterior ${previousImageUrl}:`,
+          err,
+        );
       });
     }
 
@@ -101,12 +100,12 @@ export async function updateProduct(
 export async function updateProductVisibility(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> {
   try {
     const updated = await productService.updateProductVisibility(
       req.params.id as string,
-      req.body.visible
+      req.body.visible,
     );
     res.status(200).json(updated);
   } catch (error) {
@@ -124,7 +123,7 @@ export async function updateProductVisibility(
 export async function deleteProduct(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> {
   try {
     const deleted = await productService.deleteProduct(req.params.id as string);

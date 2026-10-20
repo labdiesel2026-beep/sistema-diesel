@@ -55,7 +55,7 @@ export class AuthService {
       {
         expiresIn: AUTH_TOKEN_EXPIRATION_SECONDS,
         algorithm: "HS256",
-      }
+      },
     );
   }
 
@@ -69,7 +69,13 @@ export class AuthService {
         algorithms: ["HS256"],
       }) as jwt.JwtPayload;
 
-      if (!decoded || typeof decoded !== "object" || !decoded.id || !decoded.email || !decoded.role) {
+      if (
+        !decoded ||
+        typeof decoded !== "object" ||
+        !decoded.id ||
+        !decoded.email ||
+        !decoded.role
+      ) {
         throw new Error("Payload incompleto");
       }
 

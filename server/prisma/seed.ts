@@ -57,10 +57,7 @@ const SEED_PRODUCTS = [
     description:
       "Inyector de alta precisión para motorización 2.0 TDI. Calibrado en banco de pruebas.",
     imageUrl: "/uploads/amarok-20-tdi.webp",
-    categoryIds: [
-      "e4b6d812-7a2b-4f51-b8f3-0a567c891001",
-      "e4b6d812-7a2b-4f51-b8f3-0a567c891002",
-    ],
+    categoryIds: ["e4b6d812-7a2b-4f51-b8f3-0a567c891001", "e4b6d812-7a2b-4f51-b8f3-0a567c891002"],
     brandId: "b1a2c3d4-0001-4000-8000-000000000001",
     vehicleCompatibility: "Volkswagen Amarok 2.0 TDI (2010-2021)",
     condition: "Nuevo",
@@ -87,8 +84,7 @@ const SEED_PRODUCTS = [
   {
     id: "a0f1e2d3-3333-4000-8000-333333333333",
     name: "Inyector Hilux 3.0 D-4D",
-    description:
-      "Inyector Denso original para línea Toyota Hilux 1KD-FTV. Envasado de fábrica.",
+    description: "Inyector Denso original para línea Toyota Hilux 1KD-FTV. Envasado de fábrica.",
     imageUrl: "/uploads/hilux-30-d4d.webp",
     categoryIds: ["e4b6d812-7a2b-4f51-b8f3-0a567c891002"],
     brandId: "b1a2c3d4-0003-4000-8000-000000000003",
@@ -125,7 +121,7 @@ async function main() {
 
   if (!adminEmail || !rawPassword) {
     throw new Error(
-      "❌ [Seed Error] Variables obligatorias ADMIN_INITIAL_EMAIL y ADMIN_INITIAL_PASSWORD no definidas en el archivo .env raíz (CA-11.1)"
+      "❌ [Seed Error] Variables obligatorias ADMIN_INITIAL_EMAIL y ADMIN_INITIAL_PASSWORD no definidas en el archivo .env raíz (CA-11.1)",
     );
   }
 
@@ -147,7 +143,9 @@ async function main() {
       role: "admin",
     },
   });
-  console.log(`✅ AdminUser listo: ${admin.email} (Hash: ${admin.passwordHash.substring(0, 20)}...)`);
+  console.log(
+    `✅ AdminUser listo: ${admin.email} (Hash: ${admin.passwordHash.substring(0, 20)}...)`,
+  );
 
   // 3. Aprovisionamiento idempotente de Marcas (RF-09, CA-11.3)
   console.log("🏷️  Aprovisionando marcas...");
@@ -232,7 +230,9 @@ async function main() {
   console.log("📦 Aprovisionando catálogo de productos y relaciones...");
   for (const product of SEED_PRODUCTS) {
     const seedBrand = SEED_BRANDS.find((b) => b.id === product.brandId);
-    const realBrandId = seedBrand ? brandMap.get(seedBrand.name) || product.brandId : product.brandId;
+    const realBrandId = seedBrand
+      ? brandMap.get(seedBrand.name) || product.brandId
+      : product.brandId;
     const realCategoryIds = product.categoryIds.map((cid) => categoryMap.get(cid) || cid);
 
     const existingProduct = await prisma.product.findFirst({

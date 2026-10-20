@@ -37,7 +37,7 @@ const AdminAuthContext = createContext<AdminAuthContextValue | null>(null);
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(
-    typeof window !== "undefined" && import.meta.env.MODE !== "test"
+    typeof window !== "undefined" && import.meta.env.MODE !== "test",
   );
   const [user, setUser] = useState<AdminUser | null>(null);
 

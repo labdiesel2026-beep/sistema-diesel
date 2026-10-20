@@ -43,7 +43,13 @@ describe("Esquema de Validación de Login (Zod Fail-Fast) — Tarea 2.1", () => 
   });
 
   it("debe rechazar formatos de correo electrónico inválidos", () => {
-    const invalidEmails = ["admin", "admin@", "@laboratoriodiesel.com", "admin@.com", "admin@@test.com"];
+    const invalidEmails = [
+      "admin",
+      "admin@",
+      "@laboratoriodiesel.com",
+      "admin@.com",
+      "admin@@test.com",
+    ];
 
     for (const email of invalidEmails) {
       const result = loginSchema.safeParse({

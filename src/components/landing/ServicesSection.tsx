@@ -1,11 +1,4 @@
-import {
-  Wrench,
-  Gauge,
-  Activity,
-  Package,
-  CheckCircle,
-  type LucideIcon,
-} from "lucide-react";
+import { Wrench, Gauge, Activity, Package, CheckCircle, type LucideIcon } from "lucide-react";
 import { SITE_CONFIG } from "@/config/site-config";
 
 interface ServicesSectionProps {
@@ -40,8 +33,8 @@ export function ServicesSection({ className = "" }: ServicesSectionProps) {
             Soluciones para Sistemas de Inyección Diésel
           </h2>
           <p className="mt-4 text-base text-slate-600 dark:text-slate-400">
-            Diagnóstico avanzado y reparación integral con instrumental de última
-            generación para motores diésel livianos, medianos y pesados.
+            Diagnóstico avanzado y reparación integral con instrumental de última generación para
+            motores diésel livianos, medianos y pesados.
           </p>
         </div>
 

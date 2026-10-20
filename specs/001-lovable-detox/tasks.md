@@ -3,9 +3,10 @@
 **Fase:** 1 — Detox y Reestructuración  
 **Especificación:** [specs/001-lovable-detox/spec.md](file:///f:/INGENIERIA/GEPI/InyectoresDiesel/specs/001-lovable-detox/spec.md)  
 **Plan Técnico:** [specs/001-lovable-detox/plan.md](file:///f:/INGENIERIA/GEPI/InyectoresDiesel/specs/001-lovable-detox/plan.md)  
-**Estado:** Listo para Ejecución  
+**Estado:** Listo para Ejecución
 
 > **Reglas de Ejecución:**
+>
 > - Conforme a la Regla #6 de [AGENTS.MD](file:///f:/INGENIERIA/GEPI/InyectoresDiesel/AGENTS.MD), se ejecuta **estrictamente una sola tarea a la vez**.
 > - Cada tarea debe estar completada y validada según su criterio **"Hecho cuando:"** antes de marcar su checkbox `[x]` y solicitar confirmación para la siguiente.
 > - No se puede alterar el orden de dependencia preestablecido.

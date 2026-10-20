@@ -55,7 +55,7 @@ describe("Servicio Transaccional de Productos (Tarea 6.1) — server/tests/produ
       });
       expect(pivotRows.length).toBe(2);
       expect(pivotRows.map((r) => r.categoryId)).toEqual(
-        expect.arrayContaining([categoryId1, categoryId2])
+        expect.arrayContaining([categoryId1, categoryId2]),
       );
     });
 
@@ -75,7 +75,7 @@ describe("Servicio Transaccional de Productos (Tarea 6.1) — server/tests/produ
           visible: true,
           vehicleCompatibility: "",
           oem: "",
-        })
+        }),
       ).rejects.toThrow(AppError);
     });
 
@@ -95,7 +95,7 @@ describe("Servicio Transaccional de Productos (Tarea 6.1) — server/tests/produ
           visible: true,
           vehicleCompatibility: "",
           oem: "",
-        })
+        }),
       ).rejects.toThrow(AppError);
     });
   });
@@ -118,19 +118,22 @@ describe("Servicio Transaccional de Productos (Tarea 6.1) — server/tests/produ
       });
 
       // 2. Actualizar cambiando categorías a categoryId2 y cambiando foto
-      const { product: updated, previousImageUrl } = await productService.updateProduct(product.id, {
-        name: "Inyector Modificado",
-        description: "Nueva descripción",
-        imageUrl: "/uploads/modified.webp",
-        brandId,
-        categoryIds: [categoryId2], // Cambia categoría
-        condition: "Reacondicionado",
-        price: 280000,
-        showPrice: false,
-        visible: false,
-        vehicleCompatibility: "Ford Ranger 3.2",
-        oem: "OEM-7788",
-      });
+      const { product: updated, previousImageUrl } = await productService.updateProduct(
+        product.id,
+        {
+          name: "Inyector Modificado",
+          description: "Nueva descripción",
+          imageUrl: "/uploads/modified.webp",
+          brandId,
+          categoryIds: [categoryId2], // Cambia categoría
+          condition: "Reacondicionado",
+          price: 280000,
+          showPrice: false,
+          visible: false,
+          vehicleCompatibility: "Ford Ranger 3.2",
+          oem: "OEM-7788",
+        },
+      );
 
       expect(previousImageUrl).toBe("/uploads/initial.webp");
       expect(updated.name).toBe("Inyector Modificado");

@@ -83,11 +83,9 @@ export function ProductDeleteModal({
 
           <DialogDescription id="product-delete-description">
             Esta acción eliminará de forma definitiva el repuesto{" "}
-            <strong className="text-foreground font-semibold">
-              &quot;{product.name}&quot;
-            </strong>{" "}
-            {product.oem ? `(OEM: ${product.oem})` : ""} del catálogo general.
-            Los datos no podrán recuperarse.
+            <strong className="text-foreground font-semibold">&quot;{product.name}&quot;</strong>{" "}
+            {product.oem ? `(OEM: ${product.oem})` : ""} del catálogo general. Los datos no podrán
+            recuperarse.
           </DialogDescription>
         </DialogHeader>
 

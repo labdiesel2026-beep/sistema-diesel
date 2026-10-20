@@ -4,25 +4,17 @@ import { Button } from "@/components/ui/button";
 import { SITE_CONFIG } from "@/config/site-config";
 import { buildWhatsAppUrl, formatContactMessage } from "@/lib/whatsapp-utils";
 import { validateContactForm } from "./contact-validation";
-import {
-  INITIAL_CONTACT_FORM_DATA,
-  type ContactFormData,
-  type ContactFormErrors,
-} from "./types";
+import { INITIAL_CONTACT_FORM_DATA, type ContactFormData, type ContactFormErrors } from "./types";
 
 interface ContactFormProps {
   className?: string;
 }
 
 export function ContactForm({ className = "" }: ContactFormProps) {
-  const [formData, setFormData] = useState<ContactFormData>(
-    INITIAL_CONTACT_FORM_DATA,
-  );
+  const [formData, setFormData] = useState<ContactFormData>(INITIAL_CONTACT_FORM_DATA);
   const [errors, setErrors] = useState<ContactFormErrors>({});
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 

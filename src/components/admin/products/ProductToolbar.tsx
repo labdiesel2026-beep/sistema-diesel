@@ -40,7 +40,7 @@ export function ProductToolbar({
       data-testid="product-toolbar"
       className={cn(
         "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between",
-        className
+        className,
       )}
     >
       {/* Buscador Literal Sanitizado */}
@@ -82,8 +82,8 @@ export function ProductToolbar({
             <span>
               {isFiltered ? (
                 <>
-                  <strong className="text-foreground">{filteredCount}</strong> de{" "}
-                  {totalCount} repuestos
+                  <strong className="text-foreground">{filteredCount}</strong> de {totalCount}{" "}
+                  repuestos
                 </>
               ) : (
                 <>

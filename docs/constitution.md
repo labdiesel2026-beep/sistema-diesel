@@ -1,4 +1,5 @@
 # Constitución del Proyecto — Laboratorio Diésel (MVP)
+
 > 6 principios innegociables. Toda decisión técnica se valida contra esta lista.
 
 1. **SDD-First** — Ningún módulo se codifica sin su sección en el _Software Design Document_. Si no está en el SDD, no existe.

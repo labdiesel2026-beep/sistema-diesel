@@ -1,12 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import {
-  Package,
-  Eye,
-  EyeOff,
-  Tags,
-  BadgeCheck,
-  ArrowRight,
-} from "lucide-react";
+import { Package, Eye, EyeOff, Tags, BadgeCheck, ArrowRight } from "lucide-react";
 import { useAdmin } from "@/context/admin-context";
 import { Button } from "@/components/ui/button";
 
@@ -106,9 +99,7 @@ export function DashboardMetrics() {
                   >
                     {card.value}
                   </span>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {card.description}
-                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">{card.description}</p>
                 </div>
               </div>
 

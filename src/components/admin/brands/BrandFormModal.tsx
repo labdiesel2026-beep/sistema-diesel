@@ -1,10 +1,4 @@
-import {
-  useState,
-  useEffect,
-  type FormEvent,
-  type ChangeEvent,
-  type FocusEvent,
-} from "react";
+import { useState, useEffect, type FormEvent, type ChangeEvent, type FocusEvent } from "react";
 import { Loader2, AlertCircle, BadgeCheck } from "lucide-react";
 import type { AdminBrand } from "@/types/admin";
 import { useAdmin } from "@/context/admin-context";
@@ -177,11 +171,7 @@ export function BrandFormModal({
               onBlur={handleBlur}
               disabled={isSubmitting}
               autoFocus
-              className={
-                fieldError
-                  ? "border-destructive focus-visible:ring-destructive"
-                  : ""
-              }
+              className={fieldError ? "border-destructive focus-visible:ring-destructive" : ""}
               aria-invalid={Boolean(fieldError)}
               aria-describedby={fieldError ? "brand-name-error" : undefined}
               data-testid="brand-name-input"

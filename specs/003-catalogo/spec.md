@@ -4,213 +4,237 @@
 
 ### 1.1 Contexto
 
-Laboratorio Diésel necesita que sus clientes puedan identificar repuestos y productos técnicos ofrecidos por el taller antes de iniciar una consulta comercial. El SRS define la búsqueda por código OEM, nombre, marca y compatibilidad vehicular, además de filtros por marca y categorías. La Spec 002 establece la experiencia institucional y la identidad visual con la que este catálogo debe convivir.
+Laboratorio Diésel necesita que sus clientes (mecánicos, transportistas y particulares) puedan identificar con precisión técnica los inyectores, bombas y repuestos diésel ofrecidos por el taller antes de iniciar una consulta comercial. El SRS define la búsqueda por código OEM, nombre, marca y compatibilidad vehicular, además de filtros combinados por marca y categorías jerárquicas (padre/hija).
+
+Las Specs 001 y 002 establecen la identidad visual institucional y los componentes públicos (`LandingNavbar`, `LandingFooter`, `site-config.ts`, `whatsapp-utils.ts`), mientras que las Specs 004 (Admin Panel) y 005 (Backend) definen los contratos reales de la API REST, la base de datos relacional PostgreSQL con Prisma y la gestión de visibilidad (`visible: true/false`), precios (`showPrice`) e imágenes sanitizadas en `/uploads/`.
 
 ### 1.2 Objetivo
 
-Ofrecer un catálogo público, claro y adaptable a dispositivos móviles para explorar productos diésel, revisar su información técnica y consultar precios. El visitante podrá iniciar una consulta individual desde la ficha de un producto o reunir varios productos en un carrito y enviar una única consulta a WhatsApp, sin crear una cuenta ni completar un formulario previo.
+Ofrecer un catálogo público, ágil y totalmente adaptado a dispositivos móviles (_Mobile-First_) para explorar repuestos diésel, verificar su compatibilidad y consultar precios. El visitante podrá iniciar una consulta directa desde la ficha de una pieza o agrupar múltiples productos en un carrito de consultas para enviar un pedido pre-estructurado a WhatsApp, sin necesidad de crear cuentas ni completar formularios previos.
 
-El catálogo busca reducir consultas ambiguas y facilitar que el taller reciba el detalle de los productos de interés. No constituye una compra confirmada ni garantiza disponibilidad.
+El catálogo agiliza la atención comercial reduciendo consultas ambiguas. **No constituye una pasarela de pago ni garantiza reserva de existencias**: el cierre técnico y comercial se realiza exclusivamente a través de WhatsApp.
 
 ### 1.3 Relación con especificaciones existentes
 
-La experiencia deberá conservar la continuidad visual y funcional con el diseño institucional definido en las Specs 001 y 002, incluidos el layout público, la navegación, el pie de página y la paleta de colores. Esta especificación desarrolla los casos de uso de búsqueda y filtrado y de consulta por WhatsApp descritos en el SRS.
+- **Spec 001 y 002 (Landing Page e Identidad):** Conserva la continuidad visual y funcional utilizando `LandingNavbar`, `LandingFooter`, la paleta de colores azul institucional (`--primary`, `--hero`, `--card`) y los utilitarios de WhatsApp (`buildWhatsAppUrl`) y configuración centralizada (`SITE_CONFIG.phone`).
+- **Spec 004 (Admin Panel):** Consume la misma estructura taxonómica de marcas y categorías jerárquicas (máximo 1 nivel) gestionadas en el backoffice.
+- **Spec 005 (Backend y API REST):** Consume los endpoints reales expuestos en `/api` a través del cliente HTTP centralizado (`src/lib/api.ts`):
+  - `GET /api/products`: listado de repuestos (filtrando en frontend `visible: true` para exhibición pública).
+  - `GET /api/categories`: árbol jerárquico de categorías.
+  - `GET /api/brands`: marcas de repuestos.
+  - `GET /api/products/:id`: detalle individual de producto.
+- **Constitución del Proyecto (`docs/constitution.md`):**
+  - **Principio 2 (Fail-Fast Zod):** Validación estricta con Zod en search params de URL y en la caché del carrito.
+  - **Principio 5 (Persistencia como fuente de verdad):** PostgreSQL es el único estado autoritativo. El `localStorage` del carrito es una caché efímera no autoritativa; al abrir el carrito o generar el mensaje de WhatsApp, los datos y precios se contrastan obligatoriamente contra el backend.
+  - **Principio 6 (Errores Opacos):** Los fallos de red se presentan con mensajes funcionales amigables en español y opción de reintento, sin exponer datos técnicos internos.
 
-El catálogo comprende productos y repuestos, incluidos inyectores y bombas. Los servicios del taller seguirán presentándose en la sección institucional y no serán elementos cotizables del catálogo.
+---
 
 ## 2. Usuarios
 
-| Usuario | Necesidad |
-|:---|:---|
-| **Cliente final / visitante** | Encontrar una pieza o producto relevante, entender sus características y consultar al taller sin registrarse. |
-| **Mecánico o transportista** | Buscar por referencias técnicas, marca o compatibilidad para identificar los productos que necesita. |
-| **Administrador del taller** | Mantener información de productos y su visibilidad a través de las capacidades de gestión del catálogo previstas por el sistema; dicha gestión no forma parte de esta especificación. |
+| Usuario                        | Necesidad                                                                                                                                                                 |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Cliente final / Particular** | Encontrar rápidamente la pieza que necesita para su vehículo, verificar si el precio está disponible y consultar al taller por WhatsApp sin registrarse.                  |
+| **Mecánico o transportista**   | Buscar repuestos por Código OEM exacto, marca técnica o compatibilidad de motor, revisar especificaciones técnicas y cotizar lotes de piezas.                             |
+| **Administrador del taller**   | Asegurar que los clientes solo vean repuestos activos (`visible: true`) y que cualquier cambio de precio o visibilidad en el panel se refleje en las consultas entrantes. |
+
+---
 
 ## 3. Historias de Usuario
 
-- **HU-01:** Como cliente, quiero buscar por nombre, código OEM, marca o compatibilidad vehicular para encontrar rápidamente el producto que necesito.
-- **HU-02:** Como cliente, quiero combinar filtros de marca y categoría para acotar los resultados a productos relevantes.
-- **HU-03:** Como cliente, quiero revisar una ficha con la información técnica disponible para evaluar si el producto corresponde a mi necesidad.
-- **HU-04:** Como cliente, quiero saber si el precio se publica o debe consultarse para iniciar la conversación con expectativas claras.
-- **HU-05:** Como cliente interesado en un producto, quiero abrir una consulta de WhatsApp desde su ficha con el producto identificado en el mensaje.
-- **HU-06:** Como cliente interesado en varios productos, quiero reunirlos en un carrito y enviar una sola consulta detallada a WhatsApp.
-- **HU-07:** Como visitante desde un teléfono, quiero explorar el catálogo y completar una consulta sin perder la continuidad visual ni la facilidad de uso del sitio.
+- **HU-01:** Como cliente, quiero buscar por nombre, código OEM, marca o modelo de vehículo para localizar inmediatamente la pieza que requiere mi motor.
+- **HU-02:** Como mecánico, quiero combinar filtros de marca y categoría/subcategoría para acotar los resultados a repuestos técnicos específicos.
+- **HU-03:** Como cliente, quiero revisar la ficha detallada de un repuesto con su foto, descripción, marca, condición y compatibilidad para confirmar que es el adecuado.
+- **HU-04:** Como cliente, quiero saber de forma transparente si el precio está publicado en ARS o si debe cotizarse al día para iniciar la consulta comercial con expectativas claras.
+- **HU-05:** Como cliente interesado en una sola pieza, quiero abrir una consulta directa a WhatsApp desde su tarjeta o ficha técnica con los datos pre-cargados.
+- **HU-06:** Como cliente interesado en múltiples repuestos, quiero reunirlos en un carrito de consultas y generar un único mensaje estructurado a WhatsApp sin llenar formularios ni ingresar tarjetas de crédito.
+- **HU-07:** Como usuario desde un celular, quiero filtrar, explorar y enviar consultas con la misma agilidad y estética que en una computadora de escritorio.
+
+---
 
 ## 4. Requisitos Funcionales
 
-### RF-01 — Integración con la experiencia institucional
+### RF-01 — Integración y continuidad con la experiencia institucional
 
 **Criterios de aceptación (EARS):**
 
-- **Cuando** un visitante acceda al catálogo, **el sistema deberá** presentarlo como parte de la experiencia pública de Laboratorio Diésel, manteniendo la navegación, el layout, el pie de página y la identidad visual establecidos por las Specs 001 y 002.
-- **Cuando** el visitante use la navegación pública para cambiar entre el catálogo y las secciones institucionales, **el sistema deberá** conservar una experiencia coherente y comprensible.
+- **Cuando** un visitante acceda a la ruta del catálogo (`/catalogo`), **el sistema deberá** renderizar la página integrando los componentes estructurales compartidos `LandingNavbar` y `LandingFooter`, conservando la paleta de colores azul institucional y la tipografía del sitio.
+- **Cuando** el visitante interactúe con los enlaces de navegación del navbar o footer, **el sistema deberá** permitir la navegación fluida entre las secciones institucionales (`/` con sus anclas `#servicios`, `#garantias`, etc.) y el catálogo (`/catalogo`).
+- **Cuando** la interfaz se visualice en pantallas móviles (desde 320 px de ancho), **el sistema deberá** adaptar la disposición en columna única (_Mobile-First_) garantizando que ningún elemento desborde horizontalmente la pantalla.
 
-### RF-02 — Listado de productos visibles
-
-**Criterios de aceptación (EARS):**
-
-- **Cuando** se muestre el catálogo, **el sistema deberá** incluir únicamente productos que estén publicados como visibles.
-- **Cuando** un producto no esté visible, **el sistema deberá** excluirlo del listado público y de los resultados de búsqueda y filtrado.
-- **Cuando** no haya productos visibles, **el sistema deberá** mostrar un estado informativo que indique que el catálogo no tiene productos para mostrar.
-- **Cuando** falle la carga del catálogo, **el sistema deberá** mostrar el mensaje amigable “Error temporal al cargar el catálogo” y una acción para reintentar la carga mediante un Error Boundary del catálogo.
-
-### RF-03 — Búsqueda de productos
+### RF-02 — Listado de productos visibles y manejo de estados asíncronos
 
 **Criterios de aceptación (EARS):**
 
-- **Cuando** el visitante ingrese un término de búsqueda, **el sistema deberá** encontrar coincidencias parciales, sin distinguir mayúsculas de minúsculas ni acentos, en el nombre del producto, el código OEM, la marca y la compatibilidad de marca o modelo de vehículo, cuando esos datos existan.
-- **Cuando** un término coincida con el código OEM y con otros campos, **el sistema deberá** priorizar los productos coincidentes por código OEM en los resultados.
-- **Cuando** el visitante modifique o limpie el término de búsqueda, **el sistema deberá** actualizar los resultados de acuerdo con el término vigente.
-- **Cuando** haya un término de búsqueda activo y el visitante seleccione filtros, **el sistema deberá** combinar ambos criterios para determinar los resultados.
+- **Cuando** se cargue el catálogo, **el sistema deberá** solicitar la lista de repuestos a la API (`GET /api/products`) a través del cliente HTTP centralizado (`src/lib/api.ts`).
+- **Cuando** la respuesta del backend contenga productos, **el sistema deberá** presentar en la grilla pública exclusivamente aquellos productos que tengan la propiedad `visible: true`, excluyendo del listado los borradores u ocultos (`visible: false`).
+- **Mientras** se reciben los datos del backend, **el sistema deberá** mostrar un estado de carga visual mediante tarjetas esqueleto (_skeleton loader_) preservando la estructura de la grilla.
+- **Cuando** el backend no contenga productos o ninguno tenga `visible: true`, **el sistema deberá** mostrar un estado vacío informativo indicando que actualmente no hay productos publicados en el catálogo.
+- **Si** la petición al backend falla por desconexión o error HTTP, **el sistema deberá** capturar el error mediante un Error Boundary y mostrar el mensaje en español _“Error temporal al cargar el catálogo”_, acompañado de un botón visible para reintentar la carga.
 
-### RF-04 — Filtros de marca y categoría
-
-**Criterios de aceptación (EARS):**
-
-- **Cuando** el visitante seleccione una marca, **el sistema deberá** limitar los resultados a productos asociados con esa marca.
-- **Cuando** el visitante seleccione una o más categorías o subcategorías, **el sistema deberá** incluir productos asociados con cualquiera de esas selecciones (OR entre categorías).
-- **Cuando** el visitante combine una búsqueda, una marca y una o más selecciones de categoría, **el sistema deberá** aplicar AND entre el texto de búsqueda, la marca seleccionada y el conjunto de categorías seleccionadas.
-- **Cuando** el visitante quite un filtro, **el sistema deberá** actualizar los resultados conservando los demás criterios vigentes.
-
-### RF-05 — Estado sin resultados
+### RF-03 — Búsqueda técnica global con priorización OEM
 
 **Criterios de aceptación (EARS):**
 
-- **Cuando** la búsqueda o combinación de filtros no produzca coincidencias, **el sistema deberá** indicar claramente que no se encontraron productos.
-- **Cuando** no haya resultados, **el sistema deberá** ofrecer una acción para consultar al taller por WhatsApp acerca de la pieza buscada.
-- **Cuando** el visitante use esa acción, **el sistema deberá** iniciar una consulta que preserve el texto de búsqueda disponible, si lo hubiera, para dar contexto al taller.
-- **Cuando** no haya resultados debido a filtros activos, **el sistema deberá** incluir en el contexto del mensaje las marcas y categorías o subcategorías filtradas.
+- **Cuando** el visitante ingrese un texto en la barra de búsqueda, **el sistema deberá** evaluar coincidencias parciales insensibles a mayúsculas, minúsculas y acentos (normalización Unicode NFD) sobre los siguientes campos del producto: nombre (`name`), código OEM (`oem`), marca del repuesto (`brand.name`) y compatibilidad vehicular (`vehicleCompatibility`).
+- **Cuando** el término de búsqueda coincida con el código OEM de uno o más productos y simultáneamente con otros campos de otros productos, **el sistema deberá** ordenar prioritariamente en los primeros lugares los productos cuya coincidencia se origine en el código OEM.
+- **Cuando** el visitante limpie o modifique el término de búsqueda, **el sistema deberá** actualizar inmediatamente los resultados en pantalla.
+- **Cuando** coexistan un término de búsqueda y filtros seleccionados de marca o categoría, **el sistema deberá** aplicar una condición de intersección lógica (operador `AND`) entre la búsqueda y los filtros activos.
 
-### RF-06 — Tarjetas y ficha técnica
-
-**Criterios de aceptación (EARS):**
-
-- **Cuando** se muestren resultados, **el sistema deberá** presentar en cada tarjeta, como mínimo, la imagen del producto o un placeholder, el nombre, el código OEM cuando exista, el precio o la leyenda “Consultar precio” y un botón de acción.
-- **Cuando** el visitante abra un producto visible, **el sistema deberá** mostrar su ficha técnica con los datos disponibles: nombre, imagen, descripción, marca, categoría o categorías, código OEM, compatibilidad vehicular y condición de la pieza.
-- **Cuando** la imagen de un producto no esté disponible, **el sistema deberá** mostrar un placeholder genérico “Imagen no disponible” en formato SVG local.
-- **Cuando** alguno de los demás datos opcionales no esté informado, **el sistema deberá** omitirlo o indicar que no fue informado sin presentar un valor inventado.
-- **Cuando** el visitante solicite una consulta directa desde una ficha, **el sistema deberá** ofrecer una acción de WhatsApp identificada con ese producto.
-
-### RF-07 — Presentación del precio
+### RF-04 — Filtros combinados de marcas y árbol de categorías
 
 **Criterios de aceptación (EARS):**
 
-- **Cuando** un producto tenga un precio cargado y habilitado para mostrarse, **el sistema deberá** presentar ese precio en pesos argentinos en la tarjeta y en la ficha.
-- **Cuando** el precio no esté cargado o no esté habilitado para mostrarse, **el sistema deberá** presentar la leyenda **“Consultar precio”** en la tarjeta y en la ficha.
-- **Cuando** un producto se agregue a una consulta sin precio público, **el sistema deberá** identificarlo como **“A cotizar”** en el resumen y en el mensaje preparado para WhatsApp.
+- **Cuando** se inicialice la vista del catálogo, **el sistema deberá** consultar las marcas (`GET /api/brands`) y las categorías jerárquicas (`GET /api/categories`) desde la API para poblar dinámicamente los paneles de filtros.
+- **Cuando** el visitante seleccione una o más marcas, **el sistema deberá** filtrar los productos cuya marca (`brandId`) coincida con cualquiera de las marcas seleccionadas (operador `OR` entre marcas seleccionadas).
+- **Cuando** el visitante seleccione una categoría raíz que posea subcategorías hijas, **el sistema deberá** incluir en los resultados los productos asociados directamente a dicha categoría padre así como los asociados a cualquiera de sus subcategorías hijas.
+- **Cuando** el visitante seleccione múltiples categorías o subcategorías, **el sistema deberá** incluir los productos que pertenezcan a cualquiera de las selecciones realizadas (operador `OR` entre categorías).
+- **Cuando** se combinen búsqueda de texto, una o más marcas y una o más categorías, **el sistema deberá** aplicar un `AND` estricto entre el bloque de texto, el bloque de marcas y el bloque de categorías.
+- **Cuando** el visitante seleccione o deseleccione un filtro, **el sistema deberá** sincronizar de forma bidireccional el estado con los parámetros de búsqueda en la URL (`search params`: `q`, `brand`, `category`) mediante TanStack Router, permitiendo compartir enlaces y usar el historial de navegación (atrás/adelante).
 
-### RF-08 — Carrito de consultas
-
-**Criterios de aceptación (EARS):**
-
-- **Cuando** el visitante agregue un producto visible al carrito, **el sistema deberá** incorporarlo al resumen de consulta, tanto si tiene precio publicado como si requiere cotización.
-- **Cuando** el visitante agregue nuevamente un producto que ya está en el carrito, **el sistema deberá** incrementar su cantidad en una unidad y mantenerlo en una única línea.
-- **Cuando** el visitante actualice la cantidad de un producto, **el sistema deberá** reflejar la cantidad elegida en el resumen.
-- **Cuando** el visitante quite un producto o vacíe el carrito, **el sistema deberá** actualizar el resumen para reflejar el cambio.
-- **Cuando** el visitante recargue la página, **el sistema deberá** conservar la selección del carrito para permitirle retomar la consulta.
-- **Cuando** el carrito no contenga productos, **el sistema deberá** indicar que está vacío y no deberá ofrecer el envío de un pedido vacío.
-- **Cuando** el visitante agregue o cambie cantidades, **el sistema no deberá** descontar, reservar ni limitar cantidades por existencias.
-- **Cuando** el visitante agregue productos al carrito, **el sistema no deberá** imponer un límite máximo al número de productos distintos que puede contener.
-
-### RF-09 — Consulta directa por un producto
+### RF-05 — Estado sin resultados y consulta asistida por WhatsApp
 
 **Criterios de aceptación (EARS):**
 
-- **Cuando** el visitante elija consultar un producto desde su ficha, **el sistema deberá** abrir WhatsApp con un mensaje que identifique el producto y, cuando existan, su código OEM y su precio público o la indicación “A cotizar”.
-- **Cuando** el visitante consulte directamente un producto desde su ficha, **el sistema deberá** asumir e incluir una cantidad de una unidad en el mensaje y no deberá solicitar que el visitante elija la cantidad en la ficha.
-- **Cuando** el visitante inicie una consulta directa, **el sistema no deberá** exigirle crear una cuenta ni completar un formulario previo.
+- **Cuando** la combinación de búsqueda y filtros activos no produzca ningún producto coincidente, **el sistema deberá** mostrar un estado informativo indicando que no se encontraron repuestos con los criterios aplicados.
+- **Cuando** se visualice el estado sin resultados, **el sistema deberá** proveer un botón directo de consulta a WhatsApp hacia el número oficial (`SITE_CONFIG.phone`).
+- **Cuando** el visitante presione dicho botón, **el sistema deberá** abrir WhatsApp con un mensaje pre-formateado que incluya el término de búsqueda ingresado y los nombres de las marcas y categorías que se encontraban filtradas, para contextualizar al vendedor sobre la pieza requerida.
 
-### RF-10 — Envío de una consulta desde el carrito
-
-**Criterios de aceptación (EARS):**
-
-- **Cuando** el visitante elija enviar un carrito no vacío, **el sistema deberá** abrir WhatsApp con un mensaje estructurado que incluya cada producto, su cantidad, su código OEM si existe y su precio unitario público o la indicación “A cotizar”.
-- **Cuando** el sistema prepare el enlace de WhatsApp, **el sistema deberá** obtener los datos y precios vigentes de los productos desde la base de datos o desde una caché de catálogo actualizada al momento de preparar el enlace, y no deberá usar datos obsoletos del caché local del carrito.
-- **Cuando** no se pueda obtener un precio vigente para un producto del carrito, **el sistema no deberá** reutilizar un precio posiblemente desactualizado y **deberá** identificarlo como “A cotizar”.
-- **Cuando** el visitante envíe una consulta que exceda el límite de caracteres que WhatsApp admite, **el sistema no deberá** imponer un límite propio de productos; el límite y el comportamiento del mensaje corresponderán a WhatsApp.
-- **Cuando** el visitante inicie el envío desde el carrito, **el sistema no deberá** exigirle crear una cuenta ni completar un formulario previo.
-- **Cuando** el visitante elija la acción de envío, **el sistema deberá** dejar que WhatsApp presente el mensaje para que el visitante lo revise y decida enviarlo; el sitio no deberá comunicar que la consulta es una compra confirmada.
-
-### RF-11 — Producto que deja de estar visible
+### RF-06 — Tarjetas de producto, imágenes y ficha técnica detallada
 
 **Criterios de aceptación (EARS):**
 
-- **Cuando** un producto ya incorporado al carrito deje de estar visible en el catálogo, **el sistema deberá** mantenerlo en el resumen de esa consulta y señalar su “Vigencia en catálogo” como pendiente de reconfirmación con el taller, sin mostrar stock ni existencias.
-- **Cuando** el visitante decida enviar un carrito que contiene un producto cuya vigencia en catálogo requiere reconfirmación, **el sistema deberá** conservar esa advertencia en el contexto de la consulta y permitir que el visitante la envíe a WhatsApp.
-- **Cuando** el visitante acceda mediante enlace directo a un producto oculto, eliminado o inexistente, **el sistema deberá** mostrar una pantalla de “Producto no disponible” en lugar de la ficha y no deberá ofrecerlo para una nueva selección.
+- **Cuando** se listen productos en la grilla, **el sistema deberá** renderizar en cada tarjeta: imagen resuelta mediante `resolveImageUrl()`, nombre del producto, código OEM (si existe), nombre de la marca, insignia (_badge_) de condición de la pieza ('Nuevo' | 'Reacondicionado' | 'Usado'), precio formateado en ARS o leyenda “Consultar precio”, botón para agregar al carrito y botón de WhatsApp directo.
+- **Si** un producto no posee imagen (`imageUrl` vacío) o la imagen falla al cargar en el navegador (`onError`), **el sistema deberá** reemplazarla de inmediato por un placeholder vectorial SVG accesible con la leyenda _“Imagen no disponible”_.
+- **Cuando** el visitante seleccione un producto para ver su detalle (en modal o en `/catalogo/$productId`), **el sistema deberá** desplegar su ficha técnica completa mostrando: nombre, foto en alta resolución, descripción detallada, marca, categorías vinculadas, código OEM, compatibilidad vehicular (`vehicleCompatibility`), condición y precio.
+- **Si** alguno de los campos opcionales (`oem`, `vehicleCompatibility`) no estuviese cargado, **el sistema deberá** omitir dicho campo en la interfaz sin inventar valores ficticios.
 
-### RF-12 — Catálogo sin información pública de stock
+### RF-07 — Presentación de precios y tratamiento de productos "A cotizar"
 
 **Criterios de aceptación (EARS):**
 
-- **Cuando** el visitante navegue el catálogo o el carrito, **el sistema no deberá** mostrar cantidades de existencias ni indicadores públicos de stock o disponibilidad.
-- **Cuando** el sistema informe que un producto dejó de estar visible, **el sistema deberá** describir únicamente su vigencia en el catálogo y no deberá presentarla como información de stock o existencias.
-- **Cuando** el visitante envíe una consulta, **el sistema deberá** comunicar que se trata de una solicitud de información y no de una reserva de existencias.
+- **Cuando** un producto tenga un valor numérico en `price` y la bandera `showPrice === true`, **el sistema deberá** exhibir el precio en la tarjeta y en la ficha técnica con formato de moneda nacional (ejemplo: `$320.000 ARS`).
+- **Cuando** el producto tenga `price === null`, `price === 0` con `showPrice === false`, o `showPrice === false`, **el sistema deberá** mostrar de manera visible y destacada la leyenda **“Consultar precio”** tanto en la tarjeta como en la ficha técnica.
+- **Cuando** un producto sin precio público sea agregado al carrito de consultas, **el sistema deberá** etiquetarlo obligatoriamente como **“A cotizar”** en el desglose del carrito y en el mensaje generado para WhatsApp.
+
+### RF-08 — Carrito de consultas y persistencia efímera (Principio 5)
+
+**Criterios de aceptación (EARS):**
+
+- **Cuando** el visitante presione “Agregar al Carrito”, **el sistema deberá** incorporar el producto al estado del carrito, admitiendo tanto piezas con precio visible como piezas bajo la modalidad “Consultar precio”.
+- **Cuando** se agregue un producto que ya figura en el carrito, **el sistema deberá** incrementar su cantidad en una unidad manteniéndolo en una única fila dentro de la lista.
+- **Cuando** el visitante modifique la cantidad mediante los controles del carrito, **el sistema deberá** aceptar únicamente valores enteros mayores o iguales a 1, actualizando de forma reactiva los totales y desgloses.
+- **Cuando** el visitante decida quitar un producto o vaciar el carrito, **el sistema deberá** remover el ítem del estado en memoria y sincronizar la caché local.
+- **Cuando** el visitante recargue la página o cierre el navegador, **el sistema deberá** restaurar los ítems del carrito desde una caché efímera en `localStorage` (`CartCacheV1`), validada estrictamente con Zod.
+- **En ningún momento** el sistema deberá restringir o validar cantidades contra inventario o stock, ni simular reservas de piezas.
+- **Cuando** el carrito no contenga ningún producto, **el sistema deberá** mostrar el estado de carrito vacío y mantener inhabilitada la acción de finalización de compra.
+
+### RF-09 — Consulta directa por WhatsApp desde la ficha de producto
+
+**Criterios de aceptación (EARS):**
+
+- **Cuando** el visitante presione el botón de consulta de WhatsApp en una tarjeta o ficha técnica individual, **el sistema deberá** generar una URL canónica hacia la API de WhatsApp (`buildWhatsAppUrl`) dirigida al número oficial de Laboratorio Diésel (`SITE_CONFIG.phone`).
+- **Cuando** se componga el mensaje de consulta directa, **el sistema deberá** incluir el nombre del repuesto, marca, código OEM (si aplica), precio unitario visible o indicación “A cotizar”, y asumir automáticamente una cantidad de 1 unidad.
+- **Cuando** el visitante accione esta consulta, **el sistema no deberá** solicitar registro de usuario ni exigir el llenado de formularios previos en la web.
+
+### RF-10 — Cierre de pedido (Checkout) por WhatsApp con validación contra Backend
+
+**Criterios de aceptación (EARS):**
+
+- **Cuando** el visitante presione el botón “Enviar Pedido a WhatsApp” desde el carrito, **el sistema deberá** verificar los identificadores de los productos contra los datos autoritativos frescos del backend antes de emitir el mensaje, garantizando que los precios y nombres coincidan con la base de datos (Principio 5).
+- **Cuando** se compile el mensaje final para WhatsApp, **el sistema deberá** estructurar un texto detallado que contenga:
+  1. Saludo inicial y presentación del pedido desde la web de Laboratorio Diésel.
+  2. Lista enumerada de productos con: `[Cantidad] × [Nombre] | Marca: [Marca] | OEM: [OEM] | [Precio ARS o 'A cotizar']`.
+  3. Subtotal calculado exclusivamente sobre los productos que posean precio público vigente.
+  4. Mención explícita solicitando cotización de los productos identificados como "A cotizar" (si existieran).
+  5. Mensaje de cierre solicitando al vendedor la confirmación de compatibilidad técnica y disponibilidad de despacho.
+- **Si** la lectura de validación contra el backend no puede completarse por caída de red, **el sistema deberá** preservar el contenido del carrito en pantalla, mostrar una alerta amigable y ofrecer la opción de reintentar sin romper el flujo.
+
+### RF-11 — Tratamiento de productos que dejan de estar visibles o son eliminados
+
+**Criterios de aceptación (EARS):**
+
+- **Cuando** un producto almacenado previamente en la caché del carrito pase al estado `visible: false` en la base de datos o sea eliminado, **el sistema deberá** conservarlo en el desglose del carrito del visitante mostrando un aviso visual destacado: _“Vigencia en catálogo: requiere reconfirmación con el taller”_, sin mostrar indicadores de stock o existencias.
+- **Cuando** el visitante envíe a WhatsApp un carrito que contiene productos pendientes de reconfirmación, **el sistema deberá** incluir una aclaración en el mensaje de WhatsApp especificando que dichos artículos requieren confirmación previa de vigencia por parte del taller, rotulando su precio como “A cotizar”.
+- **Cuando** un usuario intente acceder por enlace directo (`/catalogo/$productId`) a un producto inexistente o configurado con `visible: false`, **el sistema deberá** mostrar una vista de _“Producto no disponible”_, impidiendo su agregado al carrito y ofreciendo un botón para regresar al listado público del catálogo.
+
+### RF-12 — Ausencia absoluta de indicadores de inventario y stock
+
+**Criterios de aceptación (EARS):**
+
+- **En ningún punto** de la experiencia pública (tarjetas, fichas, carrito o mensajes generados) **el sistema deberá** exhibir contadores de existencias, etiquetas de "stock disponible" o mensajes de "agotado".
+- **Cuando** el sistema presente los resúmenes del pedido o los textos de WhatsApp, **el sistema deberá** comunicar de manera explícita que la operación es una solicitud de cotización y presupuesto técnico, y no una compra confirmada ni una reserva de unidades.
+
+---
 
 ## 5. Requisitos No Funcionales
 
-| ID | Categoría | Requisito |
-|:---|:---|:---|
-| **RNF-01** | Identidad visual | La experiencia del catálogo deberá mantener la paleta azul, neutra y blanca, y el lenguaje visual profesional establecidos para el sitio institucional. |
-| **RNF-02** | Diseño adaptable | El listado, los filtros, las fichas y el carrito deberán ser utilizables en teléfonos, tabletas y equipos de escritorio, con un enfoque de diseño móvil primero y un ancho mínimo de pantalla de 320 px. |
-| **RNF-03** | Rendimiento percibido | En condiciones normales de conexión, la búsqueda y la aplicación de filtros deberán actualizar y mostrar resultados en menos de 2 segundos. |
-| **RNF-04** | Accesibilidad y claridad | Los controles de búsqueda, filtros, cantidades y consulta deberán tener nombres comprensibles, permitir su uso mediante teclado y presentar estados, errores y cambios de resultados de manera perceptible. Las imágenes deberán contar con descripciones alternativas apropiadas. |
-| **RNF-05** | Comunicación veraz | El catálogo y el mensaje de WhatsApp deberán distinguir una consulta de una compra confirmada, no prometer existencias y presentar precios únicamente bajo las condiciones definidas en RF-07. |
-| **RNF-06** | Idioma | Los textos, mensajes de estado y acciones del catálogo deberán estar redactados en español. |
-| **RNF-07** | Persistencia efímera del carrito | El estado del carrito podrá conservarse en una caché efímera del navegador, por ejemplo `localStorage`, para permitir retomar una consulta. Esa persistencia será descartable y no autoritativa; no reemplazará ni contradecirá la base de datos como fuente de verdad. Los datos vigentes de productos y precios se actualizarán al preparar el enlace de WhatsApp. |
+| ID         | Categoría                              | Requisito                                                                                                                                                                                                                                             |
+| :--------- | :------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **RNF-01** | **Identidad Visual**                   | Mantener una estética profesional de ingeniería automotriz en tonos azules (`--primary`), neutros y blancos, consistente con la Landing Page institucional.                                                                                           |
+| **RNF-02** | **Diseño Adaptable (Responsive)**      | Interfaz utilizable y ergonómica en pantallas desde 320 px hasta resoluciones de escritorio 4K, con diseño táctil (_Mobile-First_) para botones y filtros.                                                                                            |
+| **RNF-03** | **Rendimiento**                        | El motor de búsqueda y filtrado en frontend deberá procesar y actualizar la vista en menos de **2 segundos** bajo condiciones normales de navegación.                                                                                                 |
+| **RNF-04** | **Accesibilidad y Semántica**          | Controles con etiquetas comprensibles (`aria-label`, `role="img"` en placeholders), navegación completa por teclado y contraste cromático adecuado según pautas WCAG 2.1 AA.                                                                          |
+| **RNF-05** | **Seguridad y Validación (Fail-Fast)** | Los search params de la URL y la caché en `localStorage` deberán validarse mediante esquemas estrictos de Zod (`.strict()`). Datos corruptos deben descartarse de forma controlada sin romper la aplicación.                                          |
+| **RNF-06** | **Idioma**                             | El 100% de la interfaz, mensajes de error, placeholders y plantillas de WhatsApp deberán estar redactados en español claro y profesional.                                                                                                             |
+| **RNF-07** | **Persistencia Efímera Zero-Trust**    | `localStorage` almacena exclusivamente la intención de compra (`productId`, `quantity`, `lastKnown`). La base de datos PostgreSQL gobernada por el backend en Express/Prisma es la única fuente de verdad autoritativa de precios, marcas y vigencia. |
 
-## 6. Casos Límite
+---
 
-| ID | Situación | Comportamiento esperado |
-|:---|:---|:---|
-| **CL-01** | No existen productos visibles. | Mostrar el estado vacío del catálogo sin presentar productos ocultos. |
-| **CL-02** | La búsqueda o los filtros no encuentran coincidencias. | Mostrar el estado sin resultados y ofrecer una consulta por WhatsApp contextualizada con el término de búsqueda cuando exista. |
-| **CL-03** | Un producto no tiene imagen o alguno de sus datos opcionales. | Si falta la imagen, mostrar el placeholder SVG local “Imagen no disponible”. Para los demás datos opcionales, no inventar ni mostrar información vacía como si fuera un dato real. |
-| **CL-04** | El precio del producto no se publica. | Mostrar “Consultar precio” en tarjeta y ficha; al incluirlo en una consulta, identificarlo como “A cotizar”. |
-| **CL-05** | El visitante recarga la página con productos en el carrito. | La selección debe conservarse para que pueda retomar la consulta. |
-| **CL-06** | Un producto del carrito deja de estar visible. | Conservarlo en el resumen de consulta, mostrar “Vigencia en catálogo: requiere reconfirmación” y permitir incluirlo en el mensaje de WhatsApp, sin exponer stock ni existencias. |
-| **CL-07** | El visitante intenta enviar un carrito vacío. | No iniciar un envío de pedido y mostrar que primero debe agregar productos. |
-| **CL-08** | WhatsApp no está instalado o no está disponible en el dispositivo. | El sitio no debe afirmar que el mensaje fue entregado; debe dejar que el dispositivo o navegador gestione la apertura del enlace y mantener accesible la información del carrito en el sitio. |
-| **CL-09** | El contenido del mensaje contiene caracteres especiales o excede el límite aceptado por WhatsApp. | El contenido debe conservarse de forma legible al iniciar la consulta; el sitio no debe alterar nombres o referencias técnicas ni imponer un límite propio de productos. WhatsApp determina el límite de caracteres y el comportamiento de la apertura del mensaje. |
-| **CL-10** | El visitante ingresa una cantidad no válida o menor que una unidad. | No permitir que se use esa cantidad en el resumen o en el mensaje de consulta; informar cómo corregirla. |
-| **CL-11** | Falla la carga del catálogo. | Mostrar “Error temporal al cargar el catálogo” y una acción para reintentar la carga mediante el Error Boundary del catálogo. |
-| **CL-12** | El visitante accede por enlace directo a un producto oculto, eliminado o inexistente. | Mostrar la pantalla “Producto no disponible” y no presentar la ficha técnica ni permitir una nueva selección. |
-| **CL-13** | Un producto del carrito fue eliminado o sus datos ya no están disponibles en el catálogo vigente. | Mantenerlo identificable en la consulta, marcar su vigencia en catálogo para reconfirmación y no reutilizar precios locales posiblemente desactualizados. |
+## 6. Casos Límite y Manejo de Excepciones
 
-## 7. Fuera de Alcance
+| ID        | Situación Límite                                                                             | Comportamiento Esperado del Sistema                                                                                                                                     |
+| :-------- | :------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **CL-01** | La base de datos no contiene productos con `visible: true`.                                  | Mostrar el estado vacío institucional del catálogo sin exponer registros en borrador u ocultos.                                                                         |
+| **CL-02** | La búsqueda o combinación de filtros no produce coincidencias.                               | Mostrar el estado sin resultados y habilitar el botón de WhatsApp con el texto y filtros pre-cargados.                                                                  |
+| **CL-03** | Un producto no tiene imagen cargada o falla su carga por red.                                | Renderizar inmediatamente el fallback SVG accesible _“Imagen no disponible”_. Si faltan campos opcionales (`oem`, compatibilidad), omitirlos sin mostrar textos vacíos. |
+| **CL-04** | El producto tiene precio oculto (`showPrice === false`) o nulo.                              | Mostrar “Consultar precio” en catálogo/ficha y “A cotizar” en el carrito y mensaje de WhatsApp.                                                                         |
+| **CL-05** | El visitante recarga la página o cierra la pestaña con productos en el carrito.              | Rehidratar los ítems desde `localStorage` preservando las cantidades seleccionadas.                                                                                     |
+| **CL-06** | Un producto del carrito fue ocultado (`visible: false`) en el panel después de ser agregado. | Mantenerlo en el carrito con el aviso _“Vigencia en catálogo: requiere reconfirmación”_ y cotizarlo como “A cotizar” en el WhatsApp.                                    |
+| **CL-07** | El visitante intenta enviar un carrito con 0 productos.                                      | Deshabilitar el botón de envío e indicar que debe agregar al menos un producto.                                                                                         |
+| **CL-08** | El dispositivo del usuario no posee la app de WhatsApp instalada.                            | El navegador abrirá WhatsApp Web mediante la URL canónica `https://wa.me/...`. El sitio no afirma que el mensaje fue recibido.                                          |
+| **CL-09** | El visitante ingresa una cantidad menor a 1 o texto no numérico en el carrito.               | Impedir la mutación, forzar el valor mínimo a 1 unidad y mantener la consistencia del estado.                                                                           |
+| **CL-10** | Falla la conexión con el servidor al cargar el catálogo (`ApiError`).                        | El Error Boundary presenta el mensaje _“Error temporal al cargar el catálogo”_ con botón para reintentar la llamada HTTP.                                               |
+| **CL-11** | Enlace directo a un producto inexistente o con `visible: false`.                             | Desplegar la vista _“Producto no disponible”_ con opción de retornar a `/catalogo`.                                                                                     |
+| **CL-12** | La caché local de `localStorage` contiene JSON manipulado o corrupto.                        | El validador Zod falla de forma segura, limpia la clave corrupta e inicializa un carrito vacío sin arrojar errores fatales.                                             |
+| **CL-13** | Un producto del carrito fue eliminado físicamente de la base de datos.                       | Usar el campo `lastKnown` para identificar el producto en la consulta, marcarlo como pendiente de reconfirmación y cotizarlo sin precio.                                |
 
-- Compra y pago en línea.
-- Gestión de envíos, entregas o seguimiento de pedidos.
-- Creación de cuentas o autenticación de clientes.
-- Control, publicación o reserva de existencias; el catálogo no muestra cantidades ni disponibilidad.
-- Servicios del taller como elementos del catálogo cotizable; se mantienen en la sección institucional.
-- Gestión administrativa de productos, marcas, categorías, precios o visibilidad, que corresponde a las capacidades de administración del catálogo y no a esta experiencia pública.
-- Descuentos, promociones, impuestos o cálculo de totales como compromiso comercial.
-- Confirmación automática de pedidos o garantía de disponibilidad mediante WhatsApp.
+---
+
+## 7. Fuera de Alcance (Exclusiones de Fase)
+
+- Pasarelas de cobro electrónico en línea (Mercado Pago, tarjetas de crédito/débito, transferencias bancarias dentro del sitio).
+- Conteo, gestión, reserva o descuento de inventario/stock.
+- Envío automático de encomiendas o integración con APIs logísticas (Andreani, Correo Argentino).
+- Creación de cuentas, registro o autenticación de clientes finales.
+- Facturación electrónica con ARCA / AFIP.
+- Venta o cotización de servicios de taller en el catálogo (los servicios se mantienen como tarjetas informativas en la Landing Page).
+
+---
 
 ## 8. Criterios de Finalización
 
-La especificación se considerará implementada cuando se verifique que:
+La Spec 003 se considerará completamente satisfecha y lista para producción cuando:
 
-1. El catálogo conserva el layout, la navegación, el pie de página y la identidad visual de las Specs 001 y 002.
-2. Solo aparecen productos visibles, y el estado vacío se presenta correctamente cuando no hay productos publicados.
-3. La búsqueda parcial ignora mayúsculas, minúsculas y acentos, y prioriza coincidencias por código OEM.
-4. Los filtros por marca y categoría funcionan individualmente y combinados con AND entre búsqueda y marca y OR entre las categorías seleccionadas.
-5. El estado sin resultados ofrece una consulta contextualizada con el término y, cuando correspondan, las marcas y categorías filtradas.
-6. Las tarjetas muestran imagen o placeholder, nombre, OEM cuando exista, precio o “Consultar precio” y un botón de acción; la ficha muestra los datos disponibles.
-7. El precio se muestra solo cuando está habilitado; en los demás casos se muestra “Consultar precio” y el carrito identifica el producto como “A cotizar”.
-8. El visitante puede iniciar una consulta directa asumiendo una unidad, o reunir varios productos en un carrito, modificar cantidades y quitar productos.
-9. Al volver a agregar un producto al carrito, se incrementa su cantidad en una única línea; no existe un límite impuesto por el sistema al número de productos distintos.
-10. La selección del carrito sobrevive a una recarga mediante caché local efímera y no autoritativa; un carrito vacío no puede enviarse como pedido.
-11. Antes de preparar el enlace de WhatsApp se actualizan los datos y precios con la información vigente disponible, y el mensaje no presenta la consulta como compra confirmada.
-12. Un producto que deja de estar visible permanece en el carrito con advertencia de vigencia en catálogo; un acceso directo a producto oculto, eliminado o inexistente muestra “Producto no disponible”.
-13. No se publica información de stock ni se reservan existencias.
-14. Si falla la carga del catálogo, se muestra el mensaje de error temporal y la acción de reintento.
-15. Los estados de error y los controles son comprensibles y usables en móvil y escritorio, mediante teclado y tecnologías de asistencia.
-16. La búsqueda y los filtros cumplen el objetivo de actualización de resultados definido en RNF-03 bajo condiciones normales de conexión.
+1. El catálogo público `/catalogo` consuma la API real (`GET /api/products`, `GET /api/categories`, `GET /api/brands`) a través de `src/lib/api.ts` sin depender de ningún archivo de datos estáticos ni mocks en memoria.
+2. La grilla filtre estrictamente los productos con `visible: true`, y maneje correctamente estados de carga (_skeleton_), estado vacío y Error Boundary con reintento.
+3. El motor de búsqueda normalice acentos y mayúsculas, y otorgue prioridad en los resultados a las coincidencias por código OEM.
+4. El árbol de categorías padre e hija se resuelva correctamente contra el array plano `categoryIds` de cada producto, aplicando `OR` entre categorías/marcas y `AND` entre bloques.
+5. Los filtros se sincronicen de manera bidireccional con los search params de TanStack Router en la URL.
+6. El estado sin resultados provea un CTA a WhatsApp contextualizado con la búsqueda y filtros activos.
+7. Los precios respeten estrictamente la bandera `showPrice` y el valor numérico, exhibiendo "Consultar precio" / "A cotizar" cuando corresponda.
+8. La persistencia efímera del carrito en `localStorage` respete la Constitución §5, revalidando datos y precios contra el backend al cargar o enviar el pedido.
+9. Los productos ocultados o eliminados se marquen como _“Vigencia en catálogo: requiere reconfirmación”_ en el carrito y en el mensaje de WhatsApp.
+10. Las consultas directas y del carrito generen URLs válidas de WhatsApp hacia `SITE_CONFIG.phone` utilizando `src/lib/whatsapp-utils.ts`.
+11. Ningún componente o texto exhiba información de inventario o stock.
+12. La totalidad de las suites de prueba en Vitest y TypeScript pasen al 100% (`npx vitest run`, `npx tsc --noEmit`).
 
-## 9. Dudas Abiertas
+---
 
-| ID | Duda | Estado |
-|:---|:---|:---|
-| **DA-01** | Número oficial de WhatsApp para las consultas. | **Resuelta:** se utilizará el número de la constante inmutable definida en `site-config.ts` en la Spec 002. |
+## 9. Dudas Resueltas
+
+| ID        | Duda                                                                      | Resolución Definitiva                                                                                                                                                                                                                           |
+| :-------- | :------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **DA-01** | Canal y número oficial de WhatsApp para recepción de pedidos y consultas. | **Resuelta:** Se utiliza el número oficial centralizado en `SITE_CONFIG.phone` de `src/config/site-config.ts` (con fallback opcional en `ENV.VITE_CONTACT_WHATSAPP`), garantizando un único punto inmutable de contacto.                        |
+| **DA-02** | Tratamiento de imágenes de productos y placeholders.                      | **Resuelta:** Las imágenes son servidas por el backend desde `/uploads/` procesadas en WebP ≤ 500 KB (Spec 005). El frontend las resuelve con `resolveImageUrl()` de `src/lib/api.ts` y provee un fallback SVG accesible ante fallo o ausencia. |
+| **DA-03** | Comportamiento del filtro de categoría padre sobre subcategorías.         | **Resuelta:** Seleccionar una categoría padre en el filtro expande automáticamente la búsqueda para incluir productos asociados a dicha categoría padre o a cualquiera de sus subcategorías hijas.                                              |

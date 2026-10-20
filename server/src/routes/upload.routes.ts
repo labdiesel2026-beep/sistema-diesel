@@ -17,7 +17,7 @@ router.post(
   uploadRateLimiter,
   requireAuth,
   uploadSingleImage,
-  uploadProductImage
+  uploadProductImage,
 );
 
 export default router;

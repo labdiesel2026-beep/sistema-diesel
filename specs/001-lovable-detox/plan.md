@@ -3,7 +3,7 @@
 **Fase:** 1 — Detox y Reestructuración  
 **Especificación:** [specs/001-lovable-detox/spec.md](file:///f:/INGENIERIA/GEPI/InyectoresDiesel/specs/001-lovable-detox/spec.md)  
 **Marco de Referencia:** [docs/constitution.md](file:///f:/INGENIERIA/GEPI/InyectoresDiesel/docs/constitution.md) y [AGENTS.MD](file:///f:/INGENIERIA/GEPI/InyectoresDiesel/AGENTS.MD)  
-**Estado:** Aprobado para Ejecución  
+**Estado:** Aprobado para Ejecución
 
 ---
 
@@ -178,7 +178,8 @@ Se eliminan por completo las dependencias y referencias de Lovable, los override
 }
 ```
 
-*Nota sobre purga en dependencias:*
+_Nota sobre purga en dependencias:_
+
 - Se elimina `@lovable.dev/vite-tanstack-config` `(RF-05)`.
 - Se eliminan los `overrides` que forzaban versiones inestables de `rolldown` `(RF-04)`.
 - Se agregan `@tanstack/router-generator`, `@tanstack/router-vite-plugin` y `@tanstack/devtools-vite` en `devDependencies` `(RF-04b)`.
@@ -190,26 +191,26 @@ Se eliminan por completo las dependencias y referencias de Lovable, los override
 Reemplazo total del wrapper propietario `defineTanstackConfig` de Lovable por una configuración canónica estándar de Vite para aplicaciones TanStack Start:
 
 ```typescript
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import { TanStackRouterVite } from '@tanstack/router-vite-plugin';
-import tsconfigPaths from 'vite-tsconfig-paths';
-import path from 'path';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { TanStackRouterVite } from "@tanstack/router-vite-plugin";
+import tsconfigPaths from "vite-tsconfig-paths";
+import path from "path";
 
 export default defineConfig({
   plugins: [
     TanStackRouterVite({
-      routesDirectory: './src/routes',
-      generatedRouteTree: './src/routeTree.gen.ts',
-      routeFileIgnorePrefix: '-',
-      quoteStyle: 'single',
+      routesDirectory: "./src/routes",
+      generatedRouteTree: "./src/routeTree.gen.ts",
+      routeFileIgnorePrefix: "-",
+      quoteStyle: "single",
     }),
     react(),
     tsconfigPaths(),
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   server: {
@@ -219,7 +220,8 @@ export default defineConfig({
 });
 ```
 
-*Garantías del nuevo `vite.config.ts`:*
+_Garantías del nuevo `vite.config.ts`:_
+
 - Cero telemetría ni comunicación remota hacia servidores de Lovable.
 - Cero inyecciones automáticas de variables `VITE_*` no controladas.
 - Soporte nativo para regenerar `routeTree.gen.ts` de forma idéntica ante cualquier cambio en `src/routes/`.
@@ -346,16 +348,19 @@ FIN PROCEDIMIENTO
 ## 4. Decisiones Técnicas Justificadas
 
 ### 4.1. Manejo del Alias de Módulo `@/` `(RF-03)`
+
 - **Decisión Elegida:** Combinación dual: configuración explícita en `resolve.alias` de `vite.config.ts` (`path.resolve(__dirname, './src')`) acompañada del plugin `vite-tsconfig-paths` alineado con `compilerOptions.paths` en `tsconfig.json`.
 - **Alternativa Descartada:** Usar únicamente `vite-tsconfig-paths` sin alias explícito en Vite, o depender de rutas relativas (`../../`).
 - **Justificación:** `vite-tsconfig-paths` asegura que TypeScript y las herramientas de análisis estático resuelvan idénticamente los módulos, mientras que el alias explícito en `vite.config.ts` blinda a herramientas de bundling (`vite build`) y testing (`vitest`) ante discrepancias en la resolución de rutas sin importar el entorno de ejecución.
 
 ### 4.2. Retención de Mock Data de UI (`catalog-data.ts`) `(RF-07)`
+
 - **Decisión Elegida:** Conservar intacto el archivo `src/lib/catalog-data.ts` que almacena los inyectores, servicios y categorías de prueba.
 - **Alternativa Descartada:** Purgar el archivo por considerarlo "código generado" o reemplazarlo inmediatamente por llamadas a base de datos / API REST.
 - **Justificación:** En esta Fase 1, el backend en Express/PostgreSQL aún no existe (Fase 4). Eliminar los datos mock causaría la rotura inmediata del renderizado de las vistas (`/`, `/catalogo`, `/admin`) y de los tests unitarios pre-existentes (`catalog.test.ts`), impidiendo validar visualmente la UI y violando el principio de modularidad paso a paso del SDD. La desconexión y sustitución por Prisma se ejecutará de forma planificada en la Fase 3.
 
 ### 4.3. Resolución de Dependencias Fantasma y Ocultas `(RF-04, RF-04b, RF-05, RF-08)`
+
 - **Decisión Elegida:** Declarar explícitamente `@tanstack/router-generator`, `@tanstack/router-vite-plugin` y `@tanstack/devtools-vite` en `devDependencies` de `package.json`, eliminando el paquete comodín `@lovable.dev/vite-tanstack-config` y descartando el override de `rolldown`.
 - **Alternativa Descartada:** Intentar mantener el paquete de Lovable o asumir que Vite resolverá la generación de rutas dinámicas a través de `vinxi` de manera implícita sin plugins declarados.
 - **Justificación:** El paquete `@lovable.dev/vite-tanstack-config` actuaba como una "caja negra" que agrupaba dependencias transitivas e inyectaba scripts de monitoreo. Para lograr independencia total y reproducibilidad en cualquier máquina con npm sin runtime Bun, las dependencias de generación de rutas deben ser transparentes, explícitas y canónicas en el `package.json`.
@@ -366,14 +371,14 @@ FIN PROCEDIMIENTO
 
 Para certificar con rigor técnico que la desintoxicación fue exitosa y que el proyecto es 100% operativo sin regresiones, se aplicará la siguiente batería de pruebas escalonadas:
 
-| Nivel de Verificación | Comando / Acción | Criterio de Éxito / DoD | RF Vinculado |
-|:---|:---|:---|:---|
-| **1. Resolución de Paquetes** | `npm install` | Salida exitosa (código 0). Generación limpia de `package-lock.json`. Cero advertencias críticas de resolución. | `RF-04`, `RF-04b`, `RF-05`, `RF-08` |
-| **2. Chequeo de Tipos Estricto** | `npx tsc --noEmit` | Salida limpia con código de salida 0. Ningún import roto, ningún tipo huérfano por eliminación de telemetría. | `RF-01`, `RF-03`, `RF-06` |
-| **3. Análisis Estático (Linter)** | `npm run lint` | Salida con código 0. Código cumple las normas de estilo y orden de imports sin errores. | `RF-01` |
-| **4. Suite de Pruebas Unitarias** | `npm run test` | `vitest` ejecuta y aprueba el 100% de los tests pre-existentes (`catalog.test.ts`, `app-routing.test.tsx`). | `RF-07` |
-| **5. Smoke Test de Compilación** | `npm run build` | Compilación de Vite completa en exit code 0. Generación exitosa de los bundles en `.output/` o `dist/`. | `RF-03`, `RF-04` |
-| **6. Servidor de Desarrollo** | `npm run dev` | Servidor inicia en `localhost:3000`. Regenera dinámicamente `routeTree.gen.ts`. Rutas `/`, `/catalogo` y `/admin` responden HTTP 200. | `RF-01b`, `RF-03` |
-| **7. Auditoría de Cero Rastro (Grepping)** | Búsqueda regex exhaustiva | Cero coincidencias en todo el código fuente: `grep -ri "lovable" src/ public/ package.json vite.config.ts` devuelve 0 resultados. | `RF-05`, `RF-06`, `RNF-05` |
-| **8. Auditoría Física de Archivos** | Inspección en disco | No existe `diesel-blue-spark-main/`, no existe `.lovable/`, no existe `bun.lock` ni `bunfig.toml`. | `RF-10`, `RF-11`, `RF-08` |
-| **9. Integridad de Documentación** | Verificación Git | `docs/` y `specs/` permanecen bajo control de versiones y NO aparecen listados en `.gitignore`. | `RF-01b`, `RF-02` |
+| Nivel de Verificación                      | Comando / Acción          | Criterio de Éxito / DoD                                                                                                               | RF Vinculado                        |
+| :----------------------------------------- | :------------------------ | :------------------------------------------------------------------------------------------------------------------------------------ | :---------------------------------- |
+| **1. Resolución de Paquetes**              | `npm install`             | Salida exitosa (código 0). Generación limpia de `package-lock.json`. Cero advertencias críticas de resolución.                        | `RF-04`, `RF-04b`, `RF-05`, `RF-08` |
+| **2. Chequeo de Tipos Estricto**           | `npx tsc --noEmit`        | Salida limpia con código de salida 0. Ningún import roto, ningún tipo huérfano por eliminación de telemetría.                         | `RF-01`, `RF-03`, `RF-06`           |
+| **3. Análisis Estático (Linter)**          | `npm run lint`            | Salida con código 0. Código cumple las normas de estilo y orden de imports sin errores.                                               | `RF-01`                             |
+| **4. Suite de Pruebas Unitarias**          | `npm run test`            | `vitest` ejecuta y aprueba el 100% de los tests pre-existentes (`catalog.test.ts`, `app-routing.test.tsx`).                           | `RF-07`                             |
+| **5. Smoke Test de Compilación**           | `npm run build`           | Compilación de Vite completa en exit code 0. Generación exitosa de los bundles en `.output/` o `dist/`.                               | `RF-03`, `RF-04`                    |
+| **6. Servidor de Desarrollo**              | `npm run dev`             | Servidor inicia en `localhost:3000`. Regenera dinámicamente `routeTree.gen.ts`. Rutas `/`, `/catalogo` y `/admin` responden HTTP 200. | `RF-01b`, `RF-03`                   |
+| **7. Auditoría de Cero Rastro (Grepping)** | Búsqueda regex exhaustiva | Cero coincidencias en todo el código fuente: `grep -ri "lovable" src/ public/ package.json vite.config.ts` devuelve 0 resultados.     | `RF-05`, `RF-06`, `RNF-05`          |
+| **8. Auditoría Física de Archivos**        | Inspección en disco       | No existe `diesel-blue-spark-main/`, no existe `.lovable/`, no existe `bun.lock` ni `bunfig.toml`.                                    | `RF-10`, `RF-11`, `RF-08`           |
+| **9. Integridad de Documentación**         | Verificación Git          | `docs/` y `specs/` permanecen bajo control de versiones y NO aparecen listados en `.gitignore`.                                       | `RF-01b`, `RF-02`                   |

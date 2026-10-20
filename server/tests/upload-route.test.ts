@@ -58,7 +58,10 @@ describe("Controlador de Subidas, Ruta y Servicio Estático Blindado (Tarea 4.4)
 
     // Verificar que el archivo en disco existe físicamente
     const diskPath = path.join(DEFAULT_UPLOADS_DIR, path.basename(imageUrl));
-    const exists = await fs.access(diskPath).then(() => true).catch(() => false);
+    const exists = await fs
+      .access(diskPath)
+      .then(() => true)
+      .catch(() => false);
     expect(exists).toBe(true);
 
     // Probar el servicio estático HTTP GET /uploads/<uuid>.webp

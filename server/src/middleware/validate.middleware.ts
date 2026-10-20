@@ -7,11 +7,19 @@ export interface ValidationTargets {
   query?: ZodTypeAny;
 }
 
-function formatZodIssues(issues: ZodIssue[], fallbackField: string): Array<{ field: string; message: string }> {
+function formatZodIssues(
+  issues: ZodIssue[],
+  fallbackField: string,
+): Array<{ field: string; message: string }> {
   return issues.map((issue) => {
     let field = issue.path.join(".");
     // En Zod, los errores de claves no reconocidas (.strict()) proveen las claves en `keys`
-    if (!field && "keys" in issue && Array.isArray((issue as any).keys) && (issue as any).keys.length > 0) {
+    if (
+      !field &&
+      "keys" in issue &&
+      Array.isArray((issue as any).keys) &&
+      (issue as any).keys.length > 0
+    ) {
       field = (issue as any).keys.join(", ");
     }
     if (!field) {

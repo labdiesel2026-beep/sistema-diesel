@@ -1,17 +1,5 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  type ReactNode,
-} from "react";
-import type {
-  AdminCategory,
-  AdminBrand,
-  AdminProduct,
-  IntegrityCheckResult,
-} from "@/types/admin";
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import type { AdminCategory, AdminBrand, AdminProduct, IntegrityCheckResult } from "@/types/admin";
 import { api, ApiError } from "@/lib/api";
 
 /**
@@ -76,7 +64,7 @@ export interface AdminContextType {
   }) => Promise<CategoryMutationResult>;
   updateCategory: (
     id: string,
-    input: { name: string; parentId: string | null }
+    input: { name: string; parentId: string | null },
   ) => Promise<CategoryMutationResult>;
   deleteCategory: (id: string) => Promise<CategoryMutationResult>;
   canDeleteCategory: (id: string) => IntegrityCheckResult;
@@ -88,10 +76,7 @@ export interface AdminContextType {
   // Marcas
   brands: AdminBrand[];
   createBrand: (input: { name: string }) => Promise<BrandMutationResult>;
-  updateBrand: (
-    id: string,
-    input: { name: string }
-  ) => Promise<BrandMutationResult>;
+  updateBrand: (id: string, input: { name: string }) => Promise<BrandMutationResult>;
   deleteBrand: (id: string) => Promise<BrandMutationResult>;
   canDeleteBrand: (id: string) => IntegrityCheckResult;
   getBrandById: (id: string) => AdminBrand | undefined;
@@ -99,12 +84,10 @@ export interface AdminContextType {
 
   // Catálogo de Productos
   products: AdminProduct[];
-  createProduct: (
-    input: Omit<AdminProduct, "id">
-  ) => Promise<ProductMutationResult>;
+  createProduct: (input: Omit<AdminProduct, "id">) => Promise<ProductMutationResult>;
   updateProduct: (
     id: string,
-    input: Partial<Omit<AdminProduct, "id">>
+    input: Partial<Omit<AdminProduct, "id">>,
   ) => Promise<ProductMutationResult>;
   deleteProduct: (id: string) => Promise<ProductMutationResult>;
   toggleVisibility: (id: string) => Promise<ProductMutationResult>;
@@ -142,16 +125,16 @@ export function AdminProvider({
   const globalData = (globalThis as any).__TEST_ADMIN_INITIAL_DATA__;
 
   const [categories, setCategories] = useState<AdminCategory[]>(
-    () => initialCategories ?? globalData?.categories ?? []
+    () => initialCategories ?? globalData?.categories ?? [],
   );
   const [brands, setBrands] = useState<AdminBrand[]>(
-    () => initialBrands ?? globalData?.brands ?? []
+    () => initialBrands ?? globalData?.brands ?? [],
   );
   const [products, setProducts] = useState<AdminProduct[]>(
-    () => initialProducts ?? globalData?.products ?? []
+    () => initialProducts ?? globalData?.products ?? [],
   );
   const [metrics, setMetrics] = useState<CatalogMetrics | null>(
-    () => initialMetrics ?? globalData?.metrics ?? null
+    () => initialMetrics ?? globalData?.metrics ?? null,
   );
 
   const [isLoading, setIsLoading] = useState<boolean>(!initialCategories && !globalData);
@@ -174,13 +157,14 @@ export function AdminProvider({
     setIsLoading(true);
     setError(null);
     try {
-      const [fetchedBrands, fetchedCategories, fetchedProducts, fetchedMetrics] =
-        await Promise.all([
+      const [fetchedBrands, fetchedCategories, fetchedProducts, fetchedMetrics] = await Promise.all(
+        [
           api.get<AdminBrand[]>("/api/brands"),
           api.get<any[]>("/api/categories"),
           api.get<any[]>("/api/products"),
           api.get<CatalogMetrics>("/api/admin/metrics"),
-        ]);
+        ],
+      );
 
       setBrands(fetchedBrands || []);
       setCategories(
@@ -188,7 +172,7 @@ export function AdminProvider({
           id: c.id,
           name: c.name,
           parentId: c.parentId ?? null,
-        }))
+        })),
       );
       setProducts(
         (fetchedProducts || []).map((p: any) => ({
@@ -204,7 +188,7 @@ export function AdminProvider({
           showPrice: Boolean(p.showPrice),
           visible: Boolean(p.visible),
           oem: p.oem || "",
-        }))
+        })),
       );
       setMetrics(fetchedMetrics || null);
     } catch (err: any) {
@@ -238,21 +222,21 @@ export function AdminProvider({
     (parentId: string) => {
       return categories.filter((c) => c.parentId === parentId);
     },
-    [categories]
+    [categories],
   );
 
   const hasChildren = useCallback(
     (categoryId: string) => {
       return categories.some((c) => c.parentId === categoryId);
     },
-    [categories]
+    [categories],
   );
 
   const getCategoryProductCount = useCallback(
     (categoryId: string) => {
       return products.filter((p) => p.categoryIds.includes(categoryId)).length;
     },
-    [products]
+    [products],
   );
 
   // -------------------------------------------------------------------------
@@ -282,9 +266,7 @@ export function AdminProvider({
       }
 
       // Bloqueo 2: Productos asociados (CA-11.1, CL-06)
-      const linkedProducts = products.filter((p) =>
-        p.categoryIds.includes(id)
-      );
+      const linkedProducts = products.filter((p) => p.categoryIds.includes(id));
       if (linkedProducts.length > 0) {
         return {
           allowed: false,
@@ -297,7 +279,7 @@ export function AdminProvider({
 
       return { allowed: true, blocked: false };
     },
-    [categories, products]
+    [categories, products],
   );
 
   // -------------------------------------------------------------------------
@@ -305,10 +287,7 @@ export function AdminProvider({
   // -------------------------------------------------------------------------
 
   const createCategory = useCallback(
-    async (input: {
-      name: string;
-      parentId: string | null;
-    }): Promise<CategoryMutationResult> => {
+    async (input: { name: string; parentId: string | null }): Promise<CategoryMutationResult> => {
       const trimmedName = input.name.trim();
 
       if (trimmedName.length < 2) {
@@ -320,7 +299,7 @@ export function AdminProvider({
 
       // Validación preventiva local de unicidad
       const isDuplicate = categories.some(
-        (c) => c.name.trim().toLowerCase() === trimmedName.toLowerCase()
+        (c) => c.name.trim().toLowerCase() === trimmedName.toLowerCase(),
       );
       if (isDuplicate) {
         return {
@@ -377,13 +356,13 @@ export function AdminProvider({
         };
       }
     },
-    [categories, refreshMetrics]
+    [categories, refreshMetrics],
   );
 
   const updateCategory = useCallback(
     async (
       id: string,
-      input: { name: string; parentId: string | null }
+      input: { name: string; parentId: string | null },
     ): Promise<CategoryMutationResult> => {
       const currentCategory = categories.find((c) => c.id === id);
       if (!currentCategory) {
@@ -402,9 +381,7 @@ export function AdminProvider({
       }
 
       const isDuplicate = categories.some(
-        (c) =>
-          c.id !== id &&
-          c.name.trim().toLowerCase() === trimmedName.toLowerCase()
+        (c) => c.id !== id && c.name.trim().toLowerCase() === trimmedName.toLowerCase(),
       );
       if (isDuplicate) {
         return {
@@ -458,9 +435,7 @@ export function AdminProvider({
           parentId: response.parentId ?? null,
         };
 
-        setCategories((prev) =>
-          prev.map((c) => (c.id === id ? updatedCategory : c))
-        );
+        setCategories((prev) => prev.map((c) => (c.id === id ? updatedCategory : c)));
 
         return {
           success: true,
@@ -477,7 +452,7 @@ export function AdminProvider({
         };
       }
     },
-    [categories]
+    [categories],
   );
 
   const deleteCategory = useCallback(
@@ -493,9 +468,7 @@ export function AdminProvider({
       }
 
       try {
-        await api.delete<{ success: boolean; message: string }>(
-          `/api/categories/${id}`
-        );
+        await api.delete<{ success: boolean; message: string }>(`/api/categories/${id}`);
 
         setCategories((prev) => prev.filter((c) => c.id !== id));
         refreshMetrics().catch(() => {});
@@ -514,7 +487,7 @@ export function AdminProvider({
         };
       }
     },
-    [canDeleteCategory, refreshMetrics]
+    [canDeleteCategory, refreshMetrics],
   );
 
   // -------------------------------------------------------------------------
@@ -525,14 +498,14 @@ export function AdminProvider({
     (id: string): AdminBrand | undefined => {
       return brands.find((b) => b.id === id);
     },
-    [brands]
+    [brands],
   );
 
   const getBrandProductCount = useCallback(
     (brandId: string): number => {
       return products.filter((p) => p.brandId === brandId).length;
     },
-    [products]
+    [products],
   );
 
   const canDeleteBrand = useCallback(
@@ -560,7 +533,7 @@ export function AdminProvider({
 
       return { allowed: true, blocked: false };
     },
-    [brands, products]
+    [brands, products],
   );
 
   // -------------------------------------------------------------------------
@@ -579,7 +552,7 @@ export function AdminProvider({
       }
 
       const isDuplicate = brands.some(
-        (b) => b.name.trim().toLowerCase() === trimmedName.toLowerCase()
+        (b) => b.name.trim().toLowerCase() === trimmedName.toLowerCase(),
       );
       if (isDuplicate) {
         return {
@@ -616,14 +589,11 @@ export function AdminProvider({
         };
       }
     },
-    [brands, refreshMetrics]
+    [brands, refreshMetrics],
   );
 
   const updateBrand = useCallback(
-    async (
-      id: string,
-      input: { name: string }
-    ): Promise<BrandMutationResult> => {
+    async (id: string, input: { name: string }): Promise<BrandMutationResult> => {
       const currentBrand = brands.find((b) => b.id === id);
       if (!currentBrand) {
         return {
@@ -641,9 +611,7 @@ export function AdminProvider({
       }
 
       const isDuplicate = brands.some(
-        (b) =>
-          b.id !== id &&
-          b.name.trim().toLowerCase() === trimmedName.toLowerCase()
+        (b) => b.id !== id && b.name.trim().toLowerCase() === trimmedName.toLowerCase(),
       );
       if (isDuplicate) {
         return {
@@ -662,9 +630,7 @@ export function AdminProvider({
           name: response.name,
         };
 
-        setBrands((prev) =>
-          prev.map((b) => (b.id === id ? updatedBrand : b))
-        );
+        setBrands((prev) => prev.map((b) => (b.id === id ? updatedBrand : b)));
 
         return {
           success: true,
@@ -681,7 +647,7 @@ export function AdminProvider({
         };
       }
     },
-    [brands]
+    [brands],
   );
 
   const deleteBrand = useCallback(
@@ -697,9 +663,7 @@ export function AdminProvider({
       }
 
       try {
-        await api.delete<{ success: boolean; message: string }>(
-          `/api/brands/${id}`
-        );
+        await api.delete<{ success: boolean; message: string }>(`/api/brands/${id}`);
 
         setBrands((prev) => prev.filter((b) => b.id !== id));
         refreshMetrics().catch(() => {});
@@ -718,7 +682,7 @@ export function AdminProvider({
         };
       }
     },
-    [canDeleteBrand, refreshMetrics]
+    [canDeleteBrand, refreshMetrics],
   );
 
   // -------------------------------------------------------------------------
@@ -726,9 +690,7 @@ export function AdminProvider({
   // -------------------------------------------------------------------------
 
   const createProduct = useCallback(
-    async (
-      input: Omit<AdminProduct, "id">
-    ): Promise<ProductMutationResult> => {
+    async (input: Omit<AdminProduct, "id">): Promise<ProductMutationResult> => {
       const trimmedName = input.name?.trim() ?? "";
       if (trimmedName.length < 3) {
         return {
@@ -772,7 +734,8 @@ export function AdminProvider({
           categoryIds: response.categoryIds || [],
           vehicleCompatibility: response.vehicleCompatibility || "",
           condition: response.condition,
-          price: response.price !== null && response.price !== undefined ? Number(response.price) : null,
+          price:
+            response.price !== null && response.price !== undefined ? Number(response.price) : null,
           showPrice: Boolean(response.showPrice),
           visible: Boolean(response.visible),
           oem: response.oem || "",
@@ -796,13 +759,13 @@ export function AdminProvider({
         };
       }
     },
-    [refreshMetrics]
+    [refreshMetrics],
   );
 
   const updateProduct = useCallback(
     async (
       id: string,
-      input: Partial<Omit<AdminProduct, "id">>
+      input: Partial<Omit<AdminProduct, "id">>,
     ): Promise<ProductMutationResult> => {
       const currentProduct = products.find((p) => p.id === id);
       if (!currentProduct) {
@@ -841,15 +804,14 @@ export function AdminProvider({
           categoryIds: response.categoryIds || [],
           vehicleCompatibility: response.vehicleCompatibility || "",
           condition: response.condition,
-          price: response.price !== null && response.price !== undefined ? Number(response.price) : null,
+          price:
+            response.price !== null && response.price !== undefined ? Number(response.price) : null,
           showPrice: Boolean(response.showPrice),
           visible: Boolean(response.visible),
           oem: response.oem || "",
         };
 
-        setProducts((prev) =>
-          prev.map((p) => (p.id === id ? updatedProduct : p))
-        );
+        setProducts((prev) => prev.map((p) => (p.id === id ? updatedProduct : p)));
         refreshMetrics().catch(() => {});
 
         return {
@@ -867,7 +829,7 @@ export function AdminProvider({
         };
       }
     },
-    [products, refreshMetrics]
+    [products, refreshMetrics],
   );
 
   const toggleProductVisibility = useCallback(
@@ -882,19 +844,16 @@ export function AdminProvider({
 
       try {
         const nextVisible = !currentProduct.visible;
-        const response = await api.patch<any>(
-          `/api/products/${id}/visibility`,
-          { visible: nextVisible }
-        );
+        const response = await api.patch<any>(`/api/products/${id}/visibility`, {
+          visible: nextVisible,
+        });
 
         const updatedProduct: AdminProduct = {
           ...currentProduct,
           visible: response.visible,
         };
 
-        setProducts((prev) =>
-          prev.map((p) => (p.id === id ? updatedProduct : p))
-        );
+        setProducts((prev) => prev.map((p) => (p.id === id ? updatedProduct : p)));
         refreshMetrics().catch(() => {});
 
         return {
@@ -912,7 +871,7 @@ export function AdminProvider({
         };
       }
     },
-    [products, refreshMetrics]
+    [products, refreshMetrics],
   );
 
   const toggleVisibility = toggleProductVisibility;
@@ -928,9 +887,7 @@ export function AdminProvider({
       }
 
       try {
-        await api.delete<{ success: boolean; message: string }>(
-          `/api/products/${id}`
-        );
+        await api.delete<{ success: boolean; message: string }>(`/api/products/${id}`);
 
         setProducts((prev) => prev.filter((p) => p.id !== id));
         refreshMetrics().catch(() => {});
@@ -947,7 +904,7 @@ export function AdminProvider({
         };
       }
     },
-    [products, refreshMetrics]
+    [products, refreshMetrics],
   );
 
   /**
@@ -967,7 +924,7 @@ export function AdminProvider({
         );
       });
     },
-    [products]
+    [products],
   );
 
   const value: AdminContextType = {
@@ -1007,9 +964,7 @@ export function AdminProvider({
     searchProducts,
   };
 
-  return (
-    <AdminContext.Provider value={value}>{children}</AdminContext.Provider>
-  );
+  return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;
 }
 
 /**

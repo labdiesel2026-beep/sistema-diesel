@@ -1,17 +1,8 @@
-import {
-  useState,
-  useEffect,
-  type FormEvent,
-  type ChangeEvent,
-  type FocusEvent,
-} from "react";
+import { useState, useEffect, type FormEvent, type ChangeEvent, type FocusEvent } from "react";
 import { Loader2, AlertCircle, PackagePlus } from "lucide-react";
 import type { AdminProduct, ProductCondition } from "@/types/admin";
 import { useAdmin } from "@/context/admin-context";
-import {
-  productFormSchema,
-  PRODUCT_CONDITIONS,
-} from "@/lib/validations/admin-schemas";
+import { productFormSchema, PRODUCT_CONDITIONS } from "@/lib/validations/admin-schemas";
 import { ProductImageUpload } from "@/components/admin/products/ProductImageUpload";
 import {
   Dialog,
@@ -103,7 +94,7 @@ export function ProductFormModal({
         setPriceInput(
           productToEdit.price !== null && productToEdit.price !== undefined
             ? String(productToEdit.price)
-            : ""
+            : "",
         );
         setShowPrice(productToEdit.showPrice);
         setVisible(productToEdit.visible);
@@ -154,9 +145,7 @@ export function ProductFormModal({
     const result = productFormSchema.safeParse(payload);
 
     if (!result.success) {
-      const match = result.error.errors.find((err) =>
-        err.path.includes(fieldName)
-      );
+      const match = result.error.errors.find((err) => err.path.includes(fieldName));
       if (match) {
         setFieldErrors((prev) => ({ ...prev, [fieldName]: match.message }));
         return false;
@@ -172,9 +161,7 @@ export function ProductFormModal({
   };
 
   const handleBlur = (
-    e: FocusEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
     const fieldName = e.target.name as keyof ProductFormErrors;
     if (fieldName) {
@@ -184,9 +171,7 @@ export function ProductFormModal({
 
   const toggleCategory = (catId: string) => {
     setCategoryIds((prev) => {
-      const next = prev.includes(catId)
-        ? prev.filter((id) => id !== catId)
-        : [...prev, catId];
+      const next = prev.includes(catId) ? prev.filter((id) => id !== catId) : [...prev, catId];
 
       if (fieldErrors.categoryIds) {
         if (next.length > 0) {
@@ -339,9 +324,7 @@ export function ProductFormModal({
                 onBlur={handleBlur}
                 disabled={isSubmitting}
                 className={
-                  fieldErrors.name
-                    ? "border-destructive focus-visible:ring-destructive"
-                    : ""
+                  fieldErrors.name ? "border-destructive focus-visible:ring-destructive" : ""
                 }
                 aria-invalid={Boolean(fieldErrors.name)}
                 data-testid="product-name-input"
@@ -418,9 +401,7 @@ export function ProductFormModal({
                 id="product-condition"
                 name="condition"
                 value={condition}
-                onChange={(e) =>
-                  setCondition(e.target.value as ProductCondition)
-                }
+                onChange={(e) => setCondition(e.target.value as ProductCondition)}
                 disabled={isSubmitting}
                 data-testid="product-condition-select"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
@@ -435,9 +416,7 @@ export function ProductFormModal({
 
             {/* Vehículo Compatible */}
             <div className="space-y-1.5">
-              <Label htmlFor="product-vehicle-compat">
-                Vehículo / Motor Compatible
-              </Label>
+              <Label htmlFor="product-vehicle-compat">Vehículo / Motor Compatible</Label>
               <Input
                 id="product-vehicle-compat"
                 name="vehicleCompatibility"
@@ -481,9 +460,7 @@ export function ProductFormModal({
                     <label
                       key={cat.id}
                       className={`flex items-center gap-2.5 rounded-md px-2 py-1 text-sm cursor-pointer transition-colors hover:bg-muted/60 ${
-                        isChild
-                          ? "ml-5 border-l-2 border-primary/40 pl-3"
-                          : "font-medium"
+                        isChild ? "ml-5 border-l-2 border-primary/40 pl-3" : "font-medium"
                       } ${isChecked ? "bg-primary/10 text-primary font-medium" : "text-foreground"}`}
                     >
                       <input
@@ -529,9 +506,7 @@ export function ProductFormModal({
               onBlur={handleBlur}
               disabled={isSubmitting}
               className={
-                fieldErrors.description
-                  ? "border-destructive focus-visible:ring-destructive"
-                  : ""
+                fieldErrors.description ? "border-destructive focus-visible:ring-destructive" : ""
               }
               aria-invalid={Boolean(fieldErrors.description)}
               data-testid="product-description-input"
@@ -567,9 +542,7 @@ export function ProductFormModal({
                   onBlur={handleBlur}
                   disabled={isSubmitting || !showPrice}
                   className={
-                    fieldErrors.price
-                      ? "border-destructive focus-visible:ring-destructive"
-                      : ""
+                    fieldErrors.price ? "border-destructive focus-visible:ring-destructive" : ""
                   }
                   data-testid="product-price-input"
                 />

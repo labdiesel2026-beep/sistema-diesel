@@ -25,9 +25,7 @@ export const envSchema = z
     DATABASE_URL: z.string().min(1, "DATABASE_URL es obligatoria"),
     JWT_SECRET: z.string().min(32, "JWT_SECRET debe tener al menos 32 caracteres"),
     CORS_ORIGIN: z.string().min(1, "CORS_ORIGIN es obligatorio"),
-    NODE_ENV: z
-      .enum(["development", "test", "production"])
-      .default("development"),
+    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     ADMIN_INITIAL_EMAIL: z.string().email().optional(),
     ADMIN_INITIAL_PASSWORD: z.string().min(6).optional(),
   })
@@ -68,7 +66,9 @@ export function validateEnv(customEnv?: Record<string, unknown>): EnvConfig {
   const result = envSchema.safeParse(payload);
 
   if (!result.success) {
-    console.error("❌ [Crash Early] Error fatal de configuración: Variables de entorno faltantes o inválidas:");
+    console.error(
+      "❌ [Crash Early] Error fatal de configuración: Variables de entorno faltantes o inválidas:",
+    );
     for (const issue of result.error.issues) {
       console.error(`   -> ${issue.path.join(".")}: ${issue.message}`);
     }

@@ -32,7 +32,7 @@ export function ProductThumbnail({
 
   const containerClasses = cn(
     "relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/60",
-    className
+    className,
   );
 
   if (!src || hasError) {
@@ -43,10 +43,7 @@ export function ProductThumbnail({
         role="img"
         aria-label="Imagen no disponible"
       >
-        <Package
-          className="size-6 text-muted-foreground"
-          aria-hidden="true"
-        />
+        <Package className="size-6 text-muted-foreground" aria-hidden="true" />
       </div>
     );
   }

@@ -36,9 +36,7 @@ function AdminLoginPage() {
           <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <SlidersHorizontal className="size-6" />
           </div>
-          <h1 className="font-display text-2xl font-bold tracking-tight">
-            Laboratorio Diésel
-          </h1>
+          <h1 className="font-display text-2xl font-bold tracking-tight">Laboratorio Diésel</h1>
           <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Acceso al Backoffice
           </p>

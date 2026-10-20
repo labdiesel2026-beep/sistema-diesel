@@ -7,7 +7,7 @@ import {
   INITIAL_BRANDS,
   INITIAL_CATEGORIES,
   INITIAL_PRODUCTS,
-} from "@/lib/admin-seed-data";
+} from "@/test/fixtures/admin-fixtures";
 
 // Mock de @tanstack/react-router Link para testing unitario
 vi.mock("@tanstack/react-router", () => ({

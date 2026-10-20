@@ -1,0 +1,89 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ----------------------------------------------------
+// 1. Usuario Administrador (RF-01, RF-03, RF-11)
+// ----------------------------------------------------
+model AdminUser {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         String   @default("admin")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("admin_users")
+}
+
+// ----------------------------------------------------
+// 2. Marcas de Repuestos (RF-09)
+// ----------------------------------------------------
+model Brand {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("brands")
+}
+
+// ----------------------------------------------------
+// 3. Categorías y Subcategorías (1 Nivel) (RF-08, D-04)
+// ----------------------------------------------------
+model Category {
+  id                String            @id @default(uuid()) @db.Uuid
+  name              String            @unique
+  parentId          String?           @map("parent_id") @db.Uuid
+  parent            Category?         @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children          Category[]        @relation("CategoryHierarchy")
+  productCategories ProductCategory[]
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  @@map("categories")
+}
+
+// ----------------------------------------------------
+// 4. Catálogo de Productos (RF-07, D-06)
+// ----------------------------------------------------
+model Product {
+  id                   String            @id @default(uuid()) @db.Uuid
+  name                 String
+  description          String            @db.Text
+  imageUrl             String            @map("image_url")
+  brandId              String            @map("brand_id") @db.Uuid
+  brand                Brand             @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  vehicleCompatibility String?           @map("vehicle_compatibility")
+  condition            String            // 'Nuevo' | 'Reacondicionado' | 'Usado'
+  price                Int?              // Entero en pesos ARS (admite null para 'A cotizar' o 0)
+  showPrice            Boolean           @default(true) @map("show_price")
+  visible              Boolean           @default(true)
+  oem                  String?
+  productCategories    ProductCategory[]
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
+
+  @@index([visible])
+  @@map("products")
+}
+
+// ----------------------------------------------------
+// 5. Tabla Pivote Explícita Producto-Categoría (D-03)
+// ----------------------------------------------------
+model ProductCategory {
+  productId  String   @map("product_id") @db.Uuid
+  categoryId String   @map("category_id") @db.Uuid
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@id([productId, categoryId])
+  @@map("product_categories")
+}

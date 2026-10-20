@@ -51,7 +51,7 @@ export function CategoryDeleteModal({
     setIsDeleting(true);
 
     try {
-      const res = deleteCategory(category.id);
+      const res = await deleteCategory(category.id);
       if (res.success) {
         onOpenChange(false);
         onSuccess?.();

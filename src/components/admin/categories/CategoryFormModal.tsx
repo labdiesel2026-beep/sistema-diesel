@@ -140,7 +140,7 @@ export function CategoryFormModal({
           : null;
 
       if (isEditing && categoryToEdit) {
-        const result = updateCategory(categoryToEdit.id, {
+        const result = await updateCategory(categoryToEdit.id, {
           name,
           parentId: finalParentId,
         });
@@ -152,7 +152,7 @@ export function CategoryFormModal({
           setFormError(result.reason || "Error al actualizar la categoría.");
         }
       } else {
-        const result = createCategory({
+        const result = await createCategory({
           name,
           parentId: finalParentId,
         });

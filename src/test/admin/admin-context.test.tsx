@@ -5,9 +5,9 @@ import {
   INITIAL_BRANDS,
   INITIAL_CATEGORIES,
   INITIAL_PRODUCTS,
-} from "@/lib/admin-seed-data";
+} from "@/test/fixtures/admin-fixtures";
 
-describe("Store de Administración y Reglas de Integridad Referencial (AdminProvider) — Tarea 4.3", () => {
+describe("Store de Administración y Reglas de Integridad Referencial (AdminProvider) — Tarea 4.3 y 8.4", () => {
   it("debe inicializar el estado con datos semilla normalizados", () => {
     const { result } = renderHook(() => useAdmin(), {
       wrapper: AdminProvider,
@@ -22,7 +22,7 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
   // 1) Integridad Referencial de Categorías (RF-10, RF-11, CL-04, CL-05, CL-06)
   // -------------------------------------------------------------------------
   describe("Integridad Referencial de Categorías", () => {
-    it("debe bloquear la eliminación de una categoría vinculada a productos", () => {
+    it("debe bloquear la eliminación de una categoría vinculada a productos", async () => {
       const { result } = renderHook(() => useAdmin(), {
         wrapper: AdminProvider,
       });
@@ -37,9 +37,9 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       expect(check.affectedProducts?.length).toBeGreaterThan(0);
       expect(check.affectedProducts).toContain("Inyector Amarok 2.0 TDI");
 
-      let deleteRes;
-      act(() => {
-        deleteRes = result.current.deleteCategory(categoryIdWithProducts);
+      let deleteRes: any;
+      await act(async () => {
+        deleteRes = await result.current.deleteCategory(categoryIdWithProducts);
       });
 
       expect(deleteRes).toEqual({
@@ -56,7 +56,7 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       ).toBe(true);
     });
 
-    it("debe bloquear la eliminación de una categoría padre con subcategorías asociadas", () => {
+    it("debe bloquear la eliminación de una categoría padre con subcategorías asociadas", async () => {
       const { result } = renderHook(() => useAdmin(), {
         wrapper: AdminProvider,
       });
@@ -70,23 +70,23 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       expect(check.reason).toContain("posee subcategorías vinculadas");
 
       let deleteRes: any;
-      act(() => {
-        deleteRes = result.current.deleteCategory(rootCategoryWithChildren);
+      await act(async () => {
+        deleteRes = await result.current.deleteCategory(rootCategoryWithChildren);
       });
 
       expect(deleteRes?.success).toBe(false);
       expect(deleteRes?.blocked).toBe(true);
     });
 
-    it("debe permitir eliminar una categoría que no tenga productos ni subcategorías", () => {
+    it("debe permitir eliminar una categoría que no tenga productos ni subcategorías", async () => {
       const { result } = renderHook(() => useAdmin(), {
         wrapper: AdminProvider,
       });
 
       // Creamos una categoría limpia sin productos
       let newCatId = "";
-      act(() => {
-        const createRes = result.current.createCategory({
+      await act(async () => {
+        const createRes = await result.current.createCategory({
           name: "Categoría Temporal Vacía",
           parentId: null,
         });
@@ -100,8 +100,8 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       expect(check.blocked).toBe(false);
 
       let deleteRes: any;
-      act(() => {
-        deleteRes = result.current.deleteCategory(newCatId);
+      await act(async () => {
+        deleteRes = await result.current.deleteCategory(newCatId);
       });
 
       expect(deleteRes?.success).toBe(true);
@@ -110,7 +110,7 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       ).toBe(false);
     });
 
-    it("debe impedir convertir una categoría padre con hijas en una subcategoría (Prevención de ciclos CL-05)", () => {
+    it("debe impedir convertir una categoría padre con hijas en una subcategoría (Prevención de ciclos CL-05)", async () => {
       const { result } = renderHook(() => useAdmin(), {
         wrapper: AdminProvider,
       });
@@ -119,8 +119,8 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       const anotherRoot = "e4b6d812-7a2b-4f51-b8f3-0a567c891004";
 
       let updateRes: any;
-      act(() => {
-        updateRes = result.current.updateCategory(rootWithChildren, {
+      await act(async () => {
+        updateRes = await result.current.updateCategory(rootWithChildren, {
           name: "Inyección Common Rail Modificada",
           parentId: anotherRoot,
         });
@@ -132,7 +132,7 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       );
     });
 
-    it("debe respetar el límite de 1 nivel: no permite asignar como padre una subcategoría", () => {
+    it("debe respetar el límite de 1 nivel: no permite asignar como padre una subcategoría", async () => {
       const { result } = renderHook(() => useAdmin(), {
         wrapper: AdminProvider,
       });
@@ -140,8 +140,8 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       const childCategory = "e4b6d812-7a2b-4f51-b8f3-0a567c891002"; // Es subcategoría
 
       let createRes: any;
-      act(() => {
-        createRes = result.current.createCategory({
+      await act(async () => {
+        createRes = await result.current.createCategory({
           name: "Sub-subcategoría no permitida",
           parentId: childCategory,
         });
@@ -158,7 +158,7 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
   // 2) Integridad Referencial de Marcas y Renombrado Relacional (RF-12, CA-12.3, CA-12.4, CL-06, CL-09)
   // -------------------------------------------------------------------------
   describe("Integridad y Operaciones de Marcas", () => {
-    it("debe bloquear la eliminación de una marca asignada a productos (CA-12.3, CL-06)", () => {
+    it("debe bloquear la eliminación de una marca asignada a productos (CA-12.3, CL-06)", async () => {
       const { result } = renderHook(() => useAdmin(), {
         wrapper: AdminProvider,
       });
@@ -173,9 +173,9 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       expect(check.affectedProducts).toContain("Inyector Amarok 2.0 TDI");
       expect(check.affectedProducts).toContain("Inyector Sprinter 2.2 CDI");
 
-      let deleteRes;
-      act(() => {
-        deleteRes = result.current.deleteBrand(boschId);
+      let deleteRes: any;
+      await act(async () => {
+        deleteRes = await result.current.deleteBrand(boschId);
       });
 
       expect(deleteRes).toEqual({
@@ -193,15 +193,15 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       expect(result.current.brands.some((b) => b.id === boschId)).toBe(true);
     });
 
-    it("debe permitir eliminar una marca cuando no tiene productos vinculados (CA-12.5)", () => {
+    it("debe permitir eliminar una marca cuando no tiene productos vinculados (CA-12.5)", async () => {
       const { result } = renderHook(() => useAdmin(), {
         wrapper: AdminProvider,
       });
 
       // Crear marca sin productos
       let newBrandId = "";
-      act(() => {
-        const createRes = result.current.createBrand({ name: "Siemens VDO" });
+      await act(async () => {
+        const createRes = await result.current.createBrand({ name: "Siemens VDO" });
         newBrandId = createRes.brand?.id ?? "";
       });
 
@@ -212,15 +212,15 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       expect(check.blocked).toBe(false);
 
       let deleteRes: any;
-      act(() => {
-        deleteRes = result.current.deleteBrand(newBrandId);
+      await act(async () => {
+        deleteRes = await result.current.deleteBrand(newBrandId);
       });
 
       expect(deleteRes?.success).toBe(true);
       expect(result.current.brands.some((b) => b.id === newBrandId)).toBe(false);
     });
 
-    it("debe reflejar el nuevo nombre relacionalmente por UUID al renombrar una marca (CA-12.4, CL-09)", () => {
+    it("debe reflejar el nuevo nombre relacionalmente por UUID al renombrar una marca (CA-12.4, CL-09)", async () => {
       const { result } = renderHook(() => useAdmin(), {
         wrapper: AdminProvider,
       });
@@ -230,8 +230,8 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       expect(oldName).toBe("Bosch");
 
       // Renombrar la marca conservando el UUID
-      act(() => {
-        const updateRes = result.current.updateBrand(boschId, {
+      await act(async () => {
+        const updateRes = await result.current.updateBrand(boschId, {
           name: "Bosch Rexroth Motorsport",
         });
         expect(updateRes.success).toBe(true);
@@ -257,21 +257,21 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       });
     });
 
-    it("debe validar unicidad case-insensitive con trim al crear y editar marcas (CA-12.1, CA-12.2)", () => {
+    it("debe validar unicidad case-insensitive con trim al crear y editar marcas (CA-12.1, CA-12.2)", async () => {
       const { result } = renderHook(() => useAdmin(), {
         wrapper: AdminProvider,
       });
 
       // Longitud mínima < 2
-      act(() => {
-        const shortRes = result.current.createBrand({ name: " A " });
+      await act(async () => {
+        const shortRes = await result.current.createBrand({ name: " A " });
         expect(shortRes.success).toBe(false);
         expect(shortRes.reason).toContain("al menos 2 caracteres");
       });
 
       // Unicidad duplicada case-insensitive
-      act(() => {
-        const dupRes = result.current.createBrand({ name: "  delphi  " });
+      await act(async () => {
+        const dupRes = await result.current.createBrand({ name: "  delphi  " });
         expect(dupRes.success).toBe(false);
         expect(dupRes.reason).toContain("Ya existe una marca con este nombre");
       });
@@ -282,7 +282,7 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
   // 3) Operaciones de Productos y Toggle de Visibilidad (RF-05, RF-06, RF-07, CA-06.1)
   // -------------------------------------------------------------------------
   describe("Operaciones de Productos y Conmutación de Visibilidad", () => {
-    it("debe conmutar reactivamente la visibilidad de un producto con toggleVisibility (RF-06, CA-06.1)", () => {
+    it("debe conmutar reactivamente la visibilidad de un producto con toggleVisibility (RF-06, CA-06.1)", async () => {
       const { result } = renderHook(() => useAdmin(), {
         wrapper: AdminProvider,
       });
@@ -293,8 +293,8 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       const initialVisibility = product.visible;
 
       // 1. Conmutar a estado inverso
-      act(() => {
-        const res = result.current.toggleVisibility(product.id);
+      await act(async () => {
+        const res = await result.current.toggleVisibility(product.id);
         expect(res.success).toBe(true);
         expect(res.product?.visible).toBe(!initialVisibility);
       });
@@ -305,8 +305,8 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       expect(toggledProduct?.visible).toBe(!initialVisibility);
 
       // 2. Conmutar de vuelta al estado original
-      act(() => {
-        result.current.toggleProductVisibility(product.id);
+      await act(async () => {
+        await result.current.toggleProductVisibility(product.id);
       });
 
       const restoredProduct = result.current.products.find(
@@ -315,7 +315,7 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       expect(restoredProduct?.visible).toBe(initialVisibility);
     });
 
-    it("debe crear, editar y eliminar un producto manteniendo la consistencia", () => {
+    it("debe crear, editar y eliminar un producto manteniendo la consistencia", async () => {
       const { result } = renderHook(() => useAdmin(), {
         wrapper: AdminProvider,
       });
@@ -323,8 +323,8 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       let createdProductId = "";
 
       // 1. Crear producto
-      act(() => {
-        const res = result.current.createProduct({
+      await act(async () => {
+        const res = await result.current.createProduct({
           name: "Inyector Test Nuevo",
           description: "Descripción de prueba para verificar creación",
           imageUrl: "/uploads/test.webp",
@@ -348,8 +348,8 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       ).toBe(true);
 
       // 2. Editar producto
-      act(() => {
-        const updateRes = result.current.updateProduct(createdProductId, {
+      await act(async () => {
+        const updateRes = await result.current.updateProduct(createdProductId, {
           price: 180000,
           condition: "Reacondicionado",
         });
@@ -359,8 +359,8 @@ describe("Store de Administración y Reglas de Integridad Referencial (AdminProv
       });
 
       // 3. Eliminar producto
-      act(() => {
-        const deleteRes = result.current.deleteProduct(createdProductId);
+      await act(async () => {
+        const deleteRes = await result.current.deleteProduct(createdProductId);
         expect(deleteRes.success).toBe(true);
       });
 

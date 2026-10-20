@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useState,
+  useEffect,
   useCallback,
   type ReactNode,
 } from "react";
@@ -11,7 +12,19 @@ import type {
   AdminProduct,
   IntegrityCheckResult,
 } from "@/types/admin";
-import { getInitialAdminData } from "@/lib/admin-seed-data";
+import { api, ApiError } from "@/lib/api";
+
+/**
+ * Métricas cuantitativas del catálogo sincronizadas desde PostgreSQL.
+ * (RF-10, CA-10.1)
+ */
+export interface CatalogMetrics {
+  totalProducts: number;
+  visibleProducts: number;
+  hiddenProducts: number;
+  totalCategories: number;
+  totalBrands: number;
+}
 
 /**
  * Resultado estructurado para operaciones de mutación de categorías.
@@ -48,17 +61,24 @@ export interface ProductMutationResult {
 }
 
 export interface AdminContextType {
+  // Estado y Sincronización
+  isLoading: boolean;
+  error: string | null;
+  metrics: CatalogMetrics | null;
+  refreshData: () => Promise<void>;
+  refreshMetrics: () => Promise<void>;
+
   // Taxonomías (Categorías y Subcategorías)
   categories: AdminCategory[];
   createCategory: (input: {
     name: string;
     parentId: string | null;
-  }) => CategoryMutationResult;
+  }) => Promise<CategoryMutationResult>;
   updateCategory: (
     id: string,
     input: { name: string; parentId: string | null }
-  ) => CategoryMutationResult;
-  deleteCategory: (id: string) => CategoryMutationResult;
+  ) => Promise<CategoryMutationResult>;
+  deleteCategory: (id: string) => Promise<CategoryMutationResult>;
   canDeleteCategory: (id: string) => IntegrityCheckResult;
   getRootCategories: () => AdminCategory[];
   getChildCategories: (parentId: string) => AdminCategory[];
@@ -67,23 +87,28 @@ export interface AdminContextType {
 
   // Marcas
   brands: AdminBrand[];
-  createBrand: (input: { name: string }) => BrandMutationResult;
-  updateBrand: (id: string, input: { name: string }) => BrandMutationResult;
-  deleteBrand: (id: string) => BrandMutationResult;
+  createBrand: (input: { name: string }) => Promise<BrandMutationResult>;
+  updateBrand: (
+    id: string,
+    input: { name: string }
+  ) => Promise<BrandMutationResult>;
+  deleteBrand: (id: string) => Promise<BrandMutationResult>;
   canDeleteBrand: (id: string) => IntegrityCheckResult;
   getBrandById: (id: string) => AdminBrand | undefined;
   getBrandProductCount: (brandId: string) => number;
 
   // Catálogo de Productos
   products: AdminProduct[];
-  createProduct: (input: Omit<AdminProduct, "id">) => ProductMutationResult;
+  createProduct: (
+    input: Omit<AdminProduct, "id">
+  ) => Promise<ProductMutationResult>;
   updateProduct: (
     id: string,
     input: Partial<Omit<AdminProduct, "id">>
-  ) => ProductMutationResult;
-  deleteProduct: (id: string) => ProductMutationResult;
-  toggleVisibility: (id: string) => ProductMutationResult;
-  toggleProductVisibility: (id: string) => ProductMutationResult;
+  ) => Promise<ProductMutationResult>;
+  deleteProduct: (id: string) => Promise<ProductMutationResult>;
+  toggleVisibility: (id: string) => Promise<ProductMutationResult>;
+  toggleProductVisibility: (id: string) => Promise<ProductMutationResult>;
   searchProducts: (query: string) => AdminProduct[];
 }
 
@@ -91,24 +116,115 @@ const AdminContext = createContext<AdminContextType | null>(null);
 
 export interface AdminProviderProps {
   children: ReactNode;
+  initialCategories?: AdminCategory[] | undefined;
+  initialBrands?: AdminBrand[] | undefined;
+  initialProducts?: AdminProduct[] | undefined;
+  initialMetrics?: CatalogMetrics | undefined;
+  autoFetch?: boolean | undefined;
 }
 
 /**
- * Proveedor de Estado Global de Administración en Memoria Volátil.
- * (RF-05, RF-06, RF-07, RF-10, RF-11, RF-12, RF-15, CA-10.1 - CA-12.5, CL-04 - CL-11)
+ * Proveedor de Estado Global de Administración con Persistencia Real en PostgreSQL.
+ * (RF-05, RF-06, RF-07, RF-08, RF-09, RF-10, Tarea 8.4)
  *
- * Mantiene la base de datos simulada en memoria de React con cero interacción
- * con almacenamiento persistente (localStorage / sessionStorage).
+ * Conecta el frontend con la API REST de Node.js / Express (/server) mediante `api.ts`.
+ * Todas las mutaciones persisten directamente en base de datos relacional y actualizan
+ * el estado local de React exclusivamente tras confirmación HTTP 200/201.
  */
-export function AdminProvider({ children }: AdminProviderProps) {
-  const [initialData] = useState(() => getInitialAdminData());
+export function AdminProvider({
+  children,
+  initialCategories,
+  initialBrands,
+  initialProducts,
+  initialMetrics,
+  autoFetch = true,
+}: AdminProviderProps) {
+  const globalData = (globalThis as any).__TEST_ADMIN_INITIAL_DATA__;
+
   const [categories, setCategories] = useState<AdminCategory[]>(
-    initialData.categories
+    () => initialCategories ?? globalData?.categories ?? []
   );
-  const [brands, setBrands] = useState<AdminBrand[]>(initialData.brands);
+  const [brands, setBrands] = useState<AdminBrand[]>(
+    () => initialBrands ?? globalData?.brands ?? []
+  );
   const [products, setProducts] = useState<AdminProduct[]>(
-    initialData.products
+    () => initialProducts ?? globalData?.products ?? []
   );
+  const [metrics, setMetrics] = useState<CatalogMetrics | null>(
+    () => initialMetrics ?? globalData?.metrics ?? null
+  );
+
+  const [isLoading, setIsLoading] = useState<boolean>(!initialCategories && !globalData);
+  const [error, setError] = useState<string | null>(null);
+
+  // -------------------------------------------------------------------------
+  // Sincronización Inicial y Recarga de Métricas desde PostgreSQL
+  // -------------------------------------------------------------------------
+
+  const refreshMetrics = useCallback(async () => {
+    try {
+      const data = await api.get<CatalogMetrics>("/api/admin/metrics");
+      setMetrics(data);
+    } catch {
+      // Si falla la consulta de métricas se conserva el estado actual sin bloquear la UI
+    }
+  }, []);
+
+  const refreshData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [fetchedBrands, fetchedCategories, fetchedProducts, fetchedMetrics] =
+        await Promise.all([
+          api.get<AdminBrand[]>("/api/brands"),
+          api.get<any[]>("/api/categories"),
+          api.get<any[]>("/api/products"),
+          api.get<CatalogMetrics>("/api/admin/metrics"),
+        ]);
+
+      setBrands(fetchedBrands || []);
+      setCategories(
+        (fetchedCategories || []).map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          parentId: c.parentId ?? null,
+        }))
+      );
+      setProducts(
+        (fetchedProducts || []).map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description || "",
+          imageUrl: p.imageUrl || "",
+          brandId: p.brandId,
+          categoryIds: p.categoryIds || [],
+          vehicleCompatibility: p.vehicleCompatibility || "",
+          condition: p.condition || "Nuevo",
+          price: p.price !== null && p.price !== undefined ? Number(p.price) : null,
+          showPrice: Boolean(p.showPrice),
+          visible: Boolean(p.visible),
+          oem: p.oem || "",
+        }))
+      );
+      setMetrics(fetchedMetrics || null);
+    } catch (err: any) {
+      const msg =
+        (err instanceof ApiError && err.data?.message) ||
+        err?.message ||
+        "Error al conectar con el servidor de base de datos.";
+      setError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const shouldAutoFetch = autoFetch && !globalData;
+
+  useEffect(() => {
+    if (shouldAutoFetch) {
+      refreshData();
+    }
+  }, [shouldAutoFetch, refreshData]);
 
   // -------------------------------------------------------------------------
   // Helpers de Taxonomías
@@ -140,7 +256,7 @@ export function AdminProvider({ children }: AdminProviderProps) {
   );
 
   // -------------------------------------------------------------------------
-  // Verificación de Integridad de Categoría (CA-11.1, CA-11.2, CL-06)
+  // Verificación Preventiva de Integridad de Categoría
   // -------------------------------------------------------------------------
 
   const canDeleteCategory = useCallback(
@@ -185,14 +301,14 @@ export function AdminProvider({ children }: AdminProviderProps) {
   );
 
   // -------------------------------------------------------------------------
-  // Mutaciones de Categorías (RF-10, RF-11)
+  // Mutaciones de Categorías con Persistencia Real (POST, PUT, DELETE)
   // -------------------------------------------------------------------------
 
   const createCategory = useCallback(
-    (input: {
+    async (input: {
       name: string;
       parentId: string | null;
-    }): CategoryMutationResult => {
+    }): Promise<CategoryMutationResult> => {
       const trimmedName = input.name.trim();
 
       if (trimmedName.length < 2) {
@@ -202,7 +318,7 @@ export function AdminProvider({ children }: AdminProviderProps) {
         };
       }
 
-      // Validación de unicidad de nombre (CA-10.5)
+      // Validación preventiva local de unicidad
       const isDuplicate = categories.some(
         (c) => c.name.trim().toLowerCase() === trimmedName.toLowerCase()
       );
@@ -213,7 +329,7 @@ export function AdminProvider({ children }: AdminProviderProps) {
         };
       }
 
-      // Validación de límite de 1 nivel (CA-10.3, CL-04)
+      // Validación de 1 nivel de anidamiento
       if (input.parentId !== null) {
         const parentCategory = categories.find((c) => c.id === input.parentId);
         if (!parentCategory) {
@@ -231,27 +347,44 @@ export function AdminProvider({ children }: AdminProviderProps) {
         }
       }
 
-      const newCategory: AdminCategory = {
-        id: crypto.randomUUID(),
-        name: trimmedName,
-        parentId: input.parentId,
-      };
+      try {
+        const response = await api.post<any>("/api/categories", {
+          name: trimmedName,
+          parentId: input.parentId,
+        });
 
-      setCategories((prev) => [...prev, newCategory]);
+        const newCategory: AdminCategory = {
+          id: response.id,
+          name: response.name,
+          parentId: response.parentId ?? null,
+        };
 
-      return {
-        success: true,
-        category: newCategory,
-      };
+        setCategories((prev) => [...prev, newCategory]);
+        refreshMetrics().catch(() => {});
+
+        return {
+          success: true,
+          category: newCategory,
+        };
+      } catch (err: any) {
+        const reason =
+          (err instanceof ApiError && err.data?.message) ||
+          err?.message ||
+          "Error al crear la categoría en el servidor.";
+        return {
+          success: false,
+          reason,
+        };
+      }
     },
-    [categories]
+    [categories, refreshMetrics]
   );
 
   const updateCategory = useCallback(
-    (
+    async (
       id: string,
       input: { name: string; parentId: string | null }
-    ): CategoryMutationResult => {
+    ): Promise<CategoryMutationResult> => {
       const currentCategory = categories.find((c) => c.id === id);
       if (!currentCategory) {
         return {
@@ -268,7 +401,6 @@ export function AdminProvider({ children }: AdminProviderProps) {
         };
       }
 
-      // Unicidad respecto a otras categorías (CA-10.5)
       const isDuplicate = categories.some(
         (c) =>
           c.id !== id &&
@@ -281,7 +413,6 @@ export function AdminProvider({ children }: AdminProviderProps) {
         };
       }
 
-      // Prevención de ciclos: si ya tiene hijas no puede convertirse en hija (CA-10.4, CL-05)
       const categoryHasChildren = categories.some((c) => c.parentId === id);
       if (categoryHasChildren && input.parentId !== null) {
         return {
@@ -291,7 +422,6 @@ export function AdminProvider({ children }: AdminProviderProps) {
         };
       }
 
-      // Auto-referencia prohibida
       if (input.parentId === id) {
         return {
           success: false,
@@ -299,7 +429,6 @@ export function AdminProvider({ children }: AdminProviderProps) {
         };
       }
 
-      // Validación de 1 nivel: el padre debe ser raíz (CA-10.3, CL-04)
       if (input.parentId !== null) {
         const targetParent = categories.find((c) => c.id === input.parentId);
         if (!targetParent) {
@@ -317,23 +446,42 @@ export function AdminProvider({ children }: AdminProviderProps) {
         }
       }
 
-      setCategories((prev) =>
-        prev.map((c) =>
-          c.id === id
-            ? { ...c, name: trimmedName, parentId: input.parentId }
-            : c
-        )
-      );
+      try {
+        const response = await api.put<any>(`/api/categories/${id}`, {
+          name: trimmedName,
+          parentId: input.parentId,
+        });
 
-      return {
-        success: true,
-      };
+        const updatedCategory: AdminCategory = {
+          id: response.id,
+          name: response.name,
+          parentId: response.parentId ?? null,
+        };
+
+        setCategories((prev) =>
+          prev.map((c) => (c.id === id ? updatedCategory : c))
+        );
+
+        return {
+          success: true,
+          category: updatedCategory,
+        };
+      } catch (err: any) {
+        const reason =
+          (err instanceof ApiError && err.data?.message) ||
+          err?.message ||
+          "Error al actualizar la categoría en el servidor.";
+        return {
+          success: false,
+          reason,
+        };
+      }
     },
     [categories]
   );
 
   const deleteCategory = useCallback(
-    (id: string): CategoryMutationResult => {
+    async (id: string): Promise<CategoryMutationResult> => {
       const check = canDeleteCategory(id);
       if (!check.allowed) {
         return {
@@ -344,14 +492,33 @@ export function AdminProvider({ children }: AdminProviderProps) {
         };
       }
 
-      setCategories((prev) => prev.filter((c) => c.id !== id));
-      return { success: true, blocked: false };
+      try {
+        await api.delete<{ success: boolean; message: string }>(
+          `/api/categories/${id}`
+        );
+
+        setCategories((prev) => prev.filter((c) => c.id !== id));
+        refreshMetrics().catch(() => {});
+
+        return { success: true, blocked: false };
+      } catch (err: any) {
+        const isConflict = err instanceof ApiError && err.status === 409;
+        const reason =
+          (err instanceof ApiError && err.data?.message) ||
+          err?.message ||
+          "No se pudo eliminar la categoría en el servidor.";
+        return {
+          success: false,
+          blocked: isConflict,
+          reason,
+        };
+      }
     },
-    [canDeleteCategory]
+    [canDeleteCategory, refreshMetrics]
   );
 
   // -------------------------------------------------------------------------
-  // Helpers y Verificación de Integridad de Marcas (RF-12, CA-12.3, CL-06)
+  // Helpers y Verificación Preventiva de Marcas
   // -------------------------------------------------------------------------
 
   const getBrandById = useCallback(
@@ -397,11 +564,11 @@ export function AdminProvider({ children }: AdminProviderProps) {
   );
 
   // -------------------------------------------------------------------------
-  // Mutaciones de Marcas (RF-12, CA-12.1 - CA-12.5, CL-09)
+  // Mutaciones de Marcas con Persistencia Real (POST, PUT, DELETE)
   // -------------------------------------------------------------------------
 
   const createBrand = useCallback(
-    (input: { name: string }): BrandMutationResult => {
+    async (input: { name: string }): Promise<BrandMutationResult> => {
       const trimmedName = input.name.trim();
 
       if (trimmedName.length < 2) {
@@ -411,7 +578,6 @@ export function AdminProvider({ children }: AdminProviderProps) {
         };
       }
 
-      // Validación de unicidad case-insensitive con trim (CA-12.2)
       const isDuplicate = brands.some(
         (b) => b.name.trim().toLowerCase() === trimmedName.toLowerCase()
       );
@@ -422,23 +588,42 @@ export function AdminProvider({ children }: AdminProviderProps) {
         };
       }
 
-      const newBrand: AdminBrand = {
-        id: crypto.randomUUID(),
-        name: trimmedName,
-      };
+      try {
+        const response = await api.post<AdminBrand>("/api/brands", {
+          name: trimmedName,
+        });
 
-      setBrands((prev) => [...prev, newBrand]);
+        const newBrand: AdminBrand = {
+          id: response.id,
+          name: response.name,
+        };
 
-      return {
-        success: true,
-        brand: newBrand,
-      };
+        setBrands((prev) => [...prev, newBrand]);
+        refreshMetrics().catch(() => {});
+
+        return {
+          success: true,
+          brand: newBrand,
+        };
+      } catch (err: any) {
+        const reason =
+          (err instanceof ApiError && err.data?.message) ||
+          err?.message ||
+          "Error al registrar la marca en el servidor.";
+        return {
+          success: false,
+          reason,
+        };
+      }
     },
-    [brands]
+    [brands, refreshMetrics]
   );
 
   const updateBrand = useCallback(
-    (id: string, input: { name: string }): BrandMutationResult => {
+    async (
+      id: string,
+      input: { name: string }
+    ): Promise<BrandMutationResult> => {
       const currentBrand = brands.find((b) => b.id === id);
       if (!currentBrand) {
         return {
@@ -455,7 +640,6 @@ export function AdminProvider({ children }: AdminProviderProps) {
         };
       }
 
-      // Unicidad case-insensitive respecto a otras marcas (CA-12.2)
       const isDuplicate = brands.some(
         (b) =>
           b.id !== id &&
@@ -468,26 +652,40 @@ export function AdminProvider({ children }: AdminProviderProps) {
         };
       }
 
-      // Renombrado por UUID preservando relaciones (CA-12.4, CL-09)
-      const updatedBrand: AdminBrand = {
-        ...currentBrand,
-        name: trimmedName,
-      };
+      try {
+        const response = await api.put<AdminBrand>(`/api/brands/${id}`, {
+          name: trimmedName,
+        });
 
-      setBrands((prev) =>
-        prev.map((b) => (b.id === id ? updatedBrand : b))
-      );
+        const updatedBrand: AdminBrand = {
+          id: response.id,
+          name: response.name,
+        };
 
-      return {
-        success: true,
-        brand: updatedBrand,
-      };
+        setBrands((prev) =>
+          prev.map((b) => (b.id === id ? updatedBrand : b))
+        );
+
+        return {
+          success: true,
+          brand: updatedBrand,
+        };
+      } catch (err: any) {
+        const reason =
+          (err instanceof ApiError && err.data?.message) ||
+          err?.message ||
+          "Error al actualizar la marca en el servidor.";
+        return {
+          success: false,
+          reason,
+        };
+      }
     },
     [brands]
   );
 
   const deleteBrand = useCallback(
-    (id: string): BrandMutationResult => {
+    async (id: string): Promise<BrandMutationResult> => {
       const check = canDeleteBrand(id);
       if (!check.allowed) {
         return {
@@ -498,18 +696,39 @@ export function AdminProvider({ children }: AdminProviderProps) {
         };
       }
 
-      setBrands((prev) => prev.filter((b) => b.id !== id));
-      return { success: true, blocked: false };
+      try {
+        await api.delete<{ success: boolean; message: string }>(
+          `/api/brands/${id}`
+        );
+
+        setBrands((prev) => prev.filter((b) => b.id !== id));
+        refreshMetrics().catch(() => {});
+
+        return { success: true, blocked: false };
+      } catch (err: any) {
+        const isConflict = err instanceof ApiError && err.status === 409;
+        const reason =
+          (err instanceof ApiError && err.data?.message) ||
+          err?.message ||
+          "No se pudo eliminar la marca en el servidor.";
+        return {
+          success: false,
+          blocked: isConflict,
+          reason,
+        };
+      }
     },
-    [canDeleteBrand]
+    [canDeleteBrand, refreshMetrics]
   );
 
   // -------------------------------------------------------------------------
-  // Mutaciones y Consultas de Productos (RF-05, RF-06, RF-07, CL-11)
+  // Mutaciones de Productos con Persistencia Real (POST, PUT, PATCH, DELETE)
   // -------------------------------------------------------------------------
 
   const createProduct = useCallback(
-    (input: Omit<AdminProduct, "id">): ProductMutationResult => {
+    async (
+      input: Omit<AdminProduct, "id">
+    ): Promise<ProductMutationResult> => {
       const trimmedName = input.name?.trim() ?? "";
       if (trimmedName.length < 3) {
         return {
@@ -525,27 +744,66 @@ export function AdminProvider({ children }: AdminProviderProps) {
         };
       }
 
-      const newProduct: AdminProduct = {
-        ...input,
-        id: crypto.randomUUID(),
-        name: trimmedName,
-      };
+      try {
+        const payload = {
+          name: trimmedName,
+          description: input.description?.trim() ?? "",
+          imageUrl: input.imageUrl,
+          brandId: input.brandId,
+          categoryIds: input.categoryIds,
+          condition: input.condition,
+          price: input.price,
+          showPrice: input.showPrice,
+          visible: input.visible,
+          oem: input.oem ? input.oem.trim() : null,
+          vehicleCompatibility: input.vehicleCompatibility
+            ? input.vehicleCompatibility.trim()
+            : null,
+        };
 
-      setProducts((prev) => [newProduct, ...prev]);
+        const response = await api.post<any>("/api/products", payload);
 
-      return {
-        success: true,
-        product: newProduct,
-      };
+        const newProduct: AdminProduct = {
+          id: response.id,
+          name: response.name,
+          description: response.description,
+          imageUrl: response.imageUrl,
+          brandId: response.brandId,
+          categoryIds: response.categoryIds || [],
+          vehicleCompatibility: response.vehicleCompatibility || "",
+          condition: response.condition,
+          price: response.price !== null && response.price !== undefined ? Number(response.price) : null,
+          showPrice: Boolean(response.showPrice),
+          visible: Boolean(response.visible),
+          oem: response.oem || "",
+        };
+
+        setProducts((prev) => [newProduct, ...prev]);
+        refreshMetrics().catch(() => {});
+
+        return {
+          success: true,
+          product: newProduct,
+        };
+      } catch (err: any) {
+        const reason =
+          (err instanceof ApiError && err.data?.message) ||
+          err?.message ||
+          "Error al crear el producto en el servidor.";
+        return {
+          success: false,
+          reason,
+        };
+      }
     },
-    []
+    [refreshMetrics]
   );
 
   const updateProduct = useCallback(
-    (
+    async (
       id: string,
       input: Partial<Omit<AdminProduct, "id">>
-    ): ProductMutationResult => {
+    ): Promise<ProductMutationResult> => {
       const currentProduct = products.find((p) => p.id === id);
       if (!currentProduct) {
         return {
@@ -554,42 +812,66 @@ export function AdminProvider({ children }: AdminProviderProps) {
         };
       }
 
-      const updatedProduct: AdminProduct = {
-        ...currentProduct,
-        ...input,
-        id,
-      };
+      try {
+        const merged = { ...currentProduct, ...input };
+        const payload = {
+          name: merged.name.trim(),
+          description: merged.description.trim(),
+          imageUrl: merged.imageUrl,
+          brandId: merged.brandId,
+          categoryIds: merged.categoryIds,
+          condition: merged.condition,
+          price: merged.price,
+          showPrice: merged.showPrice,
+          visible: merged.visible,
+          oem: merged.oem ? merged.oem.trim() : null,
+          vehicleCompatibility: merged.vehicleCompatibility
+            ? merged.vehicleCompatibility.trim()
+            : null,
+        };
 
-      setProducts((prev) =>
-        prev.map((p) => (p.id === id ? updatedProduct : p))
-      );
+        const response = await api.put<any>(`/api/products/${id}`, payload);
 
-      return {
-        success: true,
-        product: updatedProduct,
-      };
-    },
-    [products]
-  );
+        const updatedProduct: AdminProduct = {
+          id: response.id,
+          name: response.name,
+          description: response.description,
+          imageUrl: response.imageUrl,
+          brandId: response.brandId,
+          categoryIds: response.categoryIds || [],
+          vehicleCompatibility: response.vehicleCompatibility || "",
+          condition: response.condition,
+          price: response.price !== null && response.price !== undefined ? Number(response.price) : null,
+          showPrice: Boolean(response.showPrice),
+          visible: Boolean(response.visible),
+          oem: response.oem || "",
+        };
 
-  const deleteProduct = useCallback(
-    (id: string): ProductMutationResult => {
-      const currentProduct = products.find((p) => p.id === id);
-      if (!currentProduct) {
+        setProducts((prev) =>
+          prev.map((p) => (p.id === id ? updatedProduct : p))
+        );
+        refreshMetrics().catch(() => {});
+
+        return {
+          success: true,
+          product: updatedProduct,
+        };
+      } catch (err: any) {
+        const reason =
+          (err instanceof ApiError && err.data?.message) ||
+          err?.message ||
+          "Error al actualizar el producto en el servidor.";
         return {
           success: false,
-          reason: "Producto no encontrado.",
+          reason,
         };
       }
-
-      setProducts((prev) => prev.filter((p) => p.id !== id));
-      return { success: true };
     },
-    [products]
+    [products, refreshMetrics]
   );
 
   const toggleProductVisibility = useCallback(
-    (id: string): ProductMutationResult => {
+    async (id: string): Promise<ProductMutationResult> => {
       const currentProduct = products.find((p) => p.id === id);
       if (!currentProduct) {
         return {
@@ -598,24 +880,75 @@ export function AdminProvider({ children }: AdminProviderProps) {
         };
       }
 
-      const updatedProduct: AdminProduct = {
-        ...currentProduct,
-        visible: !currentProduct.visible,
-      };
+      try {
+        const nextVisible = !currentProduct.visible;
+        const response = await api.patch<any>(
+          `/api/products/${id}/visibility`,
+          { visible: nextVisible }
+        );
 
-      setProducts((prev) =>
-        prev.map((p) => (p.id === id ? updatedProduct : p))
-      );
+        const updatedProduct: AdminProduct = {
+          ...currentProduct,
+          visible: response.visible,
+        };
 
-      return {
-        success: true,
-        product: updatedProduct,
-      };
+        setProducts((prev) =>
+          prev.map((p) => (p.id === id ? updatedProduct : p))
+        );
+        refreshMetrics().catch(() => {});
+
+        return {
+          success: true,
+          product: updatedProduct,
+        };
+      } catch (err: any) {
+        const reason =
+          (err instanceof ApiError && err.data?.message) ||
+          err?.message ||
+          "Error al modificar la visibilidad en el servidor.";
+        return {
+          success: false,
+          reason,
+        };
+      }
     },
-    [products]
+    [products, refreshMetrics]
   );
 
   const toggleVisibility = toggleProductVisibility;
+
+  const deleteProduct = useCallback(
+    async (id: string): Promise<ProductMutationResult> => {
+      const currentProduct = products.find((p) => p.id === id);
+      if (!currentProduct) {
+        return {
+          success: false,
+          reason: "Producto no encontrado.",
+        };
+      }
+
+      try {
+        await api.delete<{ success: boolean; message: string }>(
+          `/api/products/${id}`
+        );
+
+        setProducts((prev) => prev.filter((p) => p.id !== id));
+        refreshMetrics().catch(() => {});
+
+        return { success: true };
+      } catch (err: any) {
+        const reason =
+          (err instanceof ApiError && err.data?.message) ||
+          err?.message ||
+          "Error al eliminar el producto en el servidor.";
+        return {
+          success: false,
+          reason,
+        };
+      }
+    },
+    [products, refreshMetrics]
+  );
 
   /**
    * Búsqueda en catálogo literal insensible a mayúsculas/minúsculas.
@@ -638,6 +971,12 @@ export function AdminProvider({ children }: AdminProviderProps) {
   );
 
   const value: AdminContextType = {
+    isLoading,
+    error,
+    metrics,
+    refreshData,
+    refreshMetrics,
+
     // Taxonomías
     categories,
     createCategory,

@@ -36,8 +36,14 @@ async function request<T>(
   const { params, body, isFormData, headers: customHeaders, ...customOptions } = options;
 
   // 1. Construir URL y Query Params
-  const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  let url = `${BASE_URL}${cleanEndpoint}`;
+  let url: string;
+  if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
+    url = endpoint;
+  } else {
+    const base = BASE_URL.endsWith("/api") ? BASE_URL.slice(0, -4) : BASE_URL;
+    const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+    url = `${base}${cleanEndpoint}`;
+  }
 
   if (params) {
     const searchParams = new URLSearchParams();
@@ -52,8 +58,11 @@ async function request<T>(
     }
   }
 
-  // 2. Cabeceras por defecto
+  // 2. Cabeceras por defecto y Anti-CSRF
   const headers = new Headers(customHeaders);
+  const method = (customOptions.method || "GET").toUpperCase();
+
+  // Inyección obligatoria de cabecera Anti-CSRF para peticiones mutables y peticiones seguras
   headers.set("X-Requested-With", "XMLHttpRequest");
 
   if (!isFormData && body && !(body instanceof FormData)) {
@@ -71,8 +80,9 @@ async function request<T>(
   // 4. Ejecutar fetch con inclusión obligatoria de credenciales/cookies
   const fetchInit: RequestInit = {
     ...customOptions,
+    method,
     headers,
-    credentials: "include", // Mandatorio para cookies HttpOnly (RF-01, RF-03)
+    credentials: customOptions.credentials || "include", // Mandatorio para cookies HttpOnly (RF-01, RF-03)
   };
 
   if (formattedBody !== null) {

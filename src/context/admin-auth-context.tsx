@@ -41,10 +41,12 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   );
   const [user, setUser] = useState<AdminUser | null>(null);
 
-  // Rehidratación silenciosa de sesión al montar mediante GET /api/auth/me (RF-03, Tarea 8.2)
+  // Rehidratación silenciosa de sesión al montar mediante GET a http://localhost:3001/api/auth/me
   const checkSession = async (): Promise<void> => {
     try {
-      const currentUser = await api.get<AdminUser>("/api/auth/me");
+      const currentUser = await api.get<AdminUser>("http://localhost:3001/api/auth/me", {
+        credentials: "include",
+      });
       if (currentUser && currentUser.id) {
         setUser(currentUser);
         setIsAuthenticated(true);
@@ -57,9 +59,11 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // Solo chequear en runtime real (development o production)
+    // Rehidratación automática de sesión al montar la app si existe cookie HttpOnly válida
     if (import.meta.env.MODE !== "test") {
-      checkSession();
+      void checkSession();
+    } else {
+      setIsLoading(false);
     }
   }, []);
 
@@ -92,12 +96,18 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       };
     }
 
-    // 3. Entorno real (development / production): llamada a POST /api/auth/login
+    // 3. Entorno real (development / production): llamada a POST http://localhost:3001/api/auth/login
     try {
-      const response = await api.post<{ user: AdminUser }>("/api/auth/login", {
-        email,
-        password,
-      });
+      const response = await api.post<{ user: AdminUser }>(
+        "http://localhost:3001/api/auth/login",
+        {
+          email,
+          password,
+        },
+        {
+          credentials: "include",
+        },
+      );
 
       if (response && response.user) {
         setIsAuthenticated(true);
@@ -126,7 +136,9 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const logout = (): void => {
     setIsAuthenticated(false);
     setUser(null);
-    void api.post("/api/auth/logout").catch(() => {});
+    void api
+      .post("http://localhost:3001/api/auth/logout", undefined, { credentials: "include" })
+      .catch(() => {});
   };
 
   return (

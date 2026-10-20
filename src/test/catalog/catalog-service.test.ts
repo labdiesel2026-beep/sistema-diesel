@@ -77,7 +77,7 @@ describe("Catalog Service HTTP Client (T-02)", () => {
 
     const visibleProducts = await catalogService.getVisibleProducts();
 
-    expect(api.get).toHaveBeenCalledWith("/api/products");
+    expect(api.get).toHaveBeenCalledWith("http://localhost:3001/api/products");
     expect(visibleProducts).toHaveLength(2);
     expect(visibleProducts.every((p) => p.visible === true)).toBe(true);
     expect(visibleProducts.map((p) => p.id)).toEqual([
@@ -91,7 +91,7 @@ describe("Catalog Service HTTP Client (T-02)", () => {
 
     const allProducts = await catalogService.getAllProductsForValidation();
 
-    expect(api.get).toHaveBeenCalledWith("/api/products");
+    expect(api.get).toHaveBeenCalledWith("http://localhost:3001/api/products");
     expect(allProducts).toHaveLength(3);
     expect(allProducts.some((p) => p.visible === false)).toBe(true);
   });
@@ -108,8 +108,8 @@ describe("Catalog Service HTTP Client (T-02)", () => {
     const categories = await catalogService.getCategories();
     const brands = await catalogService.getBrands();
 
-    expect(api.get).toHaveBeenCalledWith("/api/categories");
-    expect(api.get).toHaveBeenCalledWith("/api/brands");
+    expect(api.get).toHaveBeenCalledWith("http://localhost:3001/api/categories");
+    expect(api.get).toHaveBeenCalledWith("http://localhost:3001/api/brands");
     expect(categories).toEqual(mockCategories);
     expect(brands).toEqual(mockBrands);
   });
@@ -120,7 +120,7 @@ describe("Catalog Service HTTP Client (T-02)", () => {
 
     const product = await catalogService.getProductById(singleProduct.id);
 
-    expect(api.get).toHaveBeenCalledWith(`/api/products/${singleProduct.id}`);
+    expect(api.get).toHaveBeenCalledWith(`http://localhost:3001/api/products/${singleProduct.id}`);
     expect(product).toEqual(singleProduct);
   });
 

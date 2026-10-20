@@ -26,8 +26,13 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Peticiones sin origen (ej. curl, postman, herramientas internas) o exactamente CORS_ORIGIN
-      if (!origin || origin === ENV.CORS_ORIGIN) {
+      // Peticiones sin origen (ej. curl, postman, herramientas internas) o CORS_ORIGIN / dev ports
+      if (
+        !origin ||
+        origin === ENV.CORS_ORIGIN ||
+        origin === "http://localhost:3000" ||
+        origin === "http://localhost:5173"
+      ) {
         callback(null, true);
       } else {
         callback(new Error(`Bloqueado por política CORS: origen ${origin} no permitido`));

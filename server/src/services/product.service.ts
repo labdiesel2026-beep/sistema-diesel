@@ -1,6 +1,6 @@
 import { prisma } from "../config/prisma.js";
 import { AppError } from "../middleware/error.middleware.js";
-import type { ProductFormData } from "../schemas/product.schemas.js";
+import type { ProductFormData, ProductFormInput } from "../schemas/product.schemas.js";
 
 export interface ProductDto {
   id: string;
@@ -170,7 +170,7 @@ export class ProductService {
    * Crea un producto de forma atómica en una transacción interactiva de Prisma ($transaction),
    * persistiendo sus atributos y las filas en la tabla pivote ProductCategory (D-03).
    */
-  async createProduct(data: ProductFormData): Promise<ProductDto> {
+  async createProduct(data: ProductFormInput): Promise<ProductDto> {
     return prisma.$transaction(async (tx) => {
       // 1. Validar existencia de la marca
       const brand = await tx.brand.findUnique({
@@ -194,7 +194,8 @@ export class ProductService {
       let featuredAt: Date | null = null;
 
       if (isFeatured) {
-        if (!data.visible) {
+        const isVisible = data.visible ?? true;
+        if (!isVisible) {
           throw AppError.badRequest("No se puede destacar un producto con visibilidad oculta");
         }
         const count = await tx.product.count({
@@ -215,9 +216,9 @@ export class ProductService {
           brandId: data.brandId,
           vehicleCompatibility: data.vehicleCompatibility?.trim() || null,
           condition: data.condition,
-          price: data.price !== null ? Math.round(data.price) : null,
-          showPrice: data.showPrice,
-          visible: data.visible,
+          price: data.price !== null && data.price !== undefined ? Math.round(data.price) : null,
+          showPrice: data.showPrice ?? true,
+          visible: data.visible ?? true,
           oem: data.oem?.trim() || null,
           isFeatured,
           featuredAt,
@@ -245,7 +246,7 @@ export class ProductService {
    */
   async updateProduct(
     id: string,
-    data: ProductFormData,
+    data: ProductFormInput,
   ): Promise<{ product: ProductDto; previousImageUrl: string }> {
     return prisma.$transaction(async (tx) => {
       // 1. Verificar existencia del producto
@@ -290,7 +291,8 @@ export class ProductService {
       let featuredAt = current.featuredAt;
 
       if (isFeatured) {
-        if (!data.visible) {
+        const isVisible = data.visible !== undefined ? data.visible : current.visible;
+        if (!isVisible) {
           throw AppError.badRequest("No se puede destacar un producto con visibilidad oculta");
         }
         if (!current.isFeatured) {
@@ -316,9 +318,9 @@ export class ProductService {
           brandId: data.brandId,
           vehicleCompatibility: data.vehicleCompatibility?.trim() || null,
           condition: data.condition,
-          price: data.price !== null ? Math.round(data.price) : null,
-          showPrice: data.showPrice,
-          visible: data.visible,
+          price: data.price !== null && data.price !== undefined ? Math.round(data.price) : null,
+          showPrice: data.showPrice !== undefined ? data.showPrice : current.showPrice,
+          visible: data.visible !== undefined ? data.visible : current.visible,
           oem: data.oem?.trim() || null,
           isFeatured,
           featuredAt,

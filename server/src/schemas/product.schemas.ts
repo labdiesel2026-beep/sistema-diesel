@@ -67,6 +67,8 @@ export const productQuerySchema = z
   .strict();
 
 export type ProductFormData = z.infer<typeof productFormSchema>;
+export type ProductFormInput = z.input<typeof productFormSchema>;
 export type VisibilityPatchData = z.infer<typeof visibilityPatchSchema>;
 export type FeaturedPatchData = z.infer<typeof featuredPatchSchema>;
 export type ProductQueryData = z.infer<typeof productQuerySchema>;
+

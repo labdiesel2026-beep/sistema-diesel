@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { BenchShowcaseSection } from "@/components/landing/BenchShowcaseSection";
 import { BrandsMarquee } from "@/components/landing/BrandsMarquee";
 import { FeaturedProductsCarousel } from "@/components/landing/FeaturedProductsCarousel";
 import { FloatingWhatsApp } from "@/components/landing/FloatingWhatsApp";
 import { HeroSection } from "@/components/landing/HeroSection";
+import { IntroSection } from "@/components/landing/IntroSection";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LocationSection } from "@/components/landing/LocationSection";
@@ -47,18 +49,20 @@ export function LandingPage() {
   }, []);
 
   return (
-    <>
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-white selection:text-black">
       <LandingNavbar />
       <main>
         <HeroSection />
+        <IntroSection />
         <FeaturedProductsCarousel />
         <BrandsMarquee />
         <ServicesSection />
+        <BenchShowcaseSection />
         <WarrantySection />
         <LocationSection />
       </main>
       <LandingFooter />
       <FloatingWhatsApp />
-    </>
+    </div>
   );
 }

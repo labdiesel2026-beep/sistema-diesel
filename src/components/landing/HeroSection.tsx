@@ -45,110 +45,91 @@ export function HeroSection({ className = "" }: HeroSectionProps) {
   return (
     <section
       id="inicio"
-      className={`scroll-mt-20 relative flex min-h-[100dvh] flex-col justify-center overflow-hidden border-b border-border/80 border-blue-500/20 bg-background text-foreground ${className}`}
+      className={`relative h-screen w-full min-h-[100dvh] overflow-hidden border-b border-white/10 border-blue-500/20 bg-zinc-950 text-foreground flex flex-col justify-between ${className}`}
     >
-      {/* Fotografía real del taller en inmersión Edge-to-Edge (75%+ superior nítida y cruda) */}
+      {/* 1. Fotografía del laboratorio a pantalla completa (h-screen w-full object-cover) */}
       <motion.img
         src={tallerHeroImg}
         alt="Instalaciones y banco de pruebas computarizado de Laboratorio Diésel"
         width={1920}
         height={1080}
-        initial={{ scale: 1 }}
-        animate={{ scale: 1.05 }}
-        transition={{ duration: 12, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
-        className="absolute inset-0 h-full w-full object-cover max-md:[object-position:center_35%] max-md:opacity-30 md:object-center opacity-65 md:opacity-80"
+        initial={{ scale: 1.02 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 10, ease: "easeOut" }}
+        className="absolute inset-0 h-full w-full object-cover brightness-[0.7] max-md:[object-position:center_35%] max-md:opacity-30 md:object-center"
         fetchPriority="high"
       />
 
-      {/* Gradientes Oscuros Estrictamente Localizados detrás del Bloque Tipográfico (Sin velo general) */}
+      {/* Sutil viñeta para profundidad visual sin veladuras genéricas */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/95 via-black/70 to-transparent"
-        aria-hidden="true"
-      />
-      <div
-        className="pointer-events-none absolute inset-y-0 left-0 w-full max-w-3xl bg-gradient-to-r from-black/85 via-black/45 to-transparent max-md:hidden"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-zinc-950/40 via-transparent to-zinc-950/80"
         aria-hidden="true"
       />
 
-      {/* Contenido Principal del Hero con Contraste Localizado WCAG */}
-      <div className="site-container relative z-10 py-20 lg:py-28">
-        <motion.div
-          className="max-w-3xl"
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
+      {/* 2. Texto principal colosal y centrado al estilo Longbow ("Speed of Lightness") */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-4 pointer-events-none select-none z-10 text-center">
+        <motion.p
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="mb-4 font-mono text-[11px] md:text-xs uppercase tracking-[0.35em] text-zinc-300 mix-blend-difference"
         >
-          {/* Eyebrow con denominación y eslogan */}
-          <motion.div
-            variants={itemVariants}
-            className="mb-5 inline-flex items-center gap-2 rounded border border-border/80 bg-card/90 px-3.5 py-1.5 text-micro text-foreground backdrop-blur-md shadow-xs"
-          >
-            <Wrench className="size-3 text-whatsapp" />
-            <span className="font-semibold">{SITE_CONFIG.name}</span>
-            <span className="text-white/40">·</span>
-            <span className="text-muted-foreground">{SITE_CONFIG.tagline}</span>
-          </motion.div>
+          <span>Especialistas en Inyección</span>
+          <span className="mx-3 text-white/40">·</span>
+          <span>{SITE_CONFIG.tagline}</span>
+        </motion.p>
 
-          {/* Título Principal Macro con Sombra Localizada Multicapa (Contraste > 7:1) */}
-          <motion.h1
-            variants={itemVariants}
-            className="font-display text-4xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] sm:text-6xl lg:text-7xl leading-[1.05]"
-          >
-            Precisión y tecnología en{" "}
-            <span className="text-white underline decoration-whatsapp/80 decoration-4 underline-offset-8">
-              inyección diésel
-            </span>
-          </motion.h1>
+        <motion.h1
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          className="text-6xl md:text-[8rem] leading-none tracking-tighter text-white text-center absolute inset-0 flex items-center justify-center mix-blend-difference font-light uppercase"
+        >
+          {SITE_CONFIG.name}
+        </motion.h1>
+      </div>
 
-          {/* Propuestas de Valor Técnicas */}
-          <motion.div
-            variants={itemVariants}
-            className="mt-7 flex flex-col gap-2.5 text-white/90 drop-shadow-[0_1px_6px_rgba(0,0,0,0.85)] sm:text-base"
-          >
+      {/* Espaciador superior para compensar el navbar superpuesto */}
+      <div className="h-20" aria-hidden="true" />
+
+      {/* 3. Barra inferior ortogonal de especificaciones y acciones institucionales */}
+      <div className="relative z-20 border-t border-white/10 bg-zinc-950/70 backdrop-blur-md px-6 py-6 sm:px-12">
+        <div className="site-container flex flex-col gap-6 md:flex-row md:items-center md:justify-between p-0">
+          {/* Propuestas de Valor Técnicas como especificaciones de alto nivel */}
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-10 text-xs font-mono uppercase tracking-widest text-zinc-400">
             {SITE_CONFIG.valueProps.map((prop) => (
-              <div key={prop} className="flex items-start gap-3">
-                <CheckCircle2 className="mt-0.5 size-4.5 shrink-0 text-whatsapp" />
-                <span className="font-medium text-white/95">{prop}</span>
+              <div key={prop} className="flex items-center gap-2.5">
+                <span className="size-1.5 bg-zinc-400" />
+                <span className="text-zinc-300">{prop}</span>
               </div>
             ))}
-          </motion.div>
+          </div>
 
-          {/* Llamados a la Acción (CTAs) */}
-          <motion.div
-            variants={itemVariants}
-            className="mt-9 flex flex-col gap-3.5 sm:flex-row sm:items-center"
-          >
-            {/* CTA Principal -> Catálogo con Shimmer Continuo */}
+          {/* Acciones principales ortogonales estilo Longbow */}
+          <div className="flex items-center gap-4 shrink-0">
             <Button
-              variant="industrial"
+              variant="outline"
               asChild
-              className="relative overflow-hidden h-12 px-7 text-sm font-bold shadow-xl shadow-black/50 transition-all duration-300 hover:scale-[1.02] ring-1 ring-white/20"
+              className="h-10 px-6 rounded-none border border-white/20 bg-white/[0.06] text-xs font-mono uppercase tracking-widest text-white hover:bg-white hover:text-black hover:border-white transition-all shadow-none"
             >
-              <Link to="/catalogo" className="relative overflow-hidden">
-                <div
-                  className="pointer-events-none absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/25 to-transparent"
-                  aria-hidden="true"
-                />
-                <span className="relative z-10 flex items-center">
-                  Ver Catálogo de Inyectores
-                  <ArrowRight className="ml-2 size-4.5 transition-transform duration-200 group-hover:translate-x-1" />
-                </span>
+              <Link to="/catalogo" className="flex items-center">
+                <span>Ver Catálogo de Inyectores</span>
+                <ArrowRight className="ml-2 size-3.5" />
               </Link>
             </Button>
 
-            {/* CTA Secundario -> Contacto con WhatsApp */}
             <Button
               variant="ghost"
               asChild
-              className="h-12 border-border/80 bg-black/60 px-7 text-sm font-semibold text-white hover:border-white/25 hover:bg-black/80 transition-all shadow-md backdrop-blur-md"
+              className="h-10 px-6 rounded-none border border-white/10 bg-transparent text-xs font-mono uppercase tracking-widest text-zinc-400 hover:text-white hover:border-white/30 transition-all shadow-none"
             >
               <a href="#contacto" className="flex items-center">
-                <FaWhatsapp className="mr-2.5 size-4.5 text-whatsapp transition-transform group-hover:scale-110" />
-                Contactar al Taller
+                <FaWhatsapp className="mr-2 size-3.5 text-whatsapp" />
+                <span>Contactar al Taller</span>
               </a>
             </Button>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   );

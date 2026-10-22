@@ -32,115 +32,104 @@ const BENTO_GRID_CLASSES: Record<string, string> = {
   "diagnostico-repuestos": "lg:col-span-6 md:col-span-2 min-h-[300px] lg:min-h-[360px]",
 };
 
+const ROMAN_NUMERALS = ["I", "II", "III", "IV"];
+
 export function ServicesSection({ className = "" }: ServicesSectionProps) {
   return (
     <section
       id="servicios"
-      className={`scroll-mt-20 border-b border-border/80 bg-background py-20 sm:py-28 ${className}`}
+      className={`scroll-mt-20 border-b border-white/10 bg-zinc-950 py-24 md:py-32 ${className}`}
       aria-labelledby="servicios-heading"
     >
       <div className="site-container">
-        {/* Encabezado Técnico de Sección */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="mx-auto max-w-2xl text-center"
-        >
-          <div className="mb-3.5 inline-flex items-center gap-2 rounded border border-border/80 bg-card px-3 py-1 text-micro text-muted-foreground shadow-xs">
-            <span className="size-1.5 rounded-full bg-whatsapp" />
-            Capacidad Operativa y Calibración
-          </div>
+        {/* Encabezado Editorial Estilo Longbow */}
+        <div className="mb-20 max-w-4xl">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-600 mb-4">
+            Pilares Técnicos y Capacidad Operativa
+          </p>
           <h2
             id="servicios-heading"
-            className="font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl"
+            className="text-4xl md:text-7xl font-light tracking-tighter text-white uppercase leading-none"
           >
             Soluciones para Sistemas de Inyección Diésel
           </h2>
-          <p className="mt-3.5 text-sm leading-relaxed text-muted-foreground sm:text-base">
+          <p className="mt-8 text-base md:text-xl font-light leading-relaxed text-zinc-400 max-w-3xl">
             Diagnóstico avanzado y calibración milimétrica con equipamiento computarizado de precisión
             para motores diésel livianos, medianos, pesados y agrícolas.
           </p>
-        </motion.div>
+        </div>
 
-        {/* Bento Grid Industrial de 12 Columnas en Desktop y 1 Columna en Móvil (RF-04) */}
-        <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-12 lg:gap-6">
-          {SITE_CONFIG.services.map((service, index) => {
-            const IconComponent = ICON_MAP[service.icon] ?? Wrench;
-            const bentoClass =
-              BENTO_GRID_CLASSES[service.id] ?? "lg:col-span-6 md:col-span-1 min-h-[300px]";
+        {/* Sección de Pilares: Lista de servicios con líneas horizontales finas (border-t border-white/10) */}
+        <div className="border-b border-white/10">
+          {/* Grilla contenedora compatible con arquitectura de 12 columnas */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-16 gap-x-12">
+            {SITE_CONFIG.services.map((service, index) => {
+              const bentoColSpan = BENTO_GRID_CLASSES[service.id] ?? "lg:col-span-6";
+              const roman = ROMAN_NUMERALS[index] ?? `0${index + 1}`;
 
-            return (
-              <motion.article
-                key={service.id}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.5, delay: index * 0.08, ease: "easeOut" }}
-                className={`group relative flex flex-col justify-between overflow-hidden rounded-lg border border-border/80 bg-card text-foreground shadow-xs transition-all duration-300 hover:border-border-hover hover:shadow-xl ${bentoClass}`}
-              >
-                {/* Fotografía Auténtica de Instalaciones con Micro-Zoom */}
-                <img
-                  src={service.image}
-                  alt={service.title}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                  loading="lazy"
-                />
-
-                {/* Viñeta Gradiente Localizada para Contraste Accessible WCAG (> 7:1) */}
-                <div
-                  className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/75 to-black/35 transition-opacity duration-300 group-hover:via-black/70"
-                  aria-hidden="true"
-                />
-
-                {/* Contenido Técnico Estructurado */}
-                <div className="relative z-10 flex h-full flex-col justify-between p-6 sm:p-7">
-                  {/* Badges Técnicos Monoespaciados e Ícono */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="inline-flex size-9 items-center justify-center rounded border border-border/80 bg-black/60 text-white backdrop-blur-md">
-                      <IconComponent className="size-4.5 transition-transform duration-300 group-hover:scale-110" />
-                    </div>
-                    {service.badges?.map((badge) => (
-                      <span
-                        key={badge}
-                        className="inline-flex items-center rounded border border-border/80 bg-black/60 px-2.5 py-1 text-micro text-white/90 backdrop-blur-md"
-                      >
-                        {badge}
+              return (
+                <article
+                  key={service.id}
+                  className={`border-t border-white/10 pt-12 pb-16 flex flex-col justify-between group transition-colors ${bentoColSpan}`}
+                >
+                  <div>
+                    {/* Encabezado del Pilar: Número Romano en Gris y Badges Técnicos */}
+                    <div className="flex items-center justify-between gap-4 mb-8">
+                      <span className="font-mono text-2xl md:text-3xl font-light text-zinc-500">
+                        {roman}
                       </span>
-                    ))}
-                  </div>
+                      <div className="flex flex-wrap gap-2 justify-end">
+                        {service.badges?.map((badge) => (
+                          <span
+                            key={badge}
+                            className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500 border border-white/10 px-2.5 py-1"
+                          >
+                            {badge}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
 
-                  {/* Título y Datos Duros */}
-                  <div className="mt-8">
-                    <h3 className="font-display text-xl font-bold tracking-tight text-white transition-colors group-hover:text-white sm:text-2xl">
+                    {/* Título Enorme en Blanco */}
+                    <h3 className="text-3xl md:text-5xl font-light tracking-tight text-white mb-6 leading-tight">
                       {service.title}
                     </h3>
-                    <p className="mt-2 text-xs leading-relaxed text-white/80 sm:text-sm">
+
+                    {/* Breve Descripción en Gris */}
+                    <p className="text-sm md:text-base font-light text-zinc-400 leading-relaxed mb-8 max-w-xl">
                       {service.description}
                     </p>
                   </div>
-                </div>
-              </motion.article>
-            );
-          })}
+
+                  {/* Fotografía de Instalaciones sin Filtro, Ortogonal de Borde a Borde */}
+                  <div className="relative overflow-hidden border border-white/10 h-52 md:h-64 w-full mt-auto">
+                    <img
+                      src={service.image}
+                      alt={service.title}
+                      className="h-full w-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-700 ease-out"
+                      loading="lazy"
+                    />
+                    <div
+                      className="pointer-events-none absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent opacity-80"
+                      aria-hidden="true"
+                    />
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </div>
 
         {/* Cláusula Formal de Transparencia sobre Repuestos Originales y Alternativos */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.5, delay: 0.25, ease: "easeOut" }}
-          className="mt-8 sm:mt-10 flex flex-col items-center justify-center gap-3 rounded-lg border border-border/80 bg-card/60 p-4 text-center sm:flex-row sm:p-5"
-        >
-          <div className="flex size-7 shrink-0 items-center justify-center rounded border border-border/80 bg-card text-whatsapp">
-            <ShieldCheck className="size-4" />
+        <div className="mt-16 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="flex items-center gap-3 text-zinc-500 font-mono text-[10px] uppercase tracking-[0.25em]">
+            <ShieldCheck className="size-4 text-zinc-400 shrink-0" />
+            <span>Especificaciones de Repuesto</span>
           </div>
-          <p className="font-mono text-xs text-muted-foreground sm:text-sm">
+          <p className="font-mono text-xs text-zinc-400 max-w-2xl text-left sm:text-right">
             {SITE_CONFIG.servicesTransparencyClause}
           </p>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

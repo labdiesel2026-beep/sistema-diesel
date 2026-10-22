@@ -88,66 +88,53 @@ export function FeaturedProductsCarousel({
     <section
       id="destacados"
       data-testid="featured-products-section"
-      className={`scroll-mt-20 bg-background py-20 dark:bg-slate-950 sm:py-24 border-y border-border/60 overflow-hidden min-h-[460px] ${className}`}
+      className={`scroll-mt-20 bg-zinc-950 py-24 md:py-32 border-b border-white/10 overflow-hidden min-h-[460px] ${className}`}
       aria-labelledby="destacados-heading"
     >
       <div className="site-container">
-        {/* Encabezado con badge y título */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-40px" }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="max-w-2xl"
-          >
-            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3.5 py-1 text-xs font-semibold text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300">
-              <Sparkles className="size-3.5 text-blue-600 dark:text-blue-400" />
-              Repuestos y Recambios Destacados
-            </div>
+        {/* Encabezado con badge y título estilo Longbow */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-16">
+          <div className="max-w-2xl">
+            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-600 block mb-3">
+              Catálogo Seleccionado
+            </span>
             <h2
               id="destacados-heading"
-              className="font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl"
+              className="text-3xl md:text-5xl font-light tracking-tight text-white uppercase leading-tight"
             >
               Inyectores y Bombas en Stock
             </h2>
-            <p className="mt-2 text-base text-muted-foreground">
+            <p className="mt-4 text-base font-light text-zinc-400">
               Piezas calibradas y verificadas bajo estándares OEM listas para instalación inmediata.
             </p>
-          </motion.div>
+          </div>
 
           {/* Indicador de movimiento continuo autónomo */}
-          <div className="hidden sm:inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1 text-xs font-semibold text-primary">
-            <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="hidden sm:inline-flex items-center gap-2 border border-white/10 bg-zinc-950 px-3.5 py-1 font-mono text-[10px] uppercase tracking-widest text-zinc-400">
+            <span className="size-1.5 bg-emerald-400 animate-pulse" />
             <span>Actualización en tiempo real</span>
           </div>
         </div>
 
-        {/* Carrusel Marquee Autónomo Infinito con framer-motion */}
-        <div className="relative mt-10 w-full overflow-hidden py-4">
-          {/* Sombras degradadas laterales para suavizar entrada y salida visual */}
-          <div className="pointer-events-none absolute left-0 top-0 z-20 h-full w-12 sm:w-24 bg-gradient-to-r from-background to-transparent dark:from-slate-950" />
-          <div className="pointer-events-none absolute right-0 top-0 z-20 h-full w-12 sm:w-24 bg-gradient-to-l from-background to-transparent dark:from-slate-950" />
+        {/* Carrusel Marquee Autónomo Infinito */}
+        <div className="relative w-full overflow-hidden py-4">
+          <div className="pointer-events-none absolute left-0 top-0 z-20 h-full w-12 sm:w-24 bg-gradient-to-r from-zinc-950 to-transparent" />
+          <div className="pointer-events-none absolute right-0 top-0 z-20 h-full w-12 sm:w-24 bg-gradient-to-l from-zinc-950 to-transparent" />
 
           <motion.div
-            className="flex gap-6 w-max"
+            className="flex gap-8 w-max"
             animate={{ x: ["0%", "-50%"] }}
             transition={{
               repeat: Infinity,
-              duration: 28,
+              duration: 32,
               ease: "linear",
             }}
           >
             {marqueeProducts.map((product, index) => {
-              const conditionClasses =
-                product.condition === "Nuevo"
-                  ? "bg-primary/10 text-primary border-primary/20"
-                  : "bg-secondary text-secondary-foreground border-secondary";
-
               return (
                 <article
                   key={`${product.id}-${index}`}
-                  className="group relative flex w-[290px] shrink-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xs transition-all duration-300 hover:border-primary/60 hover:shadow-2xl hover:shadow-primary/10 sm:w-[320px] md:w-[340px] cursor-pointer"
+                  className="group relative flex w-[290px] shrink-0 flex-col overflow-hidden border border-white/10 bg-zinc-950 transition-all duration-300 hover:border-white/30 sm:w-[320px] md:w-[340px] cursor-pointer"
                 >
                   <Link
                     to="/catalogo/$productId"
@@ -156,38 +143,36 @@ export function FeaturedProductsCarousel({
                     aria-label={`Ver ${product.name} en el catálogo oficial`}
                   >
                     {/* Contenedor Multimedia */}
-                    <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-border bg-muted">
+                    <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-white/10 bg-black">
                       <ProductImageWithFallback
                         src={product.imageUrl ?? null}
                         alt={product.name}
-                        className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-108"
+                        className="size-full object-cover grayscale brightness-90 transition-transform duration-700 ease-out group-hover:scale-105 group-hover:grayscale-0 group-hover:brightness-100"
                       />
 
                       {/* Badge de Marca */}
                       {product.brandName && (
-                        <span className="absolute left-3 top-3 rounded-md border border-border/80 bg-card/95 px-2.5 py-1 text-[11px] font-bold text-foreground shadow-xs backdrop-blur-xs">
+                        <span className="absolute left-3 top-3 border border-white/10 bg-zinc-950/90 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-white">
                           {product.brandName}
                         </span>
                       )}
 
                       {/* Badge de Condición */}
-                      <span
-                        className={`absolute right-3 top-3 rounded-md border px-2.5 py-1 text-[11px] font-semibold shadow-xs ${conditionClasses}`}
-                      >
+                      <span className="absolute right-3 top-3 border border-white/10 bg-zinc-950/90 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-zinc-400">
                         {product.condition}
                       </span>
                     </div>
 
                     {/* Contenido Técnico */}
-                    <div className="flex flex-1 flex-col p-5">
+                    <div className="flex flex-1 flex-col p-6">
                       {/* Código OEM */}
-                      <span className="mb-2.5 inline-block self-start rounded-md border border-primary/15 bg-primary/5 px-2.5 py-1 font-mono text-xs font-semibold text-primary transition-colors group-hover:bg-primary/10">
+                      <span className="mb-3 font-mono text-xs uppercase tracking-widest text-zinc-500">
                         OEM {product.oem}
                       </span>
 
                       {/* Título de Producto */}
                       <h3
-                        className="font-display text-lg font-semibold leading-tight text-foreground transition-colors group-hover:text-primary line-clamp-2"
+                        className="font-light text-base md:text-lg leading-snug text-white transition-colors group-hover:text-zinc-300 line-clamp-2"
                         title={product.name}
                       >
                         {product.name}
@@ -195,27 +180,27 @@ export function FeaturedProductsCarousel({
 
                       {/* Compatibilidad Vehicular */}
                       {product.vehicleCompatibility && (
-                        <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                        <p className="mt-2 line-clamp-2 text-xs font-light text-zinc-400">
                           {product.vehicleCompatibility}
                         </p>
                       )}
 
-                      {/* Fila de Precio y Señuelo de Navegación */}
-                      <div className="mt-auto pt-4 flex items-center justify-between border-t border-border/60">
+                      {/* Fila de Precio y Navegación */}
+                      <div className="mt-auto pt-6 flex items-center justify-between border-t border-white/10">
                         <div>
                           {product.showPrice && product.price !== null ? (
-                            <p className="font-display text-xl font-bold text-foreground">
+                            <p className="font-light text-xl text-white">
                               {formatPrice(product.price)}
                             </p>
                           ) : (
-                            <span className="rounded-md bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">
+                            <span className="font-mono text-xs uppercase tracking-widest text-zinc-500">
                               Consultar precio
                             </span>
                           )}
                         </div>
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-primary transition-transform duration-200 group-hover:translate-x-1.5">
-                          Ver ficha
-                          <ArrowRight className="size-3.5" />
+                        <span className="inline-flex items-center gap-1 font-mono text-xs uppercase tracking-widest text-zinc-400 transition-colors group-hover:text-white">
+                          Ficha
+                          <ArrowRight className="size-3" />
                         </span>
                       </div>
                     </div>
@@ -226,57 +211,23 @@ export function FeaturedProductsCarousel({
           </motion.div>
         </div>
 
-        {/* CTA Gigante al Catálogo Completo */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-          className="mt-14 flex flex-col items-center justify-center text-center"
-        >
-          <motion.div
-            animate={{
-              scale: [1, 1.04, 1, 1.06, 1],
-            }}
-            transition={{
-              duration: 2.4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="relative group"
+        {/* CTA al Catálogo Completo estilo Longbow */}
+        <div className="mt-20 flex flex-col items-center justify-center text-center">
+          <Button
+            variant="outline"
+            asChild
+            className="h-12 px-8 rounded-none border border-white/20 bg-white/[0.04] text-xs font-mono uppercase tracking-widest text-white hover:bg-white hover:text-black hover:border-white transition-all shadow-none"
           >
-            {/* Halo sutil y elegante de expansión */}
-            <div
-              className="absolute -inset-0.5 rounded-xl bg-blue-500/30 blur-sm animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite] opacity-20"
-              aria-hidden="true"
-            />
-            <div
-              className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-blue-600 via-sky-400 to-blue-500 opacity-30 blur-xs animate-[pulse_1.8s_cubic-bezier(0.4,0,0.6,1)_infinite]"
-              aria-hidden="true"
-            />
-            <Button
-              variant="industrial"
-              asChild
-              className="group relative overflow-hidden h-14 sm:h-16 px-8 sm:px-12 text-base sm:text-lg font-bold shadow-xl shadow-blue-950/40 transition-all duration-300 hover:scale-[1.03] hover:shadow-blue-500/30 ring-1 ring-blue-500/20"
-            >
-              <Link to="/catalogo" className="relative overflow-hidden flex items-center gap-3">
-                {/* Shimmer continuo de atracción */}
-                <div
-                  className="pointer-events-none absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/25 to-transparent"
-                  aria-hidden="true"
-                />
-                <span className="relative z-10 flex items-center gap-3">
-                  <span>Ver Catálogo Completo</span>
-                  <ArrowRight className="size-5 transition-transform duration-200 group-hover:translate-x-1.5" />
-                </span>
-              </Link>
-            </Button>
-          </motion.div>
-          <p className="mt-3 text-xs text-muted-foreground flex items-center gap-1.5">
-            <Check className="size-3.5 text-primary" />
-            <span>Más de 500 referencias en inyectores, toberas y bombas con garantía de taller</span>
+            <Link to="/catalogo" className="flex items-center gap-3">
+              <span>Ver Catálogo Completo</span>
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+          <p className="mt-4 font-mono text-xs text-zinc-500 flex items-center gap-2">
+            <Check className="size-3.5 text-zinc-400" />
+            <span>Más de 500 referencias en inyectores, toberas y bombas con garantía</span>
           </p>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

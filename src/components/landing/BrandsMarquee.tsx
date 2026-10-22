@@ -58,13 +58,13 @@ export function BrandsMarquee({ className = "" }: BrandsMarqueeProps) {
   return (
     <section
       aria-label="Marcas y sistemas de inyección atendidos"
-      className={`relative overflow-hidden py-10 bg-background border-y border-border/80 ${className}`}
+      className={`relative overflow-hidden py-24 md:py-32 bg-zinc-950 border-y border-white/10 ${className}`}
     >
-      <div className="site-container mb-6 text-center">
-        <p className="text-micro text-muted-foreground">
+      <div className="site-container mb-12 text-center">
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-600">
           Especialización Técnica Multimarca
         </p>
-        <h2 className="mt-1.5 font-display text-lg font-bold text-foreground sm:text-2xl">
+        <h2 className="mt-3 font-display text-2xl md:text-3xl font-light tracking-tight text-zinc-300">
           Marcas y Sistemas de Inyección que Atendemos
         </h2>
       </div>
@@ -78,7 +78,7 @@ export function BrandsMarquee({ className = "" }: BrandsMarqueeProps) {
         data-testid="brands-marquee-container"
       >
         <div
-          className="flex w-max items-center gap-12 sm:gap-16 py-2 group hover:[animation-play-state:paused] animate-marquee max-md:[animation-duration:25s] motion-reduce:[animation:none]"
+          className="flex w-max items-center gap-16 sm:gap-24 py-4 group hover:[animation-play-state:paused] animate-marquee max-md:[animation-duration:25s] motion-reduce:[animation:none]"
           style={isTouchPaused ? { animationPlayState: "paused" } : undefined}
           data-paused={isTouchPaused ? "true" : "false"}
           data-testid="brands-marquee-track"
@@ -94,11 +94,11 @@ export function BrandsMarquee({ className = "" }: BrandsMarqueeProps) {
                 role="img"
                 tabIndex={0}
                 aria-label={`Fabricante homologado: ${brand.name}`}
-                className="flex items-center justify-center shrink-0 cursor-default outline-none rounded-md p-1.5 transition-all duration-300 ease-out opacity-45 grayscale hover:opacity-100 hover:grayscale-0 focus-visible:opacity-100 focus-visible:grayscale-0 focus-visible:ring-1 focus-visible:ring-white/40 text-muted-foreground hover:text-white max-md:opacity-70 max-md:grayscale-0 [@media(hover:none)]:opacity-70 [@media(hover:none)]:grayscale-0"
+                className="flex items-center justify-center shrink-0 cursor-default outline-none rounded-none p-2 transition-all duration-300 ease-out text-zinc-600 hover:text-zinc-300 focus-visible:text-white focus-visible:ring-1 focus-visible:ring-white/20"
                 title={title}
                 data-testid={`brand-item-${brand.id}`}
               >
-                <BrandLogoComponent className="h-7 sm:h-8 w-auto max-w-[130px] sm:max-w-[160px]" />
+                <BrandLogoComponent className="h-7 sm:h-8 w-auto max-w-[130px] sm:max-w-[160px] opacity-60 hover:opacity-100 transition-opacity" />
               </div>
             );
           })}

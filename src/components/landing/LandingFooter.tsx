@@ -24,27 +24,27 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
   return (
     <>
       <footer
-        className={`border-t border-slate-800 bg-slate-950 text-slate-400 ${className}`}
+        className={`border-t border-white/5 bg-zinc-950 text-zinc-400 ${className}`}
         role="contentinfo"
       >
-        <div className="site-container py-14 lg:py-16">
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-12 lg:gap-12">
+        <div className="site-container py-24 lg:py-32">
+          <div className="grid grid-cols-1 gap-14 md:grid-cols-12 lg:gap-16">
             {/* Columna 1: Marca y propuesta institucional (5 columnas) */}
-            <div className="space-y-4 md:col-span-5">
+            <div className="space-y-6 md:col-span-5">
               <a
                 href="#inicio"
-                className="inline-block text-xl font-bold tracking-tight text-white transition-opacity hover:opacity-90"
+                className="inline-block text-2xl font-medium tracking-tighter text-white transition-opacity hover:opacity-90"
                 aria-label={`${SITE_CONFIG.name} - Ir al inicio`}
               >
                 <span className="font-display">
                   Laboratorio <span className="text-blue-500">Diésel</span>
                 </span>
               </a>
-              <p className="max-w-sm text-sm leading-relaxed text-slate-400">
+              <p className="max-w-sm text-sm leading-relaxed text-zinc-400">
                 Especialistas en diagnóstico, reparación y calibración de sistemas de inyección Common
                 Rail. Tecnología de precisión y respaldo técnico para su motor.
               </p>
-              <div className="flex items-start gap-2.5 pt-2 text-xs text-slate-400">
+              <div className="flex items-start gap-3 pt-3 text-xs text-zinc-400">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-blue-500" />
                 <span>{SITE_CONFIG.address}</span>
               </div>
@@ -52,10 +52,10 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
 
             {/* Columna 2: Navegación por secciones (4 columnas) */}
             <div className="md:col-span-4">
-              <h4 className="font-display text-sm font-semibold tracking-wider text-slate-200 uppercase">
+              <h4 className="font-mono text-[10px] tracking-[0.25em] uppercase text-zinc-500">
                 Navegación
               </h4>
-              <ul className="mt-4 space-y-2.5 text-sm">
+              <ul className="mt-8 space-y-3.5 text-sm">
                 {SITE_CONFIG.navLinks.map((link) => (
                   <li key={link.href}>
                     <a href={link.href} className="transition-colors hover:text-white">
@@ -68,10 +68,10 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
 
             {/* Columna 3: Accesos Rápidos y Catálogo (3 columnas) */}
             <div className="md:col-span-3">
-              <h4 className="font-display text-sm font-semibold tracking-wider text-slate-200 uppercase">
+              <h4 className="font-mono text-[10px] tracking-[0.25em] uppercase text-zinc-500">
                 Productos y Repuestos
               </h4>
-              <ul className="mt-4 space-y-2.5 text-sm">
+              <ul className="mt-8 space-y-3.5 text-sm">
                 <li>
                   <Link
                     to="/catalogo"
@@ -106,8 +106,8 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
           </div>
 
           {/* Barra inferior de copyright y derechos */}
-          <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-800/80 pt-8 text-xs sm:flex-row">
-            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-slate-500">
+          <div className="mt-24 flex flex-col items-center justify-between gap-6 border-t border-white/5 pt-12 text-xs sm:flex-row">
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-zinc-500">
               <p>
                 © {currentYear} {SITE_CONFIG.name}. Todos los derechos reservados.
               </p>
@@ -117,7 +117,7 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
               <button
                 type="button"
                 onClick={handleOpenPolicies}
-                className="text-slate-400 hover:text-white underline decoration-slate-700 hover:decoration-slate-400 transition-colors cursor-pointer"
+                className="text-zinc-400 hover:text-white underline decoration-zinc-700 hover:decoration-zinc-400 transition-colors cursor-pointer"
               >
                 {SITE_CONFIG.commercialPolicies.footerLinkText}
               </button>
@@ -125,7 +125,7 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
 
             <a
               href="#inicio"
-              className="inline-flex items-center gap-1.5 text-slate-400 transition-colors hover:text-white"
+              className="inline-flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase text-zinc-500 transition-colors hover:text-white"
               aria-label="Volver arriba de la página"
             >
               <span>Volver arriba</span>

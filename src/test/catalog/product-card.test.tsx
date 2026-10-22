@@ -71,6 +71,8 @@ describe("ProductCard y ProductGridSkeleton", () => {
     expect(whatsappLink).toHaveAttribute("target", "_blank");
     expect(whatsappLink.getAttribute("href")).toContain("https://wa.me/");
     expect(whatsappLink.getAttribute("href")).toContain("0445110231");
+    expect(whatsappLink.className).toContain("bg-whatsapp");
+    expect(whatsappLink.className).toContain("uppercase");
 
     // Validar interacción con el carrito: clic agrega y actualiza etiqueta reactiva
     const addToCartButton = screen.getByRole("button", {

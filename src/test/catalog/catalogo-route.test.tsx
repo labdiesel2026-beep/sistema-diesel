@@ -135,6 +135,7 @@ describe("Ruta /catalogo", () => {
     expect(noResultsWhatsAppBtn).toHaveAttribute("target", "_blank");
     expect(noResultsWhatsAppBtn.getAttribute("href")).toContain("https://wa.me/");
     expect(noResultsWhatsAppBtn.getAttribute("href")).toContain("PIEZA_INEXISTENTE_XYZ");
+    expect(noResultsWhatsAppBtn.className).toContain("bg-whatsapp");
 
     // Limpiar búsqueda mediante botón en estado sin resultados
     const resetSearchBtn = screen.getByTestId("no-results-reset-button");
@@ -147,6 +148,7 @@ describe("Ruta /catalogo", () => {
     // 6. Botón flotante y drawer del carrito (RF-08, RF-10)
     const floatingCartBtn = screen.getByTestId("floating-cart-button");
     expect(floatingCartBtn).toBeInTheDocument();
+    expect(floatingCartBtn.parentElement?.className).toContain("z-40");
 
     // Agregar un producto al carrito
     const addToCartBtn = screen.getByRole("button", {

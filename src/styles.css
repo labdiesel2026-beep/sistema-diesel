@@ -72,9 +72,9 @@
 }
 
 :root {
-  --whatsapp: oklch(0.76 0.2 149);
+  --whatsapp: oklch(0.55 0.16 160);
   --success-foreground: oklch(0.4 0.12 149);
-  --whatsapp-foreground: oklch(0.18 0.04 151);
+  --whatsapp-foreground: oklch(0.99 0 0);
   --hero: oklch(0.19 0.04 260);
   --hero-foreground: oklch(0.99 0.002 250);
   --hero-muted: oklch(0.75 0.025 255);
@@ -116,6 +116,8 @@
 }
 
 .dark {
+  --whatsapp: oklch(0.52 0.17 160);
+  --whatsapp-foreground: oklch(0.99 0 0);
   --success-foreground: oklch(0.8 0.15 149);
   --background: oklch(0.129 0.042 264.695);
   --foreground: oklch(0.984 0.003 247.858);
@@ -224,6 +226,7 @@
 }
 @theme {
   --animate-shimmer: shimmer 2s infinite linear;
+  --animate-marquee: marquee 35s linear infinite;
   @keyframes shimmer {
     0% {
       transform: translateX(-100%);
@@ -232,9 +235,20 @@
       transform: translateX(100%);
     }
   }
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
 }
 .animate-shimmer {
   animation: var(--animate-shimmer);
+}
+.animate-marquee {
+  animation: var(--animate-marquee);
 }
 @media (max-width: 767px) {
   .site-container {

@@ -1,19 +1,43 @@
 /**
  * Configuración estática inmutable del sitio web de Laboratorio Diésel.
  * Única fuente de verdad para datos de contacto, horarios, dirección,
- * textos institucionales y mensajes pre-formateados de WhatsApp (RNF-06).
+ * textos institucionales, servicios técnicos, marcas autorizadas,
+ * políticas comerciales y mensajes pre-formateados de WhatsApp (RNF-06, RF-02.2, RF-03.2, RF-04.1).
  */
+
+import tallerHeroImg from "@/assets/workshop/taller-hero.webp";
+import bancoPruebasImg from "@/assets/workshop/banco-pruebas.webp";
+import diagnosticoElectronicoImg from "@/assets/workshop/diagnostico-electronico.webp";
+import inyectoresDetalleImg from "@/assets/workshop/inyectores-detalle.webp";
+import fachadaLocalImg from "@/assets/workshop/fachada-local.webp";
 
 export interface ServiceItem {
   readonly id: string;
   readonly title: string;
   readonly description: string;
   readonly icon: string;
+  readonly image: string;
+  readonly badges: readonly string[];
+  readonly colSpanDesktop?: string;
 }
 
 export interface NavLinkItem {
   readonly label: string;
   readonly href: string;
+}
+
+export interface WorkshopBrandItem {
+  readonly id: string;
+  readonly name: string;
+  readonly subtitle?: string;
+}
+
+export interface PolicyAxis {
+  readonly id: string;
+  readonly number: number;
+  readonly title: string;
+  readonly shortTitle: string;
+  readonly content: string;
 }
 
 export const SITE_CONFIG = {
@@ -33,7 +57,7 @@ export const SITE_CONFIG = {
   address: "Pres. Juan Domingo Perón 1215, Villa Mercedes, San Luis",
   businessHours: "Lunes a Viernes de 9:00 a 18:00 h",
 
-  // Número de WhatsApp oficial (Placeholder configurado en DA-01 pendiente de confirmación cliente)
+  // Número de WhatsApp oficial (Placeholder configurado en DA-01)
   phone: "5492657659108",
 
   // URL del iframe de Google Maps Embed centrado en la dirección física (RF-05, CL-01)
@@ -43,6 +67,15 @@ export const SITE_CONFIG = {
   // URL externa para navegación directa a Google Maps (Fallback accesible)
   googleMapsDirectionsUrl:
     "https://www.google.com/maps/dir/?api=1&destination=Pres.+Juan+Domingo+Per%C3%B3n+1215,+Villa+Mercedes,+San+Luis",
+
+  // Activos multimedia fotográficos reales del taller (RF-01.1, RF-01.2, RF-01.3, RF-02.1)
+  workshopImages: {
+    hero: tallerHeroImg,
+    bancoPruebas: bancoPruebasImg,
+    diagnosticoElectronico: diagnosticoElectronicoImg,
+    inyectoresDetalle: inyectoresDetalleImg,
+    fachadaLocal: fachadaLocalImg,
+  } as const,
 
   // Enlaces de navegación áncora para Header y Footer (RF-01, RF-08)
   navLinks: [
@@ -62,7 +95,7 @@ export const SITE_CONFIG = {
       "Hola, me contacto desde la web de Laboratorio Diésel.\nMotivo: Consulta general / solicitar turno.",
   } as const,
 
-  // Textos y condiciones de garantía comercial (RF-04)
+  // Textos y condiciones de garantía comercial básica en sección (RF-04)
   warrantyTerms: {
     title: "Garantía de Calidad y Confianza Técnica",
     summary:
@@ -74,35 +107,115 @@ export const SITE_CONFIG = {
     ] as const,
   } as const,
 
-  // Servicios representativos del taller (RF-03)
+  // 4 Bloques técnicos definitivos para el Bento Grid industrial (RF-02.1, RF-02.2)
   services: [
     {
-      id: "reparacion-inyectores",
-      title: "Reparación de Inyectores",
+      id: "banco-pruebas",
+      title: "Banco de Pruebas y Calibración Computarizada",
       description:
-        "Desarme, limpieza por ultrasonido y reemplazo de componentes de alta precisión en inyectores Common Rail multimarca.",
-      icon: "Wrench",
-    },
-    {
-      id: "calibracion-banco",
-      title: "Calibración en Banco de Pruebas",
-      description:
-        "Ajuste milimétrico y validación de caudales de inyección bajo especificaciones originales del fabricante.",
+        "Ensayo dinámico y calibración milimétrica de caudal, retorno y curvas de presión bajo especificaciones estrictas de fabricante para bombas e inyectores diésel.",
       icon: "Gauge",
+      image: bancoPruebasImg,
+      badges: [
+        "Banco de Pruebas Computarizado",
+        "Calibración Milimétrica",
+        "Tolerancia OEM",
+      ],
+      colSpanDesktop: "lg:col-span-7",
     },
     {
-      id: "diagnostico-electronico",
-      title: "Diagnóstico Computarizado",
+      id: "bombas-inyectoras",
+      title: "Servicio Integral de Bombas Inyectoras",
       description:
-        "Detección precisa de fallas en el circuito de combustible diésel y lectura de parámetros de funcionamiento en tiempo real.",
+        "Diagnóstico, desarme y ajuste de bombas electrónicas, bombas lineales y bombas rotativas multimarca para utilitarios, transporte pesado y maquinaria agrícola.",
+      icon: "Wrench",
+      image: tallerHeroImg,
+      badges: ["Bombas Lineales y Rotativas", "Línea Pesada y Agrícola"],
+      colSpanDesktop: "lg:col-span-5",
+    },
+    {
+      id: "inyectores-common-rail",
+      title: "Inyectores Electrónicos Common Rail",
+      description:
+        "Equipamiento y fuentes electrónicas de precisión para testear, reparar y calibrar inyectores inductivos, piezoeléctricos, bombeantes (UPS/PLD) e inyectores bomba (UIS).",
       icon: "Activity",
+      image: inyectoresDetalleImg,
+      badges: [
+        "Inductivos & Piezoeléctricos",
+        "Sistemas UPS / PLD",
+        "Sistemas UIS",
+      ],
+      colSpanDesktop: "lg:col-span-6",
     },
     {
-      id: "repuestos-recambios",
-      title: "Repuestos y Recambios",
+      id: "diagnostico-repuestos",
+      title: "Diagnóstico Electrónico y Provisión de Repuestos",
       description:
-        "Disponibilidad de toberas, válvulas, arandelas de suplemento e inyectores reacondicionados listos para instalación.",
+        "Escaneo en tiempo real de circuitos de combustible diésel y disponibilidad permanente de toberas, válvulas y conjuntos de recambio originales y alternativos seleccionados.",
       icon: "Package",
+      image: diagnosticoElectronicoImg,
+      badges: ["Diagnóstico en Tiempo Real", "Originales & Alternativos"],
+      colSpanDesktop: "lg:col-span-6",
     },
   ] as const satisfies readonly ServiceItem[],
+
+  // Cláusula de transparencia sobre repuestos originales y alternativos (RF-02.3)
+  servicesTransparencyClause:
+    "Trabajamos con repuestos legítimos de primer equipo (OEM) y líneas alternativas homologadas de máxima durabilidad, adecuándonos a la exigencia operativa de su vehículo o flota",
+
+  // Nómina oficial inmutable de las 10 marcas atendidas para el carrusel continuo (RF-03.2)
+  workshopBrands: [
+    { id: "bosch", name: "Bosch", subtitle: "Diesel Service" },
+    { id: "zexel", name: "Zexel" },
+    { id: "denso", name: "Denso" },
+    { id: "siemens-vdo", name: "Siemens VDO" },
+    { id: "delphi", name: "Delphi" },
+    { id: "caterpillar", name: "Caterpillar", subtitle: "CAT" },
+    { id: "cummins", name: "Cummins" },
+    { id: "stanadyne", name: "Stanadyne" },
+    { id: "diesel-kiki", name: "Diesel Kiki" },
+    { id: "perkins", name: "Perkins" },
+  ] as const satisfies readonly WorkshopBrandItem[],
+
+  // Los 4 ejes normativos de políticas comerciales y de garantía (RF-04.1)
+  commercialPolicies: {
+    title: "Políticas Comerciales y de Garantía",
+    subtitle:
+      "Términos operativos, validez de cotizaciones y respaldo técnico de Laboratorio Diésel",
+    footerLinkText: "Políticas de Garantía y Cotización",
+    axes: [
+      {
+        id: "cotizaciones-precios",
+        number: 1,
+        title: "Eje 1: Alcance de Cotizaciones y Precios Publicados",
+        shortTitle: "Alcance de Cotizaciones y Precios",
+        content:
+          "Los precios exhibidos en el catálogo revisten carácter orientativo y referencial sujeto a variación cambiaria o de reposición de insumos. Toda consulta iniciada por WhatsApp o agregada al carrito representa una solicitud formal de presupuesto y asesoramiento técnico personalizado, no constituyendo en ningún caso una compra confirmada, reserva automática de stock físico ni obligación contractual exigible hasta tanto sea validada expresamente por el taller.",
+      },
+      {
+        id: "garantia-calibracion",
+        number: 2,
+        title: "Eje 2: Garantía de Calibración y Laboratorio",
+        shortTitle: "Garantía de Calibración y Laboratorio",
+        content:
+          "Las reparaciones, calibraciones de caudal en banco computarizado e inyectores de recambio cuentan con garantía técnica de 30 días corridos sobre mano de obra y piezas reemplazadas. La validez de la garantía queda estrictamente sujeta a que el montaje en el vehículo sea ejecutado por personal idóneo, habiendo realizado la limpieza química completa del depósito y cañerías de combustible, drenaje del filtro de gasoil y sustitución de elementos filtrantes por nuevos bajo especificación original.",
+      },
+      {
+        id: "repuestos-originales-alternativos",
+        number: 3,
+        title: "Eje 3: Repuestos Originales y Alternativos",
+        shortTitle: "Repuestos Originales y Alternativos",
+        content:
+          "Laboratorio Diésel mantiene una política de absoluta transparencia técnica. Se comercializan tanto repuestos legítimos de equipo original (OEM) de las principales marcas mundiales como líneas alternativas seleccionadas de probada confiabilidad. La procedencia, condición (nuevo o reacondicionado a nuevo) y garantía específica de cada pieza son notificadas de forma previa e inequívoca al cliente al emitir el presupuesto.",
+      },
+      {
+        id: "recepcion-envios-comisionistas",
+        number: 4,
+        title: "Eje 4: Recepción, Envíos y Comisionistas",
+        shortTitle: "Recepción, Envíos y Comisionistas",
+        content:
+          "Para clientes, transportistas y talleres mecánicos del interior de San Luis y provincias vecinas, se ofrece recepción y despacho diario de bombas e inyectores mediante comisionistas de confianza y empresas de encomienda habilitadas. Todo envío debe ser previamente coordinado por WhatsApp indicando datos de remitente y síntomas de falla.",
+      },
+    ] as const satisfies readonly PolicyAxis[],
+  } as const,
 } as const;

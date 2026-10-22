@@ -340,7 +340,7 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
 
             <Button
               variant="whatsapp"
-              className="relative overflow-hidden h-12 w-full gap-2.5 text-sm font-semibold shadow-xs"
+              className="relative overflow-hidden h-12 w-full gap-2.5 text-sm font-bold tracking-wide text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-950/25"
               asChild
             >
               <a
@@ -349,14 +349,14 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                 rel="noopener noreferrer"
                 aria-label="Enviar pedido del carrito por WhatsApp"
                 data-testid="whatsapp-checkout-button"
-                className="relative overflow-hidden"
+                className="relative overflow-hidden flex items-center justify-center gap-2.5"
               >
                 {/* Shimmer Effect */}
                 <div
                   className="pointer-events-none absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/25 to-transparent"
                   aria-hidden="true"
                 />
-                <FaWhatsapp className="size-5 shrink-0" />
+                <FaWhatsapp className="size-5 shrink-0 text-white" />
                 <span>Consultar por WhatsApp</span>
               </a>
             </Button>

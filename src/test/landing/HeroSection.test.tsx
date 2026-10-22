@@ -20,18 +20,33 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
-// Mock de la imagen de assets
-vi.mock("@/assets/diesel-injector.jpg", () => ({
-  default: "diesel-injector-mock.jpg",
+// Mock de la imagen de assets real del taller
+vi.mock("@/assets/workshop/taller-hero.webp", () => ({
+  default: "taller-hero-mock.webp",
 }));
 
 describe("Sección Hero (HeroSection.tsx)", () => {
-  it("renderiza el contenedor con id='inicio' y altura 'min-h-[100dvh]' (RF-02, RNF-02)", () => {
+  it("renderiza el contenedor con id='inicio', altura 'min-h-[100dvh]' y borde industrial (RF-01.1, RF-02, RNF-02)", () => {
     const { container } = render(<HeroSection />);
     const section = container.querySelector("section#inicio");
 
     expect(section).toBeInTheDocument();
     expect(section?.className).toContain("min-h-[100dvh]");
+    expect(section?.className).toContain("border-b");
+    expect(section?.className).toContain("border-blue-500/20");
+  });
+
+  it("renderiza la fotografía real del taller con alt descriptivo y clases de resiliencia móvil (RF-01.1)", () => {
+    render(<HeroSection />);
+    const img = screen.getByAltText(
+      /Instalaciones y banco de pruebas computarizado de Laboratorio Diésel/i,
+    );
+
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveAttribute("src", "taller-hero-mock.webp");
+    expect(img.className).toContain("object-cover");
+    expect(img.className).toContain("max-md:[object-position:center_35%]");
+    expect(img.className).toContain("max-md:opacity-30");
   });
 
   it("muestra la denominación tipográfica 'Laboratorio Diésel' y el eslogan estático (RF-02)", () => {

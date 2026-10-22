@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { SITE_CONFIG } from "@/config/site-config";
 
@@ -54,5 +54,40 @@ describe("Pie de Página Institucional (LandingFooter.tsx)", () => {
     });
     expect(catalogLink).toBeInTheDocument();
     expect(catalogLink).toHaveAttribute("href", "/catalogo");
+  });
+
+  it("renderiza el botón de 'Políticas de Garantía y Cotización' y abre el modal al accionarlo (RF-04.4)", () => {
+    render(<LandingFooter />);
+
+    const policyButtons = screen.getAllByRole("button", {
+      name: new RegExp(SITE_CONFIG.commercialPolicies.footerLinkText, "i"),
+    });
+
+    expect(policyButtons.length).toBeGreaterThanOrEqual(1);
+
+    // Al hacer clic en el botón de políticas
+    act(() => {
+      policyButtons[0]!.click();
+    });
+
+    // El modal dialog debe abrirse
+    expect(
+      screen.getByRole("heading", { level: 2, name: /Políticas Comerciales y de Garantía/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("invoca onOpenPoliciesModal si se proporciona como prop", () => {
+    const handleOpen = vi.fn();
+    render(<LandingFooter onOpenPoliciesModal={handleOpen} />);
+
+    const policyButtons = screen.getAllByRole("button", {
+      name: new RegExp(SITE_CONFIG.commercialPolicies.footerLinkText, "i"),
+    });
+
+    act(() => {
+      policyButtons[0]!.click();
+    });
+
+    expect(handleOpen).toHaveBeenCalledTimes(1);
   });
 });

@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { CatalogCartProvider } from "@/context/catalog-cart-context";
+import { PublicPoliciesContainer } from "@/components/policies/PublicPoliciesContainer";
 
 function NotFoundComponent() {
   return (
@@ -123,6 +124,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <CatalogCartProvider>
         <Outlet />
+        <PublicPoliciesContainer />
       </CatalogCartProvider>
     </QueryClientProvider>
   );

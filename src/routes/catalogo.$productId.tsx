@@ -20,12 +20,12 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   ArrowLeft,
   ShoppingCart,
-  MessageCircle,
   Check,
   AlertCircle,
   ShieldCheck,
   Cpu,
 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { Button } from "@/components/ui/button";
@@ -341,7 +341,7 @@ export function ProductDetailPage({
                   <Button
                     variant="whatsapp"
                     size="lg"
-                    className="h-12 w-full gap-2 text-sm font-semibold shadow-xs"
+                    className="h-12 w-full gap-2.5 text-sm font-semibold tracking-wide text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-950/25"
                     asChild
                   >
                     <a
@@ -351,7 +351,7 @@ export function ProductDetailPage({
                       aria-label="Consultar repuesto por WhatsApp"
                       data-testid="direct-whatsapp-button"
                     >
-                      <MessageCircle className="size-4" />
+                      <FaWhatsapp className="size-[18px] shrink-0 text-white" />
                       <span>WhatsApp Directo</span>
                     </a>
                   </Button>

@@ -97,6 +97,8 @@ describe("CartDrawer", () => {
     expect(href).toContain("https://wa.me/");
     expect(href).toContain("Inyector%20Bosch%20CR%20Revalidado");
     expect(href).toContain("Bomba%20Delphi%20Oculta");
+    expect(checkoutLink.className).toContain("bg-whatsapp");
+    expect(checkoutLink.className).toContain("font-bold");
 
     // 7. Modificar cantidad (+): aumenta cantidad y recalcula precio
     const increaseBtn = screen.getByTestId("increase-quantity-p-bosch");

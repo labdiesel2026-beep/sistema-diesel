@@ -12,18 +12,40 @@ describe("Sección de Servicios (ServicesSection.tsx)", () => {
     expect(section?.className).toContain("scroll-mt-20");
   });
 
-  it("renderiza al menos 4 tarjetas de servicios con títulos y descripciones no vacíos (RF-03)", () => {
+  it("renderiza la estructura de Bento Grid industrial en 12 columnas (RF-02.1)", () => {
+    const { container } = render(<ServicesSection />);
+    const grid = container.querySelector(".lg\\:grid-cols-12");
+    expect(grid).toBeInTheDocument();
+
+    const cardBanco = container.querySelector(".lg\\:col-span-7");
+    const cardBombas = container.querySelector(".lg\\:col-span-5");
+    const cardsMedias = container.querySelectorAll(".lg\\:col-span-6");
+
+    expect(cardBanco).toBeInTheDocument();
+    expect(cardBombas).toBeInTheDocument();
+    expect(cardsMedias.length).toBe(2);
+  });
+
+  it("renderiza las 4 tarjetas enriquecidas fotográficamente con sus badges técnicos (RF-02.1, RF-02.2)", () => {
     const { container } = render(<ServicesSection />);
     const cards = container.querySelectorAll("article");
 
-    // Verificar que existen al menos 4 tarjetas
-    expect(cards.length).toBeGreaterThanOrEqual(4);
     expect(cards.length).toBe(SITE_CONFIG.services.length);
 
-    // Verificar que cada servicio de la configuración está presente
     for (const service of SITE_CONFIG.services) {
+      // Título y descripción
       expect(screen.getByText(service.title)).toBeInTheDocument();
       expect(screen.getByText(service.description)).toBeInTheDocument();
+
+      // Imagen con alt accesible
+      const img = screen.getByAltText(service.title);
+      expect(img).toBeInTheDocument();
+      expect(img).toHaveAttribute("src", service.image);
+
+      // Badges técnicos
+      for (const badge of service.badges) {
+        expect(screen.getByText(badge)).toBeInTheDocument();
+      }
     }
   });
 
@@ -34,5 +56,10 @@ describe("Sección de Servicios (ServicesSection.tsx)", () => {
       name: /Soluciones para Sistemas de Inyección Diésel/i,
     });
     expect(heading).toBeInTheDocument();
+  });
+
+  it("renderiza la cláusula formal de transparencia sobre repuestos originales y alternativos (RF-02.3)", () => {
+    render(<ServicesSection />);
+    expect(screen.getByText(SITE_CONFIG.servicesTransparencyClause)).toBeInTheDocument();
   });
 });

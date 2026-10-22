@@ -107,6 +107,8 @@ describe("Ruta /catalogo/$productId (Ficha Técnica)", () => {
     expect(whatsappBtn).toHaveAttribute("target", "_blank");
     expect(whatsappBtn.getAttribute("href")).toContain("https://wa.me/");
     expect(whatsappBtn.getAttribute("href")).toContain("0445110001");
+    expect(whatsappBtn.className).toContain("bg-whatsapp");
+    expect(whatsappBtn.className).toContain("h-12");
 
     // Valida agregado al carrito
     const addToCartBtn = screen.getByTestId("add-to-cart-button");

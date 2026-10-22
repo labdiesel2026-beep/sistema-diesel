@@ -4,7 +4,7 @@ import { ArrowRight, CheckCircle2, Wrench } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { SITE_CONFIG } from "@/config/site-config";
-import injectorImage from "@/assets/diesel-injector.jpg";
+import tallerHeroImg from "@/assets/workshop/taller-hero.webp";
 
 interface HeroSectionProps {
   className?: string;
@@ -34,21 +34,23 @@ export function HeroSection({ className = "" }: HeroSectionProps) {
   return (
     <section
       id="inicio"
-      className={`scroll-mt-20 relative flex min-h-[100dvh] flex-col justify-center overflow-hidden bg-slate-900 text-slate-50 ${className}`}
+      className={`scroll-mt-20 relative flex min-h-[100dvh] flex-col justify-center overflow-hidden border-b border-blue-500/20 bg-slate-900 text-slate-50 ${className}`}
     >
-      {/* Imagen de fondo con efecto de zoom superlento */}
+      {/* Fotografía real del taller con micro-animación de zoom ultralento continuo (RF-01.1) */}
       <motion.img
-        src={injectorImage}
-        alt="Inyector Common Rail de alta precisión en banco de pruebas"
+        src={tallerHeroImg}
+        alt="Instalaciones y banco de pruebas computarizado de Laboratorio Diésel"
         width={1920}
         height={1080}
         initial={{ scale: 1 }}
-        animate={{ scale: 1.08 }}
-        transition={{ duration: 8, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
-        className="absolute inset-0 h-full w-full object-cover object-center opacity-25"
+        animate={{ scale: 1.06 }}
+        transition={{ duration: 12, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
+        className="absolute inset-0 h-full w-full object-cover max-md:[object-position:center_35%] max-md:opacity-30 md:object-center opacity-25 md:opacity-35"
         fetchPriority="high"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/85 to-slate-900/70" />
+      {/* Overlays multidireccionales para legibilidad absoluta con contraste > 7:1 */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/85 to-slate-900/70 max-md:from-slate-950 max-md:via-slate-900/90 max-md:to-slate-900/80" />
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-900/60 to-transparent" />
 
       {/* Contenido principal del Hero */}
       <div className="site-container relative z-10 py-20 lg:py-28">

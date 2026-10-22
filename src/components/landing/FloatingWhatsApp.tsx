@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { SITE_CONFIG } from "@/config/site-config";
 import { buildWhatsAppUrl } from "@/lib/whatsapp-utils";
+import { usePoliciesConsent } from "@/components/policies/use-policies-consent";
 
 interface FloatingWhatsAppProps {
   className?: string;
@@ -14,6 +15,7 @@ export function FloatingWhatsApp({
   targetSectionIds = ["garantias", "ubicacion"],
 }: FloatingWhatsAppProps) {
   const [isOverlapping, setIsOverlapping] = useState(false);
+  const { shouldShowBanner } = usePoliciesConsent();
 
   const generalUrl = buildWhatsAppUrl(SITE_CONFIG.phone, SITE_CONFIG.whatsappMessages.general);
 
@@ -62,10 +64,13 @@ export function FloatingWhatsApp({
     };
   }, [targetSectionIds]);
 
+  // Si el banner de políticas está desplegado en móvil, elevar a bottom-36 para prevenir colisión (RF-04.3, CL-07)
+  const verticalSpacingClass = shouldShowBanner ? "bottom-36 sm:bottom-6" : "bottom-6";
+
   return (
     <aside
       aria-label="Acceso directo a WhatsApp"
-      className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${
+      className={`fixed ${verticalSpacingClass} right-6 z-40 transition-all duration-300 ${
         isOverlapping ? "pointer-events-none translate-y-6 opacity-0" : "translate-y-0 opacity-100"
       } ${className}`}
     >
@@ -90,3 +95,5 @@ export function FloatingWhatsApp({
     </aside>
   );
 }
+
+export default FloatingWhatsApp;

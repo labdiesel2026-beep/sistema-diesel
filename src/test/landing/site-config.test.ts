@@ -41,20 +41,73 @@ describe("Módulo de Configuración Centralizada (site-config.ts)", () => {
     );
   });
 
-  it("incluye al menos 4 servicios con título y descripción para la grilla", () => {
-    // RF-03: Al menos 4 servicios
-    expect(SITE_CONFIG.services.length).toBeGreaterThanOrEqual(4);
+  it("incluye exactamente los 4 bloques técnicos definitivos para el Bento Grid (RF-02.1, RF-02.2)", () => {
+    expect(SITE_CONFIG.services.length).toBe(4);
+
+    const expectedIds = [
+      "banco-pruebas",
+      "bombas-inyectoras",
+      "inyectores-common-rail",
+      "diagnostico-repuestos",
+    ];
+
+    const actualIds = SITE_CONFIG.services.map((s) => s.id);
+    expect(actualIds).toEqual(expectedIds);
 
     for (const service of SITE_CONFIG.services) {
       expect(service.id).toBeTruthy();
       expect(service.title).toBeTruthy();
       expect(service.description).toBeTruthy();
       expect(service.icon).toBeTruthy();
+      expect(service.image).toBeTruthy();
+      expect(service.badges.length).toBeGreaterThanOrEqual(2);
+      expect(service.colSpanDesktop).toBeTruthy();
     }
+
+    // Cláusula de transparencia técnica
+    expect(SITE_CONFIG.servicesTransparencyClause).toContain(
+      "repuestos legítimos de primer equipo (OEM) y líneas alternativas homologadas",
+    );
+  });
+
+  it("expone la nómina oficial inmutable de las 10 marcas del taller (RF-03.2)", () => {
+    expect(SITE_CONFIG.workshopBrands.length).toBe(10);
+
+    const expectedBrandIds = [
+      "bosch",
+      "zexel",
+      "denso",
+      "siemens-vdo",
+      "delphi",
+      "caterpillar",
+      "cummins",
+      "stanadyne",
+      "diesel-kiki",
+      "perkins",
+    ];
+
+    const actualBrandIds = SITE_CONFIG.workshopBrands.map((b) => b.id);
+    expect(actualBrandIds).toEqual(expectedBrandIds);
+  });
+
+  it("define de forma inmutable los 4 ejes normativos de políticas comerciales y garantía (RF-04.1)", () => {
+    expect(SITE_CONFIG.commercialPolicies.axes.length).toBe(4);
+
+    const axes = SITE_CONFIG.commercialPolicies.axes;
+    expect(axes[0]?.title).toContain("Eje 1: Alcance de Cotizaciones y Precios Publicados");
+    expect(axes[0]?.content).toContain("carácter orientativo y referencial");
+
+    expect(axes[1]?.title).toContain("Eje 2: Garantía de Calibración y Laboratorio");
+    expect(axes[1]?.content).toContain("garantía técnica de 30 días corridos");
+
+    expect(axes[2]?.title).toContain("Eje 3: Repuestos Originales y Alternativos");
+    expect(axes[2]?.content).toContain("absoluta transparencia técnica");
+
+    expect(axes[3]?.title).toContain("Eje 4: Recepción, Envíos y Comisionistas");
+    expect(axes[3]?.content).toContain("comisionistas de confianza y empresas de encomienda");
   });
 
   it("contiene los enlaces áncora de navegación principal", () => {
-    // RF-01, RF-08: Enlaces a secciones activas (Contacto removido)
     const expectedAnchors = ["#inicio", "#servicios", "#garantias", "#ubicacion"];
     const actualAnchors = SITE_CONFIG.navLinks.map((link) => link.href);
 
@@ -62,5 +115,13 @@ describe("Módulo de Configuración Centralizada (site-config.ts)", () => {
     for (const anchor of expectedAnchors) {
       expect(actualAnchors).toContain(anchor);
     }
+  });
+
+  it("expone los activos fotográficos WebP del taller", () => {
+    expect(SITE_CONFIG.workshopImages.hero).toBeTruthy();
+    expect(SITE_CONFIG.workshopImages.bancoPruebas).toBeTruthy();
+    expect(SITE_CONFIG.workshopImages.diagnosticoElectronico).toBeTruthy();
+    expect(SITE_CONFIG.workshopImages.inyectoresDetalle).toBeTruthy();
+    expect(SITE_CONFIG.workshopImages.fachadaLocal).toBeTruthy();
   });
 });

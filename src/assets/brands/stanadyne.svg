@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40" fill="currentColor">
+  <!-- STANADYNE -->
+  <g transform="translate(6, 6)">
+    <!-- Stanadyne Diamond / Rotor Emblem -->
+    <g transform="translate(2, 2)">
+      <polygon points="12,0 24,12 12,24 0,12" fill="none" stroke="currentColor" stroke-width="2.5"/>
+      <polygon points="12,5 19,12 12,19 5,12" fill="currentColor"/>
+    </g>
+    <!-- STANADYNE Typography -->
+    <g transform="translate(36, 4)">
+      <!-- S -->
+      <path d="M9 3c-1-.7-2.3-1.2-3.8-1.2-2.2 0-3.6 1-3.6 2.5 0 3.2 7.8 1.6 7.8 6 0 2.2-1.8 3.5-4.6 3.5-2 0-3.8-.6-5-1.8l1.3-2.2c1 .9 2.2 1.4 3.6 1.4 1.6 0 2.6-.7 2.6-1.7 0-3.2-7.8-1.6-7.8-6 0-2.3 1.9-3.7 4.8-3.7 1.8 0 3.4.5 4.6 1.4L9 3z"/>
+      <!-- T -->
+      <path d="M12 1.5h8v2.6h-2.6v11H14.7v-11H12V1.5z"/>
+      <!-- A -->
+      <path d="M25 1.5L20 15.1h2.7l1.2-3.2h5.5l1.2 3.2h2.7l-5-13.6h-3.3zm-.2 8l2-5.4 2 5.4h-4z"/>
+      <!-- N -->
+      <path d="M35 1.5h2.6l5.5 8.5V1.5h2.6v13.6h-2.5l-5.6-8.6v8.6H35V1.5z"/>
+      <!-- A -->
+      <path d="M51 1.5L46 15.1h2.7l1.2-3.2h5.5l1.2 3.2h2.7l-5-13.6h-3.3zm-.2 8l2-5.4 2 5.4h-4z"/>
+      <!-- D -->
+      <path d="M61 1.5h5.8c4 0 6.8 2.6 6.8 6.8s-2.8 6.8-6.8 6.8H61V1.5zm2.7 2.6v8.4h3c2.4 0 4-1.5 4-4.2s-1.6-4.2-4-4.2h-3z"/>
+      <!-- Y -->
+      <path d="M75 1.5h2.8l3.2 5.4 3.2-5.4H87l-4.7 7.5v6.1h-2.7V9L75 1.5z"/>
+      <!-- N -->
+      <path d="M89 1.5h2.6l5.5 8.5V1.5h2.6v13.6h-2.5l-5.6-8.6v8.6H89V1.5z"/>
+      <!-- E -->
+      <path d="M102 1.5h8.8v2.5h-6.1v2.8h5.2v2.4h-5.2v3.4h6.3v2.5h-9V1.5z"/>
+    </g>
+  </g>
+</svg>

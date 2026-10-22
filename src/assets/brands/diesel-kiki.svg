@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40" fill="currentColor">
+  <!-- DIESEL KIKI -->
+  <g transform="translate(6, 7)">
+    <!-- Industrial Fuel Injection Gauge Icon -->
+    <g transform="translate(0, 3)">
+      <circle cx="10" cy="10" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M10 4v4l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="10" cy="10" r="2" fill="currentColor"/>
+    </g>
+    <!-- Text Group -->
+    <g transform="translate(26, 0)">
+      <!-- DIESEL -->
+      <g transform="translate(0, 0)">
+        <text x="0" y="11" font-family="system-ui, -apple-system, sans-serif" font-size="11.5" font-weight="900" letter-spacing="1.2" fill="currentColor">DIESEL</text>
+      </g>
+      <!-- KIKI -->
+      <g transform="translate(0, 14)">
+        <text x="0" y="10" font-family="system-ui, -apple-system, sans-serif" font-size="11.5" font-weight="900" letter-spacing="3.5" fill="currentColor">KIKI</text>
+      </g>
+    </g>
+  </g>
+</svg>

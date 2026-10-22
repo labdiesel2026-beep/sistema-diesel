@@ -10,7 +10,8 @@ const buttonVariants = cva(
     variants: {
       variant: {
         industrial: "bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl",
-        whatsapp: "bg-whatsapp text-whatsapp-foreground hover:bg-whatsapp/90 rounded-xl",
+        whatsapp:
+          "bg-whatsapp text-whatsapp-foreground ring-1 ring-emerald-400/20 shadow-sm hover:brightness-105 active:scale-[0.98] rounded-xl transition-all duration-200",
         technical:
           "border border-hero-border bg-hero-surface text-hero-foreground hover:bg-hero-border rounded-xl",
         default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",

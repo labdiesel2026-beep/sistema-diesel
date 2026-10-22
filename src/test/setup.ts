@@ -24,6 +24,12 @@ Object.defineProperty(window, "matchMedia", {
   }),
 });
 
+// Mock de HTMLMediaElement para componentes de video en jsdom
+if (typeof window !== "undefined" && window.HTMLMediaElement) {
+  window.HTMLMediaElement.prototype.play = () => Promise.resolve();
+  window.HTMLMediaElement.prototype.pause = () => {};
+}
+
 // Mock de IntersectionObserver para Framer Motion (whileInView) en jsdom
 class GlobalMockIntersectionObserver {
   readonly root: Element | null = null;

@@ -138,7 +138,11 @@ export function ProductCard({
           </Button>
 
           {/* Botón WhatsApp Directo */}
-          <Button variant="whatsapp" className="h-11 w-full gap-2 text-sm font-semibold" asChild>
+          <Button
+            variant="whatsapp"
+            className="h-11 w-full gap-2 text-xs font-semibold tracking-wide uppercase shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-950/25"
+            asChild
+          >
             <a
               href={directWhatsAppUrl}
               target="_blank"

@@ -71,5 +71,21 @@ describe("Ruta principal de Landing Page", () => {
         name: "Contactar por WhatsApp para consulta general o turnos",
       }),
     ).toBeInTheDocument();
+
+    // Validar integración del carrusel de marcas (RF-03.1)
+    expect(
+      screen.getByRole("region", { name: "Marcas y sistemas de inyección atendidos" }),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("brands-marquee-track")).toBeInTheDocument();
+
+    // Validar orden narrativo en <main>
+    const mainElement = container.querySelector("main")!;
+    const mainChildren = Array.from(mainElement.children);
+    const marqueeIndex = mainChildren.findIndex((el) =>
+      el.getAttribute("aria-label")?.includes("Marcas y sistemas de inyección"),
+    );
+    const servicesIndex = mainChildren.findIndex((el) => el.id === "servicios");
+    expect(marqueeIndex).toBeGreaterThan(0);
+    expect(marqueeIndex).toBeLessThan(servicesIndex);
   });
 });

@@ -2,22 +2,49 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import { FloatingWhatsApp } from "@/components/landing/FloatingWhatsApp";
 import { SITE_CONFIG } from "@/config/site-config";
+import {
+  POLICIES_STORAGE_KEY,
+  POLICIES_CONSENT_EVENT,
+} from "@/components/policies/policies-consent";
 
 describe("Botón Flotante de WhatsApp (FloatingWhatsApp.tsx)", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    localStorage.clear();
+    window.dispatchEvent(new Event(POLICIES_CONSENT_EVENT));
     window.innerWidth = 1024; // Default desktop
   });
 
-  it("renderiza el botón fijo en la esquina inferior derecha con las clases 'fixed bottom-6 right-6 z-50' (RF-07)", () => {
+  it("renderiza el botón fijo en la esquina inferior derecha con las clases 'fixed right-6 z-40' (RF-07, CL-07)", () => {
     const { container } = render(<FloatingWhatsApp />);
     const aside = container.querySelector("aside");
 
     expect(aside).toBeInTheDocument();
     expect(aside?.className).toContain("fixed");
-    expect(aside?.className).toContain("bottom-6");
     expect(aside?.className).toContain("right-6");
-    expect(aside?.className).toContain("z-50");
+    expect(aside?.className).toContain("z-40");
+  });
+
+  it("se desplaza dinámicamente a bottom-36 en móvil cuando el banner de políticas está desplegado (RF-04.3, CL-07)", () => {
+    // Sin consentimiento en localStorage -> shouldShowBanner=true
+    const { container } = render(<FloatingWhatsApp />);
+    const aside = container.querySelector("aside");
+
+    expect(aside?.className).toContain("bottom-36");
+    expect(aside?.className).toContain("sm:bottom-6");
+  });
+
+  it("mantiene bottom-6 cuando el usuario ya otorgó consentimiento a las políticas (RF-04.3)", () => {
+    localStorage.setItem(
+      POLICIES_STORAGE_KEY,
+      JSON.stringify({ version: 1, accepted: true, timestamp: Date.now() }),
+    );
+
+    const { container } = render(<FloatingWhatsApp />);
+    const aside = container.querySelector("aside");
+
+    expect(aside?.className).toContain("bottom-6");
+    expect(aside?.className).not.toContain("bottom-36");
   });
 
   it("contiene el enlace de WhatsApp con el mensaje de consulta general pre-formateado (RF-07)", () => {
@@ -58,44 +85,36 @@ describe("Botón Flotante de WhatsApp (FloatingWhatsApp.tsx)", () => {
     // Simular pantalla móvil (< 768px)
     window.innerWidth = 400;
 
-    // Crear elementos ficticios de sección para observar
-    const contactoSection = document.createElement("div");
-    contactoSection.id = "contacto";
-    document.body.appendChild(contactoSection);
-
-    const { container } = render(<FloatingWhatsApp targetSectionIds={["contacto"]} />);
+    const { container } = render(
+      <FloatingWhatsApp targetSectionIds={["garantias", "ubicacion"]} />,
+    );
     const aside = container.querySelector("aside");
 
-    // Inicialmente visible
     expect(aside?.className).toContain("opacity-100");
 
-    // Disparar evento de intersección (contacto visible en viewport móvil)
+    // Disparar evento de intersección
     act(() => {
       observerCallback([
         {
-          target: contactoSection,
+          target: { id: "garantias" } as unknown as Element,
           isIntersecting: true,
         },
       ]);
     });
 
-    // Ahora debe ocultarse con opacity-0 y pointer-events-none
     expect(aside?.className).toContain("opacity-0");
     expect(aside?.className).toContain("pointer-events-none");
 
-    // Salir de la sección (isIntersecting: false)
+    // Disparar evento de salida
     act(() => {
       observerCallback([
         {
-          target: contactoSection,
+          target: { id: "garantias" } as unknown as Element,
           isIntersecting: false,
         },
       ]);
     });
 
-    // Debe volver a mostrarse
     expect(aside?.className).toContain("opacity-100");
-
-    document.body.removeChild(contactoSection);
   });
 });

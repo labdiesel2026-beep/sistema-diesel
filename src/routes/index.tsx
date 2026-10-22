@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { BrandsMarquee } from "@/components/landing/BrandsMarquee";
 import { FeaturedProductsCarousel } from "@/components/landing/FeaturedProductsCarousel";
 import { FloatingWhatsApp } from "@/components/landing/FloatingWhatsApp";
 import { HeroSection } from "@/components/landing/HeroSection";
@@ -51,6 +52,7 @@ export function LandingPage() {
       <main>
         <HeroSection />
         <FeaturedProductsCarousel />
+        <BrandsMarquee />
         <ServicesSection />
         <WarrantySection />
         <LocationSection />

@@ -15,7 +15,8 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, ShoppingCart, MessageCircle, X } from "lucide-react";
+import { Search, ShoppingCart, X } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { Button } from "@/components/ui/button";
@@ -351,7 +352,7 @@ export function CatalogPage({
                     <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                       <Button
                         variant="whatsapp"
-                        className="h-11 gap-2 px-5 font-semibold shadow-xs"
+                        className="h-11 gap-2.5 px-5 text-sm font-semibold tracking-wide text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-950/25"
                         asChild
                       >
                         <a
@@ -360,7 +361,7 @@ export function CatalogPage({
                           rel="noopener noreferrer"
                           data-testid="no-results-whatsapp-button"
                         >
-                          <MessageCircle className="size-4" />
+                          <FaWhatsapp className="size-4 shrink-0 text-white" />
                           <span>Consultar pieza por WhatsApp</span>
                         </a>
                       </Button>

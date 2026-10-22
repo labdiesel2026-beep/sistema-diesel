@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 40" fill="currentColor">
+  <!-- ZEXEL Wordmark -->
+  <g transform="skewX(-12) translate(12, 6)">
+    <!-- Z -->
+    <path d="M4 4h18l-10 16h11v5H3l10-16H4V4z"/>
+    <!-- E -->
+    <path d="M26 4h16v5H32v5h9v4.5h-9v5.5h11V29H26V4z"/>
+    <!-- X -->
+    <path d="M44 4h6l5.5 9 5.5-9h6l-8.5 12.5L67 29h-6l-6-9.5-6 9.5h-6l8.8-12.5L44 4z"/>
+    <!-- E -->
+    <path d="M69 4h16v5H75v5h9v4.5h-9v5.5h11V29H69V4z"/>
+    <!-- L -->
+    <path d="M88 4h6v20h11v5H88V4z"/>
+  </g>
+</svg>

@@ -1,3 +1,17 @@
+/**
+ * Carrusel Continuo de Marcas Homologadas con Efecto Ghost Industrial.
+ * (Spec 009, RF-05, RNF-04, CL-05, Bloque 3 - Tarea 3.3)
+ *
+ * Características:
+ * - Desplazamiento continuo por GPU sin saltos de ciclo (20 nodos duplicados).
+ * - En escritorio: Opacidad pasiva de 45% y desaturación completa; activación al 100% en 300ms ease-out
+ *   ante :hover o navegación por teclado :focus-visible.
+ * - En dispositivos táctiles: Opacidad calibrada fija al 70% estática para visibilidad diurna bajo luz solar,
+ *   erradicando estados de hover bloqueados o pegados en pantalla.
+ * - Accesibilidad completa: role="img", tabIndex={0} y aria-label descriptivo en cada nodo.
+ * - Soporte para touch-pan-y y directiva prefers-reduced-motion.
+ */
+
 import { useState, useRef, useEffect } from "react";
 import { WORKSHOP_BRANDS } from "./brands";
 
@@ -5,20 +19,15 @@ export interface BrandsMarqueeProps {
   className?: string;
 }
 
-// Duplicación de los 10 nodos en el DOM para generar el ciclo continuo sin saltos (RF-03.1)
+// Duplicación de los 10 nodos en el DOM para generar el ciclo continuo sin saltos (RF-05)
 const MARQUEE_ITEMS = [...WORKSHOP_BRANDS, ...WORKSHOP_BRANDS];
 
-/**
- * Carrusel continuo infinito de las 10 marcas de inyección atendidas por el taller.
- * Implementa desplazamiento por GPU continuo, gradientes difuminados laterales,
- * control táctil no invasivo y soporte para prefers-reduced-motion (RF-03.1, RF-03.2, RF-03.3, RNF-04).
- */
 export function BrandsMarquee({ className = "" }: BrandsMarqueeProps) {
   const [isTouchPaused, setIsTouchPaused] = useState(false);
   const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Manejo táctil no intrusivo (CL-09, CL-13)
+  // Manejo táctil no intrusivo
   const handleTouchStart = () => {
     if (resumeTimerRef.current) {
       clearTimeout(resumeTimerRef.current);
@@ -49,13 +58,13 @@ export function BrandsMarquee({ className = "" }: BrandsMarqueeProps) {
   return (
     <section
       aria-label="Marcas y sistemas de inyección atendidos"
-      className={`relative overflow-hidden py-10 bg-slate-100/60 dark:bg-slate-950/40 border-y border-slate-200/60 dark:border-slate-800/80 ${className}`}
+      className={`relative overflow-hidden py-10 bg-background border-y border-border/80 ${className}`}
     >
       <div className="site-container mb-6 text-center">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-micro text-muted-foreground">
           Especialización Técnica Multimarca
         </p>
-        <h2 className="mt-1 font-display text-lg font-bold text-slate-800 dark:text-slate-200 sm:text-xl">
+        <h2 className="mt-1.5 font-display text-lg font-bold text-foreground sm:text-2xl">
           Marcas y Sistemas de Inyección que Atendemos
         </h2>
       </div>
@@ -82,7 +91,10 @@ export function BrandsMarquee({ className = "" }: BrandsMarqueeProps) {
             return (
               <div
                 key={`${brand.id}-${idx}`}
-                className="flex items-center justify-center opacity-65 transition-all duration-300 hover:opacity-100 hover:scale-105 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:drop-shadow-[0_0_12px_rgba(59,130,246,0.35)] shrink-0"
+                role="img"
+                tabIndex={0}
+                aria-label={`Fabricante homologado: ${brand.name}`}
+                className="flex items-center justify-center shrink-0 cursor-default outline-none rounded-md p-1.5 transition-all duration-300 ease-out opacity-45 grayscale hover:opacity-100 hover:grayscale-0 focus-visible:opacity-100 focus-visible:grayscale-0 focus-visible:ring-1 focus-visible:ring-white/40 text-muted-foreground hover:text-white max-md:opacity-70 max-md:grayscale-0 [@media(hover:none)]:opacity-70 [@media(hover:none)]:grayscale-0"
                 title={title}
                 data-testid={`brand-item-${brand.id}`}
               >

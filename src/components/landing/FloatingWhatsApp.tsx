@@ -70,7 +70,7 @@ export function FloatingWhatsApp({
   return (
     <aside
       aria-label="Acceso directo a WhatsApp"
-      className={`fixed ${verticalSpacingClass} right-6 z-40 transition-all duration-300 ${
+      className={`fixed ${verticalSpacingClass} right-6 z-30 transition-all duration-300 ${
         isOverlapping ? "pointer-events-none translate-y-6 opacity-0" : "translate-y-0 opacity-100"
       } ${className}`}
     >

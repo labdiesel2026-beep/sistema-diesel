@@ -39,4 +39,12 @@ describe("Componente Button y buttonVariants (RF-05.1)", () => {
     expect(classes).toContain("text-whatsapp-foreground");
     expect(classes).toContain("ring-emerald-400/20");
   });
+
+  it("renderiza la variante ghost con borde hairline y transición de 300ms ease-out (Spec 009)", () => {
+    const classes = buttonVariants({ variant: "ghost" });
+    expect(classes).toContain("dark:border-white/10");
+    expect(classes).toContain("duration-300");
+    expect(classes).toContain("ease-out");
+  });
 });
+

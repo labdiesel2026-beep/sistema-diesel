@@ -48,7 +48,7 @@ describe("Componente PoliciesBanner (PoliciesBanner.tsx)", () => {
       name: /Aviso de políticas comerciales y de garantía/i,
     });
     expect(banner).toBeInTheDocument();
-    expect(banner.className).toContain("z-45");
+    expect(banner.className).toContain("z-30");
     expect(banner.className).toContain("sm:left-6");
     expect(banner.className).toContain("sm:bottom-6");
     expect(banner.className).toContain("sm:max-w-md");

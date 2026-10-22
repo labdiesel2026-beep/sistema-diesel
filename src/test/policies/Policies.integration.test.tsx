@@ -77,12 +77,12 @@ describe("Suite de Integración: Políticas Comerciales y Banner (Policies.integ
       vi.advanceTimersByTime(1000);
     });
 
-    // El banner se proyecta en z-45
+    // El banner se proyecta en z-30
     const banner = screen.getByRole("region", {
       name: /Aviso de políticas comerciales y de garantía/i,
     });
     expect(banner).toBeInTheDocument();
-    expect(banner.className).toContain("z-45");
+    expect(banner.className).toContain("z-30");
 
     // Localizar botón de aceptación en el banner
     const acceptBtn = screen.getByRole("button", { name: /Aceptar y Continuar/i });

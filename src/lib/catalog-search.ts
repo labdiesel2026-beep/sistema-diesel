@@ -110,3 +110,37 @@ export function searchProducts(
 
   return matchesWithRank.map((item) => item.product);
 }
+
+export interface ParsedOemCodes {
+  primary: string | null;
+  alternatives: string[];
+  totalCount: number;
+}
+
+/**
+ * Parsea y descompone múltiples códigos OEM cruzados en un repuesto diésel.
+ * (Spec 009, RF-08, CL-02)
+ *
+ * Separa por comas (,), barras (/), puntos y coma (;) o saltos de línea.
+ * El primer token se asume como código principal del fabricante de inyección.
+ */
+export function parseOemCodes(oem?: string | null): ParsedOemCodes {
+  if (!oem || !oem.trim()) {
+    return { primary: null, alternatives: [], totalCount: 0 };
+  }
+
+  const tokens = oem
+    .split(/[,/;\n]+/)
+    .map((code) => code.trim())
+    .filter((code) => code.length > 0);
+
+  if (tokens.length === 0) {
+    return { primary: null, alternatives: [], totalCount: 0 };
+  }
+
+  return {
+    primary: tokens[0] ?? null,
+    alternatives: tokens.slice(1),
+    totalCount: tokens.length,
+  };
+}

@@ -63,39 +63,42 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
   return (
     <section
       id="garantias"
-      className={`scroll-mt-20 border-y border-slate-200/80 bg-white py-20 dark:border-slate-800 dark:bg-slate-950 sm:py-24 ${className}`}
+      className={`scroll-mt-20 border-y border-border/80 bg-background py-20 text-foreground sm:py-24 ${className}`}
       aria-labelledby="garantias-heading"
     >
       <div className="site-container">
-        <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/50 via-white to-slate-50 p-6 sm:p-10 lg:p-12 shadow-sm dark:border-blue-900/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-950">
+        <div className="rounded-2xl border border-border bg-card p-6 sm:p-10 lg:p-12 shadow-sm">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* Columna Informativa (7 columnas en desktop) */}
             <div className="lg:col-span-7">
               {/* Badge superior de garantía */}
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-100/70 px-3.5 py-1 text-xs font-semibold text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300">
-                <ShieldCheck className="size-4 text-blue-600 dark:text-blue-400" />
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border/80 bg-muted/50 px-3.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
+                <ShieldCheck className="size-3.5 text-primary" />
                 <span>Respaldo y Posventa</span>
               </div>
 
               {/* Título de la sección */}
               <h2
                 id="garantias-heading"
-                className="font-display text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl"
+                className="font-display text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
               >
                 {SITE_CONFIG.warrantyTerms.title}
               </h2>
 
               {/* Resumen institucional */}
-              <p className="mt-3 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+              <p className="mt-3 text-base leading-relaxed text-muted-foreground">
                 {SITE_CONFIG.warrantyTerms.summary}
               </p>
 
-              {/* Lista de condiciones y detalles de garantía */}
-              <div className="mt-6 flex flex-col gap-3">
+              {/* Lista de condiciones y detalles de garantía en tarjetas técnicas */}
+              <div className="mt-6 flex flex-col gap-2.5">
                 {SITE_CONFIG.warrantyTerms.details.map((detail) => (
-                  <div key={detail} className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-blue-600 dark:text-blue-400" />
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                  <div
+                    key={detail}
+                    className="flex items-start gap-3 rounded-lg border border-border/50 bg-background/40 p-3 transition-colors hover:border-border"
+                  >
+                    <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
+                    <span className="text-sm font-medium text-foreground">
                       {detail}
                     </span>
                   </div>
@@ -108,22 +111,22 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
                   variant="whatsapp"
                   size="lg"
                   asChild
-                  className="h-13 w-full px-6 text-sm font-bold shadow-md sm:w-auto"
+                  className="h-12 w-full px-6 font-mono text-xs uppercase tracking-wider font-bold shadow-md sm:w-auto"
                 >
                   <a href={warrantyUrl} target="_blank" rel="noopener noreferrer">
-                    <FaWhatsapp className="size-5" />
+                    <FaWhatsapp className="size-4" />
                     Solicitar Garantía / Soporte
                   </a>
                 </Button>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="font-mono text-xs text-muted-foreground">
                   Atención técnica directa de Lun a Vie
                 </p>
               </div>
             </div>
 
-            {/* Columna Multimedia (5 columnas en desktop) con reproductor HTML5 resiliente */}
+            {/* Columna Multimedia (5 columnas en desktop) con reproductor HTML5 resiliente Edge-to-Edge */}
             <div className="lg:col-span-5">
-              <div className="relative aspect-video lg:aspect-[4/3] w-full overflow-hidden rounded-2xl border border-blue-500/20 bg-slate-950 shadow-xl">
+              <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border/80 bg-black shadow-2xl">
                 {shouldFallback ? (
                   <img
                     src={posterImg}
@@ -147,10 +150,10 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
                 )}
 
                 {/* Badge técnico contextual */}
-                <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-slate-950/85 px-3 py-1 text-xs font-semibold text-blue-300 backdrop-blur-md">
+                <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 rounded-full border border-border/80 bg-background/90 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-foreground backdrop-blur-md">
                   <span
                     className={`size-2 rounded-full ${
-                      shouldFallback ? "bg-blue-400" : "bg-emerald-400 animate-pulse"
+                      shouldFallback ? "bg-muted-foreground" : "bg-emerald-400 animate-pulse"
                     }`}
                   />
                   <span>
@@ -158,9 +161,9 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
                   </span>
                 </div>
 
-                {/* Overlay degradado sutil de profundidad */}
+                {/* Overlay degradado sutil de profundidad acotado a la base */}
                 <div
-                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent"
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"
                   aria-hidden="true"
                 />
               </div>

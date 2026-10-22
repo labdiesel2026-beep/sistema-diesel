@@ -219,3 +219,20 @@ export const SITE_CONFIG = {
     ] as const satisfies readonly PolicyAxis[],
   } as const,
 } as const;
+
+/**
+ * Mapa de elevación estricta Z-Index Maestro (Spec 009, RF-10, Bloque 1 - Tarea 1.4)
+ * Erradica colisiones de apilamiento entre barras fijas, modales y widgets interactivos.
+ */
+export const Z_INDEX = {
+  NAVBAR: 50,          // Barra de Navegación Maestra (LandingNavbar)
+  MODAL_DRAWER: 40,    // CartDrawer, CommercialPoliciesModal, FilterDrawer
+  MOBILE_FILTER: 35,   // Botón flotante MobileFilterTrigger en catálogo móvil
+  FLOATING_WIDGET: 30, // FloatingWhatsApp y CommercialPoliciesBanner
+  STICKY_CONSOLE: 20,  // Consola fija de filtros en escritorio (CatalogFilters)
+  INTERACTIVE_CARD: 10,// Tarjetas técnicas, Bento modules, menús locales
+  BASE: 0,             // Superficie mineral base y fotografía cruda
+} as const;
+
+export type ZIndexLevel = (typeof Z_INDEX)[keyof typeof Z_INDEX];
+

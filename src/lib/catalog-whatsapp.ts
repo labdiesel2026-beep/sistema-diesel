@@ -54,6 +54,10 @@ export function generateDirectProductWhatsAppUrl(
   return buildWhatsAppUrl(customPhone, message);
 }
 
+export interface GenerateCartWhatsAppOptions {
+  tagCotizar?: boolean;
+}
+
 /**
  * Genera la URL de WhatsApp para enviar el pedido completo del carrito con datos enriquecidos (RF-10).
  * Calcula el subtotal de productos con precio, discrimina ítems a cotizar y señala
@@ -62,6 +66,7 @@ export function generateDirectProductWhatsAppUrl(
 export function generateCartWhatsAppUrl(
   enrichedItems: EnrichedCartItem[],
   customPhone = SITE_CONFIG.phone,
+  options?: GenerateCartWhatsAppOptions,
 ): string {
   if (!enrichedItems.length) {
     throw new Error("El carrito no contiene productos para cotizar.");
@@ -76,15 +81,16 @@ export function generateCartWhatsAppUrl(
   let subtotalPriced = 0;
   let hasQuotes = false;
   let hasReconfirmation = false;
+  const quoteTag = options?.tagCotizar ? "[A Cotizar]" : "A cotizar";
 
   enrichedItems.forEach((item, index) => {
     let priceLabel = "";
 
     if (item.requiresReconfirmation) {
-      priceLabel = "A cotizar (Requiere reconfirmación con taller)";
+      priceLabel = `${quoteTag} (Requiere reconfirmación con taller)`;
       hasReconfirmation = true;
       hasQuotes = true;
-    } else if (item.showPrice && item.price !== null) {
+    } else if (item.showPrice && item.price !== null && item.price > 0) {
       const itemTotal = item.price * item.quantity;
       subtotalPriced += itemTotal;
       priceLabel =
@@ -92,7 +98,7 @@ export function generateCartWhatsAppUrl(
           ? `${formatPrice(itemTotal)} (${formatPrice(item.price)} c/u)`
           : formatPrice(itemTotal);
     } else {
-      priceLabel = "A cotizar";
+      priceLabel = quoteTag;
       hasQuotes = true;
     }
 
@@ -108,6 +114,14 @@ export function generateCartWhatsAppUrl(
 
   if (subtotalPriced > 0) {
     lines.push(`Subtotal productos con precio público: ${formatPrice(subtotalPriced)}`);
+  }
+
+  if (subtotalPriced > 0 && hasQuotes) {
+    lines.push(`*TOTAL ESTIMADO:* ${formatPrice(subtotalPriced)} + ÍTEMS A COTIZAR`);
+  } else if (subtotalPriced > 0) {
+    lines.push(`*TOTAL ESTIMADO:* ${formatPrice(subtotalPriced)}`);
+  } else {
+    lines.push("*TOTAL ESTIMADO:* PRESUPUESTO A CONFIRMAR");
   }
 
   if (hasQuotes) {

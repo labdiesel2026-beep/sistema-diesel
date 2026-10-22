@@ -87,16 +87,19 @@ describe("CartDrawer", () => {
     expect(screen.getByTestId("badge-reconfirmation-p-delphi-hidden")).toBeInTheDocument();
     expect(screen.getByTestId("cart-reconfirmation-banner")).toBeInTheDocument();
 
-    // 5. Validar subtotal de productos con precio ($200.000 ARS)
+    // 5. Validar subtotal de productos con precio ($200.000 ARS) y leyenda mixta
     expect(screen.getByTestId("cart-subtotal")).toHaveTextContent("$200.000 ARS");
+    expect(screen.getByTestId("cart-subtotal")).toHaveTextContent("+ ÍTEMS A COTIZAR");
+    expect(screen.getByText("[A Cotizar]")).toBeInTheDocument();
 
-    // 6. Validar enlace de checkout por WhatsApp
+    // 6. Validar enlace de checkout por WhatsApp con desglose y etiqueta [A Cotizar]
     const checkoutLink = screen.getByTestId("whatsapp-checkout-button");
     expect(checkoutLink).toHaveAttribute("target", "_blank");
     const href = checkoutLink.getAttribute("href") || "";
     expect(href).toContain("https://wa.me/");
     expect(href).toContain("Inyector%20Bosch%20CR%20Revalidado");
     expect(href).toContain("Bomba%20Delphi%20Oculta");
+    expect(decodeURIComponent(href)).toContain("[A Cotizar]");
     expect(checkoutLink.className).toContain("bg-whatsapp");
     expect(checkoutLink.className).toContain("font-bold");
 

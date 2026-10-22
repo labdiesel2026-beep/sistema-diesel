@@ -11,7 +11,7 @@
  * - Checkout directo estructurado hacia WhatsApp según RF-10 sin simulación de existencias.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaWhatsapp } from "react-icons/fa";
 import {
@@ -35,6 +35,49 @@ import { useCatalogCart } from "@/context/catalog-cart-context";
 import { revalidateCartItems } from "@/lib/cart-revalidation";
 import { formatPrice, generateCartWhatsAppUrl } from "@/lib/catalog-whatsapp";
 import type { EnrichedCartItem } from "@/types/catalog";
+
+export interface CartTotalsSummary {
+  numericalTotal: number;
+  hasPricedItems: boolean;
+  quoteItemsCount: number;
+  displayLabel: string;
+}
+
+/**
+ * Calcula de forma determinista y estricta los subtotales numéricos y discriminación
+ * de repuestos a cotizar para el carrito mixto (Spec 009, RF-09, CL-03, Principio 5).
+ */
+export function calculateCartTotals(items: EnrichedCartItem[]): CartTotalsSummary {
+  let numericalTotal = 0;
+  let hasPricedItems = false;
+  let quoteItemsCount = 0;
+
+  for (const item of items) {
+    const isPriced =
+      !item.requiresReconfirmation &&
+      item.showPrice &&
+      item.price !== null &&
+      item.price > 0;
+
+    if (isPriced) {
+      numericalTotal += (item.price as number) * item.quantity;
+      hasPricedItems = true;
+    } else {
+      quoteItemsCount += item.quantity;
+    }
+  }
+
+  let displayLabel = "";
+  if (hasPricedItems && quoteItemsCount > 0) {
+    displayLabel = `${formatPrice(numericalTotal)} + ÍTEMS A COTIZAR`;
+  } else if (hasPricedItems && quoteItemsCount === 0) {
+    displayLabel = formatPrice(numericalTotal);
+  } else {
+    displayLabel = "PRESUPUESTO A CONFIRMAR";
+  }
+
+  return { numericalTotal, hasPricedItems, quoteItemsCount, displayLabel };
+}
 
 export interface CartDrawerProps {
   open?: boolean;
@@ -103,22 +146,14 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
           isDeletedOrUnavailable: false,
         }));
 
-  // Cálculos de subtotal y banderas de advertencia
-  const subtotalPriced = displayedItems.reduce((acc, item) => {
-    if (!item.requiresReconfirmation && item.showPrice && item.price !== null) {
-      return acc + item.price * item.quantity;
-    }
-    return acc;
-  }, 0);
-
-  const hasQuotes = displayedItems.some(
-    (item) => item.requiresReconfirmation || !item.showPrice || item.price === null,
-  );
-
+  // Cálculos de subtotal estricto y desglose dinámico (RF-09, CL-03)
+  const cartSummary = useMemo(() => calculateCartTotals(displayedItems), [displayedItems]);
   const hasReconfirmation = displayedItems.some((item) => item.requiresReconfirmation);
 
   const whatsappCheckoutUrl =
-    displayedItems.length > 0 ? generateCartWhatsAppUrl(displayedItems) : "";
+    displayedItems.length > 0
+      ? generateCartWhatsAppUrl(displayedItems, undefined, { tagCotizar: true })
+      : "";
 
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
@@ -246,18 +281,22 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                     {/* Precio / A cotizar */}
                     <div className="mt-2 text-sm font-bold text-foreground">
                       {item.requiresReconfirmation ? (
-                        <span className="text-muted-foreground">A cotizar</span>
-                      ) : item.showPrice && item.price !== null ? (
+                        <span className="font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          [A Cotizar]
+                        </span>
+                      ) : item.showPrice && item.price !== null && item.price > 0 ? (
                         <span>
                           {formatPrice(item.price * item.quantity)}
                           {item.quantity > 1 && (
-                            <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                            <span className="ml-1.5 font-mono text-xs font-normal text-muted-foreground">
                               ({formatPrice(item.price)} c/u)
                             </span>
                           )}
                         </span>
                       ) : (
-                        <span className="text-muted-foreground">A cotizar</span>
+                        <span className="font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          [A Cotizar]
+                        </span>
                       )}
                     </div>
 
@@ -315,19 +354,30 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
         {items.length > 0 && (
           <div className="border-t border-border bg-card p-6 space-y-4">
             <div className="space-y-1.5">
-              {subtotalPriced > 0 && (
-                <div className="flex items-center justify-between text-base">
-                  <span className="font-medium text-muted-foreground">Subtotal con precio:</span>
-                  <span
-                    className="font-display text-xl font-bold text-foreground"
-                    data-testid="cart-subtotal"
-                  >
-                    {formatPrice(subtotalPriced)}
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center justify-between text-base">
+                <span className="font-medium text-muted-foreground">
+                  {cartSummary.hasPricedItems ? "Subtotal estimado:" : "Presupuesto:"}
+                </span>
+                <span
+                  className="font-display text-lg font-bold text-foreground"
+                  data-testid="cart-subtotal"
+                >
+                  {cartSummary.hasPricedItems ? (
+                    <>
+                      <span>{formatPrice(cartSummary.numericalTotal)}</span>
+                      {cartSummary.quoteItemsCount > 0 && (
+                        <span className="ml-1.5 text-xs font-mono font-bold text-primary uppercase">
+                          + ÍTEMS A COTIZAR
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    "PRESUPUESTO A CONFIRMAR"
+                  )}
+                </span>
+              </div>
 
-              {hasQuotes && (
+              {cartSummary.quoteItemsCount > 0 && (
                 <p className="text-xs text-muted-foreground">
                   * La solicitud incluye repuestos para cotizar al día.
                 </p>

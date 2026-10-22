@@ -111,4 +111,45 @@ describe("ProductCard y ProductGridSkeleton", () => {
     const skeletonCards = skeletonContainer.querySelectorAll("article");
     expect(skeletonCards.length).toBe(4);
   });
+
+  it("renderiza badges de OEM principal, +{N} ALTERNATIVOS para equivalencias y guion para ausente (RF-08, CL-02)", () => {
+    // 1. Producto con 3 códigos OEM cruzados
+    const productWithMultipleOem: CatalogProduct = {
+      ...mockProductWithPrice,
+      id: "prod-multi-oem",
+      oem: "0445110001, 23670-0L050 / 095000-5881",
+    };
+
+    const { rerender } = render(
+      <CatalogCartProvider>
+        <ProductCard product={productWithMultipleOem} brandName="Bosch" />
+      </CatalogCartProvider>,
+    );
+
+    // Debe mostrar el OEM primario (primer token)
+    expect(screen.getByText("OEM 0445110001")).toBeInTheDocument();
+
+    // Debe mostrar el badge con el conteo de equivalencias restantes (+2 ALTERNATIVOS)
+    const altBadge = screen.getByTestId("oem-alternatives-prod-multi-oem");
+    expect(altBadge).toBeInTheDocument();
+    expect(altBadge).toHaveTextContent("+2 ALTERNATIVOS");
+    expect(altBadge).toHaveAttribute("title", expect.stringContaining("23670-0L050"));
+    expect(altBadge).toHaveAttribute("title", expect.stringContaining("095000-5881"));
+
+    // 2. Producto sin código OEM (renderiza el guion "—")
+    const productWithoutOem: CatalogProduct = {
+      ...mockProductWithPrice,
+      id: "prod-no-oem",
+      oem: null,
+    };
+
+    rerender(
+      <CatalogCartProvider>
+        <ProductCard product={productWithoutOem} brandName="Bosch" />
+      </CatalogCartProvider>,
+    );
+
+    expect(screen.queryByText(/OEM/i)).not.toBeInTheDocument();
+    expect(screen.getByTestId("oem-empty-prod-no-oem")).toHaveTextContent("—");
+  });
 });

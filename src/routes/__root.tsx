@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -13,6 +14,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { CatalogCartProvider } from "@/context/catalog-cart-context";
 import { PublicPoliciesContainer } from "@/components/policies/PublicPoliciesContainer";
+import { PublicLayoutWrapper } from "@/components/layout/PublicLayoutWrapper";
 
 function NotFoundComponent() {
   return (
@@ -118,14 +120,22 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith("/admin");
 
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <CatalogCartProvider>
+      {isAdmin ? (
         <Outlet />
-        <PublicPoliciesContainer />
-      </CatalogCartProvider>
+      ) : (
+        <CatalogCartProvider>
+          <PublicLayoutWrapper>
+            <Outlet />
+            <PublicPoliciesContainer />
+          </PublicLayoutWrapper>
+        </CatalogCartProvider>
+      )}
     </QueryClientProvider>
   );
 }

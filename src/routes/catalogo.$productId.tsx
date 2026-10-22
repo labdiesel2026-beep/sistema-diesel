@@ -34,6 +34,7 @@ import { CartDrawer } from "@/components/catalog/CartDrawer";
 import { useCatalogCart } from "@/context/catalog-cart-context";
 import { catalogService } from "@/services/catalog-service";
 import { formatPrice, generateDirectProductWhatsAppUrl } from "@/lib/catalog-whatsapp";
+import { parseOemCodes } from "@/lib/catalog-search";
 import type { CatalogProduct, CatalogBrand, CatalogCategory } from "@/types/catalog";
 import { pageHead } from "@/components/diesel-site";
 
@@ -120,6 +121,7 @@ export function ProductDetailPage({
     [product, brandName],
   );
 
+  const oemData = useMemo(() => parseOemCodes(product?.oem), [product?.oem]);
   const cartQuantity = product ? getItemQuantity(product.id) : 0;
 
   return (
@@ -248,11 +250,38 @@ export function ProductDetailPage({
 
               {/* Columna de Información y Acciones */}
               <div className="flex flex-col">
-                {product.oem && (
-                  <span className="mb-2 self-start rounded-md border border-primary/20 bg-primary/5 px-2.5 py-1 font-mono text-xs font-semibold text-primary">
-                    OEM {product.oem}
-                  </span>
-                )}
+                {/* Código OEM y Alternativos (Spec 009, RF-08, CL-02) */}
+                <div className="mb-2 flex flex-wrap items-center gap-2 self-start">
+                  {oemData.primary ? (
+                    <>
+                      <span
+                        className="rounded-md border border-primary/20 bg-primary/5 px-2.5 py-1 font-mono text-xs font-semibold text-primary"
+                        data-testid="detail-oem-primary"
+                      >
+                        OEM {oemData.primary}
+                      </span>
+                      {oemData.alternatives.length > 0 && (
+                        <span
+                          tabIndex={0}
+                          role="note"
+                          className="cursor-help rounded-md border border-border/80 bg-card px-2 py-0.5 font-mono text-[11px] font-semibold tracking-wider text-muted-foreground uppercase hover:border-border-hover hover:text-foreground transition-colors"
+                          title={`Códigos OEM alternativos:\n${oemData.alternatives.join(", ")}`}
+                          aria-label={`Códigos OEM alternativos: ${oemData.alternatives.join(", ")}`}
+                          data-testid="detail-oem-alternatives"
+                        >
+                          +{oemData.alternatives.length} ALTERNATIVOS
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span
+                      className="font-mono text-xs text-muted-foreground"
+                      data-testid="detail-oem-empty"
+                    >
+                      —
+                    </span>
+                  )}
+                </div>
 
                 <h1 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl">
                   {product.name}
@@ -284,10 +313,25 @@ export function ProductDetailPage({
                     Especificaciones Técnicas
                   </div>
                   <dl className="divide-y divide-border text-xs">
-                    {product.oem && (
+                    {oemData.primary ? (
                       <div className="grid grid-cols-3 px-4 py-2.5">
                         <dt className="font-semibold text-muted-foreground">Código OEM</dt>
-                        <dd className="col-span-2 font-mono text-foreground">{product.oem}</dd>
+                        <dd className="col-span-2 font-mono text-foreground flex flex-wrap items-center gap-2">
+                          <span>{oemData.primary}</span>
+                          {oemData.alternatives.length > 0 && (
+                            <span
+                              className="font-mono text-xs text-muted-foreground"
+                              title={oemData.alternatives.join(", ")}
+                            >
+                              (+{oemData.alternatives.length} alternativos: {oemData.alternatives.join(", ")})
+                            </span>
+                          )}
+                        </dd>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 px-4 py-2.5">
+                        <dt className="font-semibold text-muted-foreground">Código OEM</dt>
+                        <dd className="col-span-2 font-mono text-muted-foreground">—</dd>
                       </div>
                     )}
                     {brandName && (

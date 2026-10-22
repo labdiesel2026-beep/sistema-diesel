@@ -15,14 +15,14 @@ describe("Botón Flotante de WhatsApp (FloatingWhatsApp.tsx)", () => {
     window.innerWidth = 1024; // Default desktop
   });
 
-  it("renderiza el botón fijo en la esquina inferior derecha con las clases 'fixed right-6 z-40' (RF-07, CL-07)", () => {
+  it("renderiza el botón fijo en la esquina inferior derecha con las clases 'fixed right-6 z-30' (RF-07, CL-07)", () => {
     const { container } = render(<FloatingWhatsApp />);
     const aside = container.querySelector("aside");
 
     expect(aside).toBeInTheDocument();
     expect(aside?.className).toContain("fixed");
     expect(aside?.className).toContain("right-6");
-    expect(aside?.className).toContain("z-40");
+    expect(aside?.className).toContain("z-30");
   });
 
   it("se desplaza dinámicamente a bottom-36 en móvil cuando el banner de políticas está desplegado (RF-04.3, CL-07)", () => {

@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { ProductGridSkeleton } from "@/components/catalog/ProductGridSkeleton";
 import { CatalogFilters } from "@/components/catalog/CatalogFilters";
+import { MobileFilterTrigger } from "@/components/catalog/FilterDrawer";
 import { CartDrawer } from "@/components/catalog/CartDrawer";
 import { CatalogErrorBoundary, CatalogErrorView } from "@/components/catalog/CatalogErrorBoundary";
 import { useCatalogCart } from "@/context/catalog-cart-context";
@@ -67,6 +68,7 @@ export function CatalogPage({
 }: CatalogPageProps = {}) {
   const { count: cartCount } = useCatalogCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
   // Estados de datos obtenidos de la API REST
   const [products, setProducts] = useState<CatalogProduct[]>(mockProducts || []);
@@ -267,6 +269,8 @@ export function CatalogPage({
                   onCategoryToggle={handleCategoryToggle}
                   onResetFilters={handleResetFilters}
                   products={products}
+                  mobileOpen={isFilterDrawerOpen}
+                  onMobileOpenChange={setIsFilterDrawerOpen}
                 />
               </aside>
 
@@ -394,6 +398,12 @@ export function CatalogPage({
             </div>
           )}
         </div>
+
+        {/* Botón Flotante FILTROS TÉCNICOS en Móvil (z-35) */}
+        <MobileFilterTrigger
+          onClick={() => setIsFilterDrawerOpen(true)}
+          activeFiltersCount={activeFiltersCount}
+        />
 
         {/* Botón Flotante Reactivo del Carrito de Consultas (RF-08) */}
         <div className="fixed bottom-6 right-6 z-40">

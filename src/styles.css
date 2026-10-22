@@ -21,8 +21,10 @@
 @theme inline {
   --font-sans: "Manrope", sans-serif;
   --font-display: "Barlow", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --color-whatsapp: var(--whatsapp);
   --color-whatsapp-foreground: var(--whatsapp-foreground);
+  --color-whatsapp-hover: var(--whatsapp-hover);
   --color-success-foreground: var(--success-foreground);
   --color-hero: var(--hero);
   --color-hero-foreground: var(--hero-foreground);
@@ -53,6 +55,7 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
@@ -73,6 +76,7 @@
 
 :root {
   --whatsapp: oklch(0.55 0.16 160);
+  --whatsapp-hover: oklch(0.48 0.17 160);
   --success-foreground: oklch(0.4 0.12 149);
   --whatsapp-foreground: oklch(0.99 0 0);
   --hero: oklch(0.19 0.04 260);
@@ -98,6 +102,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(0.929 0.013 255.508);
+  --border-hover: oklch(0.85 0.015 255);
   --input: oklch(0.929 0.013 255.508);
   --ring: oklch(0.704 0.04 256.788);
   --chart-1: oklch(0.646 0.222 41.116);
@@ -116,7 +121,8 @@
 }
 
 .dark {
-  --whatsapp: oklch(0.52 0.17 160);
+  --whatsapp: oklch(0.55 0.16 160);
+  --whatsapp-hover: oklch(0.48 0.17 160);
   --whatsapp-foreground: oklch(0.99 0 0);
   --success-foreground: oklch(0.8 0.15 149);
   --background: oklch(0.129 0.042 264.695);
@@ -136,6 +142,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(1 0 0 / 10%);
+  --border-hover: oklch(1 0 0 / 25%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.551 0.027 264.364);
   --chart-1: oklch(0.488 0.243 264.376);
@@ -277,3 +284,59 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   Spec 009 — Utilidades de Dirección de Arte Industrial Premium
+   ========================================================================== */
+
+.text-macro {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.text-micro {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.hairline-border {
+  border: 1px solid var(--color-border);
+}
+
+.hairline-border:hover,
+.hairline-border:focus-visible {
+  border-color: var(--color-border-hover);
+}
+
+/* Jerarquía Z-Index Maestro (Spec 009, RF-10) */
+.z-35 {
+  z-index: 35;
+}
+
+/* Barra de desplazamiento técnica oscurecida para laptop console */
+.technical-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.technical-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.technical-scrollbar::-webkit-scrollbar-thumb {
+  background: oklch(1 0 0 / 15%);
+  border-radius: 9999px;
+}
+.technical-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: oklch(1 0 0 / 30%);
+}
+.technical-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(1 0 0 / 15%) transparent;
+}
+
+

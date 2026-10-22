@@ -1,11 +1,13 @@
 /**
- * Componente de Imagen de Producto con Fallback SVG Vectorial Accesible.
- * (Spec 003, RF-06, CL-03, Bloque 5 - Tarea T-12)
+ * Componente de Imagen de Producto con Fallback Esquematizado Técnico.
+ * (Spec 009, RF-11, Principio 6 de la Constitución, Bloque 2 - Tarea 2.4)
  *
  * Características:
  * - Resuelve URLs relativas hacia el backend mediante resolveImageUrl() de api.ts.
- * - Detecta ausencia de imagen o error de carga en el evento onError.
- * - Renderiza un placeholder SVG vectorial semántico con role="img" y texto "Imagen no disponible".
+ * - Detecta ausencia de imagen o error de carga en el evento onError de forma opaca y silenciosa.
+ * - Renderiza un diagrama esquemático técnico vectorial de un inyector diésel en trazo fino monocrómico
+ *   sobre fondo mineral, eliminando fotografías de stock genéricas o iconos rotos.
+ * - Conserva accesibilidad semántica con role="img", aria-label y etiquetas accesibles.
  */
 
 import { useState, useEffect } from "react";
@@ -23,7 +25,7 @@ export function ProductImageWithFallback({
   src,
   alt,
   className = "size-full object-cover",
-  fallbackClassName = "flex size-full flex-col items-center justify-center bg-muted p-4 text-center text-muted-foreground",
+  fallbackClassName = "flex size-full flex-col items-center justify-center bg-card/60 p-4 text-center border-b border-border/80",
   loading = "lazy",
 }: ProductImageWithFallbackProps) {
   const [hasError, setHasError] = useState(false);
@@ -43,22 +45,43 @@ export function ProductImageWithFallback({
         className={fallbackClassName}
         data-testid="product-image-fallback"
       >
+        {/* Esquema Vectorial Técnico de Inyector Diésel */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
+          viewBox="0 0 64 64"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.5"
+          strokeWidth="1.3"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="size-10 stroke-muted-foreground/60"
+          className="size-11 stroke-muted-foreground/50 transition-opacity hover:stroke-white/60"
           aria-hidden="true"
         >
-          <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-          <circle cx="9" cy="9" r="2" />
-          <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+          {/* Conector y cabezal electromagnético */}
+          <path d="M26 8h12v5H26z" />
+          <path d="M30 4h4v4h-4z" />
+          {/* Cuerpo principal cilíndrico */}
+          <path d="M28 13h8v16h-8z" />
+          {/* Racor de retorno de combustible */}
+          <path d="M36 17h6v4h-6" />
+          {/* Racor de entrada Common Rail alta presión */}
+          <path d="M22 23h6v4h-6" />
+          {/* Cuerpo intermedio cónico */}
+          <path d="M28 29l2 15h4l2-15" />
+          {/* Tobera y punta atomizadora */}
+          <path d="M30 44h4v12l-2 4-2-4v-12z" />
+          {/* Guías de cota técnica milimétrica */}
+          <line x1="16" y1="31" x2="19" y2="31" strokeDasharray="1 1" />
+          <line x1="45" y1="31" x2="48" y2="31" strokeDasharray="1 1" />
         </svg>
-        <span className="mt-2 text-xs font-medium text-muted-foreground">Imagen no disponible</span>
+
+        {/* Identificador técnico monoespaciado */}
+        <span className="mt-2.5 font-mono text-[10px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+          Esquema Técnico Registrado
+        </span>
+        <span className="mt-0.5 text-[10px] text-muted-foreground/60">
+          Imagen no disponible
+        </span>
       </div>
     );
   }

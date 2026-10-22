@@ -14,7 +14,7 @@ import { useState } from "react";
 import { SlidersHorizontal, ChevronDown, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { FilterDrawer } from "@/components/catalog/FilterDrawer";
 import { expandCategoryIds } from "@/lib/catalog-filter";
 import type { CatalogBrand, CatalogCategory, CatalogProduct } from "@/types/catalog";
 
@@ -28,6 +28,8 @@ export interface CatalogFiltersProps {
   onResetFilters: () => void;
   products?: CatalogProduct[];
   className?: string;
+  mobileOpen?: boolean;
+  onMobileOpenChange?: (open: boolean) => void;
 }
 
 export function CatalogFilters({
@@ -40,8 +42,12 @@ export function CatalogFilters({
   onResetFilters,
   products = [],
   className = "",
+  mobileOpen,
+  onMobileOpenChange,
 }: CatalogFiltersProps) {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [internalMobileOpen, setInternalMobileOpen] = useState(false);
+  const isMobileOpen = mobileOpen !== undefined ? mobileOpen : internalMobileOpen;
+  const handleMobileOpen = onMobileOpenChange !== undefined ? onMobileOpenChange : setInternalMobileOpen;
 
   // Cantidad total de filtros activos
   const activeFiltersCount = selectedBrandIds.length + selectedCategoryIds.length;
@@ -102,7 +108,7 @@ export function CatalogFilters({
     <div className="space-y-6" data-testid="catalog-filter-content">
       {/* Sección Categorías */}
       <div className="border-b border-border pb-5">
-        <h3 className="mb-3 font-display text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <h3 className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Categorías
         </h3>
         <div className="space-y-1.5" role="group" aria-label="Filtro por Categorías">
@@ -188,7 +194,7 @@ export function CatalogFilters({
 
       {/* Sección Marcas */}
       <div>
-        <h3 className="mb-3 font-display text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <h3 className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Marcas
         </h3>
         <div className="space-y-1.5" role="group" aria-label="Filtro por Marcas">
@@ -229,57 +235,38 @@ export function CatalogFilters({
     <>
       {/* Botón y Drawer Deslizable para Mobile (lg:hidden) */}
       <div className="lg:hidden">
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              className="h-11 w-full justify-between rounded-xl border-border bg-card px-4 font-medium text-foreground shadow-xs"
-              aria-label="Abrir filtros de productos"
-              data-testid="open-mobile-filters-button"
-            >
-              <span className="flex items-center gap-2">
-                <SlidersHorizontal className="size-4 text-primary" />
-                <span>Filtros</span>
-                {activeFiltersCount > 0 && (
-                  <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
-                    {activeFiltersCount}
-                  </span>
-                )}
+        <Button
+          variant="outline"
+          className="h-11 w-full justify-between rounded-xl border-border bg-card px-4 font-mono text-xs uppercase tracking-wider text-foreground shadow-xs"
+          aria-label="Abrir filtros de productos"
+          onClick={() => handleMobileOpen(true)}
+          data-testid="open-mobile-filters-button"
+        >
+          <span className="flex items-center gap-2">
+            <SlidersHorizontal className="size-4 text-primary" />
+            <span>Filtros Técnicos</span>
+            {activeFiltersCount > 0 && (
+              <span className="rounded-full bg-primary px-2 py-0.5 font-mono text-[10px] font-bold text-primary-foreground">
+                {activeFiltersCount}
               </span>
-              <ChevronDown className="size-4 text-muted-foreground" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-[300px] overflow-y-auto sm:w-[350px]">
-            <SheetHeader className="mb-4 text-left">
-              <SheetTitle className="flex items-center justify-between font-display text-lg">
-                <span className="flex items-center gap-2">
-                  <SlidersHorizontal className="size-5 text-primary" /> Filtros
-                </span>
-                {activeFiltersCount > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      onResetFilters();
-                      setMobileOpen(false);
-                    }}
-                    className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-                    data-testid="reset-filters-mobile-button"
-                  >
-                    <RotateCcw className="size-3.5" />
-                    Limpiar
-                  </Button>
-                )}
-              </SheetTitle>
-            </SheetHeader>
-            <FilterContent prefix="mob" />
-          </SheetContent>
-        </Sheet>
+            )}
+          </span>
+          <ChevronDown className="size-4 text-muted-foreground" />
+        </Button>
+
+        <FilterDrawer
+          open={isMobileOpen}
+          onOpenChange={handleMobileOpen}
+          activeFiltersCount={activeFiltersCount}
+          onResetFilters={onResetFilters}
+        >
+          <FilterContent prefix="mob" />
+        </FilterDrawer>
       </div>
 
-      {/* Panel Lateral de Filtros para Pantallas Grandes (hidden lg:block) */}
+      {/* Panel Lateral de Filtros para Pantallas Grandes (hidden lg:block) con consola sticky y scroll laptop */}
       <aside
-        className={`hidden lg:block rounded-xl border border-border bg-card p-5 shadow-xs ${className}`}
+        className={`hidden lg:block sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto technical-scrollbar rounded-xl border border-border bg-card p-5 shadow-xs ${className}`}
         aria-label="Filtros del catálogo"
         data-testid="catalog-filters-desktop"
       >
@@ -293,7 +280,7 @@ export function CatalogFilters({
               variant="ghost"
               size="sm"
               onClick={onResetFilters}
-              className="h-8 gap-1.5 px-2 text-xs font-semibold text-muted-foreground hover:text-primary"
+              className="h-8 gap-1.5 px-2 font-mono text-xs font-semibold text-muted-foreground hover:text-primary"
               data-testid="reset-filters-desktop-button"
             >
               <RotateCcw className="size-3.5" />

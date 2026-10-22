@@ -163,7 +163,7 @@ export function CategoryFormModal({
         aria-describedby="category-form-description"
       >
         <DialogHeader>
-          <div className="flex items-center gap-2 text-primary mb-1">
+          <div className="flex items-center gap-2 text-industrial mb-1">
             <FolderPlus className="size-5" />
             <span className="text-xs font-bold uppercase tracking-wider">
               {isEditing ? "Modificación de Taxonomía" : "Alta de Categoría"}

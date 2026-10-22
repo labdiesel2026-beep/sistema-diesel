@@ -109,6 +109,11 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="es">
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `document.documentElement.classList.add('js-enabled');`,
+          }}
+        />
       </head>
       <body>
         {children}
@@ -122,6 +127,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
+
+  useEffect(() => {
+    document.documentElement.classList.add("js-enabled");
+    document.body.classList.add("js-enabled");
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

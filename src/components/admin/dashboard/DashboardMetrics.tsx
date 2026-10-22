@@ -93,14 +93,14 @@ export function DashboardMetrics() {
             <article
               key={card.id}
               data-testid={`metric-card-${card.id}`}
-              className="flex flex-col justify-between rounded-xl border border-border bg-card p-5 shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
+              className="flex flex-col justify-between rounded-xl border border-border bg-card p-5 shadow-sm transition-all hover:border-industrial/40 hover:shadow-md"
             >
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {card.label}
                   </span>
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-industrial/10 text-industrial">
                     <Icon className="size-4" />
                   </div>
                 </div>
@@ -118,7 +118,7 @@ export function DashboardMetrics() {
               <div className="mt-4 pt-3 border-t border-border/50">
                 <Link
                   to={card.to}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-industrial hover:underline"
                 >
                   <span>{card.linkText}</span>
                   <ArrowRight className="size-3" />
@@ -149,11 +149,11 @@ export function DashboardMetrics() {
           <Button
             variant="outline"
             asChild
-            className="h-auto justify-between p-4 border-border hover:border-primary/50 hover:bg-accent/40"
+            className="h-auto justify-between p-4 border-border hover:border-industrial/50 hover:bg-accent/40"
           >
             <Link to="/admin" data-testid="quick-link-products">
               <div className="flex items-center gap-3 text-left">
-                <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <div className="flex size-9 items-center justify-center rounded-lg bg-industrial/10 text-industrial">
                   <Package className="size-5" />
                 </div>
                 <div>
@@ -172,11 +172,11 @@ export function DashboardMetrics() {
           <Button
             variant="outline"
             asChild
-            className="h-auto justify-between p-4 border-border hover:border-primary/50 hover:bg-accent/40"
+            className="h-auto justify-between p-4 border-border hover:border-industrial/50 hover:bg-accent/40"
           >
             <Link to="/admin/categorias" data-testid="quick-link-categories">
               <div className="flex items-center gap-3 text-left">
-                <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <div className="flex size-9 items-center justify-center rounded-lg bg-industrial/10 text-industrial">
                   <Tags className="size-5" />
                 </div>
                 <div>
@@ -195,11 +195,11 @@ export function DashboardMetrics() {
           <Button
             variant="outline"
             asChild
-            className="h-auto justify-between p-4 border-border hover:border-primary/50 hover:bg-accent/40"
+            className="h-auto justify-between p-4 border-border hover:border-industrial/50 hover:bg-accent/40"
           >
             <Link to="/admin/marcas" data-testid="quick-link-brands">
               <div className="flex items-center gap-3 text-left">
-                <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <div className="flex size-9 items-center justify-center rounded-lg bg-industrial/10 text-industrial">
                   <BadgeCheck className="size-5" />
                 </div>
                 <div>

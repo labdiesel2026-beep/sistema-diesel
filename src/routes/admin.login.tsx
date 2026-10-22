@@ -33,7 +33,7 @@ function AdminLoginPage() {
     <div className="flex min-h-[calc(100dvh-5rem)] w-full items-center justify-center p-4">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl sm:p-8">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-industrial/10 text-industrial">
             <SlidersHorizontal className="size-6" />
           </div>
           <h1 className="font-display text-2xl font-bold tracking-tight">Laboratorio Diésel</h1>

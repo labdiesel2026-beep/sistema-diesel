@@ -45,19 +45,19 @@ export function PoliciesBanner({ onOpenModal, className = "" }: PoliciesBannerPr
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 30, scale: 0.96, transition: { duration: 0.3 } }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className={`fixed bottom-3 inset-x-3 z-30 sm:bottom-6 sm:left-6 sm:right-auto sm:max-w-md w-auto rounded-2xl border border-border bg-card/95 p-5 shadow-2xl backdrop-blur-md ${className}`}
+          className={`fixed bottom-3 inset-x-3 z-30 sm:bottom-6 sm:left-6 sm:right-auto sm:max-w-md w-auto rounded-none border border-white/10 bg-zinc-950/95 p-5 shadow-2xl backdrop-blur-md text-zinc-100 ${className}`}
         >
           <div className="flex items-start gap-3.5">
             {/* Ícono de garantía institucional */}
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/50 text-primary">
+            <div className="flex size-10 shrink-0 items-center justify-center border border-orange-500/30 bg-orange-500/10 text-industrial">
               <ShieldCheck className="size-5" />
             </div>
 
             <div className="flex-1">
-              <h3 className="font-display text-sm font-bold tracking-tight text-foreground">
+              <h3 className="font-display text-sm font-semibold tracking-tight text-white uppercase">
                 Políticas Comerciales y Garantía
               </h3>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              <p className="mt-1 text-xs leading-relaxed text-zinc-400">
                 Precios orientativos sujetos a cotización técnica. Trabajos y componentes con
                 garantía de 30 días bajo protocolo de montaje idóneo.
               </p>
@@ -68,7 +68,7 @@ export function PoliciesBanner({ onOpenModal, className = "" }: PoliciesBannerPr
                   type="button"
                   size="sm"
                   onClick={acceptPolicies}
-                  className="h-8.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-primary-foreground shadow-sm hover:opacity-90 active:scale-[0.98] transition-all"
+                  className="h-8.5 rounded-none bg-industrial px-3.5 text-xs font-semibold text-white shadow-sm hover:bg-industrial-hover active:scale-[0.98] transition-all cursor-pointer"
                 >
                   Aceptar y Continuar
                   <ArrowRight className="ml-1.5 size-3.5" />
@@ -80,7 +80,7 @@ export function PoliciesBanner({ onOpenModal, className = "" }: PoliciesBannerPr
                     variant="ghost"
                     size="sm"
                     onClick={onOpenModal}
-                    className="h-8.5 rounded-lg px-2.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                    className="h-8.5 rounded-none px-2.5 text-xs font-medium text-zinc-400 hover:bg-white/10 hover:text-white cursor-pointer"
                   >
                     Ver Políticas Completas
                     <ExternalLink className="ml-1 size-3" />

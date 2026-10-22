@@ -70,7 +70,7 @@ export function CategoryList({ onEdit, onDelete }: CategoryListProps) {
                 className="grid grid-cols-12 items-center gap-4 px-6 py-4 hover:bg-muted/20"
               >
                 <div className="col-span-12 sm:col-span-6 flex items-center gap-3">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-industrial/10 text-industrial">
                     <Folder className="size-4" />
                   </div>
                   <div>

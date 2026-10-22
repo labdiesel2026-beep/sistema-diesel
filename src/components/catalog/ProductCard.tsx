@@ -43,33 +43,35 @@ export function ProductCard({
 
   return (
     <article
-      className={`group flex min-w-0 flex-col h-full overflow-hidden rounded-lg border border-border/80 bg-card shadow-xs transition-all duration-300 ease-out hover:-translate-y-1 hover:border-border-hover hover:shadow-xl ${className}`}
+      className={`group flex min-w-0 flex-col h-full overflow-hidden rounded-lg border border-white/10 bg-[#111111] shadow-xs transition-all duration-300 ease-out hover:border-white/25 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)] ${className}`}
       data-testid={`product-card-${product.id}`}
     >
-      {/* Contenedor Multimedia 16/10 */}
-      <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-border/80 bg-white/5">
+      {/* Contenedor Multimedia Cuadrado 1:1 (#1c1c1e con marco interno de 16px) */}
+      <div className="relative aspect-square w-full overflow-hidden border-b border-white/10 bg-media p-4 flex items-center justify-center">
         <ProductImageWithFallback
           src={product.imageUrl}
           alt={product.name}
-          className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          className="size-full object-contain rounded-md transition-transform duration-500 ease-out group-hover:scale-105"
+          fallbackClassName="flex size-full flex-col items-center justify-center bg-transparent p-2 text-center"
         />
 
         {/* Badges superiores sobre imagen */}
         <div className="absolute inset-x-3 top-3 flex items-center justify-between gap-2 pointer-events-none">
           {brandName ? (
-            <span className="rounded border border-border/80 bg-card/90 px-2 py-0.5 text-micro text-foreground backdrop-blur-xs shadow-xs">
+            <span className="rounded border border-white/10 bg-zinc-950/90 px-2 py-0.5 text-micro text-zinc-300 backdrop-blur-xs shadow-xs font-mono">
               {brandName}
             </span>
           ) : (
             <span />
           )}
 
-          {/* Badge de Condición Técnica */}
+          {/* Badge de Condición Técnica Jerárquico (RF-08, TASK-17) */}
           <span
-            className={`rounded px-2 py-0.5 text-micro shadow-xs backdrop-blur-xs ${
+            data-testid={`badge-condition-${product.id}`}
+            className={`rounded px-2.5 py-0.5 text-micro shadow-xs backdrop-blur-xs font-mono tracking-wider uppercase ${
               product.condition === "Nuevo"
-                ? "border border-white/20 bg-card/90 text-white font-semibold"
-                : "border border-dashed border-white/30 bg-card/90 text-white/90 font-medium"
+                ? "border border-industrial/50 bg-zinc-950/90 text-industrial font-semibold"
+                : "border border-badge-refurbished/50 bg-zinc-950/90 text-badge-refurbished font-medium"
             }`}
           >
             {product.condition}

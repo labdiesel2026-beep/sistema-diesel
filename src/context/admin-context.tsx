@@ -200,10 +200,17 @@ export function AdminProvider({
       );
       setMetrics(fetchedMetrics || null);
     } catch (err: any) {
-      const msg =
-        (err instanceof ApiError && err.data?.message) ||
-        err?.message ||
-        "Error al conectar con el servidor de base de datos.";
+      let msg = "Error al conectar con el servidor de base de datos.";
+      if (err instanceof ApiError) {
+        const serverError = err.data?.error || err.data?.message || err.message;
+        if (serverError && typeof serverError === "string") {
+          msg = serverError.startsWith("Referencia:")
+            ? `Error del servidor. ${serverError}`
+            : serverError;
+        }
+      } else if (err?.message) {
+        msg = err.message;
+      }
       setError(msg);
     } finally {
       setIsLoading(false);

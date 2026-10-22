@@ -90,4 +90,22 @@ describe("Pie de Página Institucional (LandingFooter.tsx)", () => {
 
     expect(handleOpen).toHaveBeenCalledTimes(1);
   });
+
+  it("incluye la mención institucional de GEPI SOFTWARE con target='_self' (RF-06)", () => {
+    render(<LandingFooter />);
+
+    const gepiLink = screen.getByRole("link", { name: "GEPI SOFTWARE" });
+    expect(gepiLink).toBeInTheDocument();
+    expect(gepiLink).toHaveAttribute("href", "https://www.gepisoftware.com");
+    expect(gepiLink).toHaveAttribute("target", "_self");
+    expect(screen.getByText(/Desarrollada por/i)).toBeInTheDocument();
+  });
+
+  it("no contiene clases cromáticas azules residuales en su marcado (RF-06)", () => {
+    const { container } = render(<LandingFooter />);
+    const htmlContent = container.innerHTML;
+
+    expect(htmlContent).not.toMatch(/blue-/);
+  });
 });
+

@@ -53,7 +53,7 @@ describe("Middleware Global de Manejo de Errores (Tarea 2.4)", () => {
 
     const unauth = await request(app).get("/operational-unauthorized");
     expect(unauth.status).toBe(401);
-    expect(unauth.body.error).toBe("Credenciales expiradas");
+    expect(unauth.body.error).toMatch(/^Referencia: [0-9a-f-]+/i);
 
     const conflict = await request(app).get("/operational-conflict");
     expect(conflict.status).toBe(409);
@@ -77,10 +77,8 @@ describe("Middleware Global de Manejo de Errores (Tarea 2.4)", () => {
     // 1. Debe ser 500
     expect(res.status).toBe(500);
 
-    // 2. Debe contener única y exclusivamente mensaje genérico y referencia UUID
-    expect(res.body.error).toBe("Error interno del servidor");
-    expect(res.body.referencia).toBeDefined();
-    expect(res.body.referencia).toMatch(UUIDV4_REGEX);
+    // 2. Debe contener única y exclusivamente mensaje formal opaco con formato Referencia: <uuid> (Principio 6)
+    expect(res.body.error).toMatch(/^Referencia: [0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
 
     // 3. NO debe haber rastro del stack trace ni de strings confidenciales
     expect(res.body.stack).toBeUndefined();

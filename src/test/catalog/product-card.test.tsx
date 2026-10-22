@@ -152,4 +152,81 @@ describe("ProductCard y ProductGridSkeleton", () => {
     expect(screen.queryByText(/OEM/i)).not.toBeInTheDocument();
     expect(screen.getByTestId("oem-empty-prod-no-oem")).toHaveTextContent("—");
   });
+
+  it("cumple con las directivas estéticas de RF-08: contenedor 1:1, marco de 16px, polaroid y hover sin salto vertical (TASK-16)", () => {
+    const { container } = render(
+      <CatalogCartProvider>
+        <ProductCard product={mockProductWithPrice} brandName="Bosch" />
+      </CatalogCartProvider>,
+    );
+
+    const article = container.querySelector("article");
+    expect(article).toBeInTheDocument();
+
+    // 1. Superficie oscura #111111 y borde translúcido
+    expect(article?.className).toContain("bg-[#111111]");
+    expect(article?.className).toContain("border-white/10");
+    expect(article?.className).toContain("hover:border-white/25");
+
+    // 2. Resplandor blanco al 5% en hover
+    expect(article?.className).toContain("hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]");
+
+    // 3. Ausencia total de traslación física vertical (no debe tener hover:-translate-y-1)
+    expect(article?.className).not.toContain("hover:-translate-y-1");
+
+    // 4. Contenedor de fotografía cuadrado 1:1 con marco uniforme de 16px (p-4)
+    const mediaContainer = article?.querySelector(".aspect-square");
+    expect(mediaContainer).toBeInTheDocument();
+    expect(mediaContainer?.className).toContain("bg-media");
+    expect(mediaContainer?.className).toContain("p-4");
+
+    // 5. Imagen con ajuste proporcional polaroid redondeado sin modo de mezcla multiply
+    const img = screen.getByRole("img", { name: "Inyector Common Rail Bosch CRI2.2" });
+    expect(img.className).toContain("object-contain");
+    expect(img.className).toContain("rounded-md");
+    expect(img.className).not.toContain("mix-blend-multiply");
+    expect(img.className).not.toContain("multiply");
+  });
+
+  it("cumple con TASK-17: contingencia de isotipo vectorial al 20% y diferenciación cromática de badges", () => {
+    // 1. Producto nuevo con imagen ausente: debe proyectar fallback con SVG en opacity-20 y badge naranja
+    const { rerender } = render(
+      <CatalogCartProvider>
+        <ProductCard
+          product={{ ...mockProductWithPrice, imageUrl: null, condition: "Nuevo" }}
+          brandName="Bosch"
+        />
+      </CatalogCartProvider>,
+    );
+
+    const fallback = screen.getByTestId("product-image-fallback");
+    expect(fallback).toBeInTheDocument();
+    const fallbackSvg = fallback.querySelector("svg");
+    expect(fallbackSvg).toBeInTheDocument();
+    expect(fallbackSvg?.getAttribute("class")).toContain("opacity-20");
+    expect(fallbackSvg?.getAttribute("class")).toContain("stroke-white");
+
+    // Badge Nuevo: Naranja Técnico (#ea580c / text-industrial border-industrial/50)
+    const badgeNuevo = screen.getByTestId("badge-condition-prod-100");
+    expect(badgeNuevo).toHaveTextContent("Nuevo");
+    expect(badgeNuevo.className).toContain("text-industrial");
+    expect(badgeNuevo.className).toContain("border-industrial/50");
+
+    // 2. Producto reacondicionado: Badge Gris Metalizado (#71717a / text-badge-refurbished border-badge-refurbished/50)
+    rerender(
+      <CatalogCartProvider>
+        <ProductCard
+          product={{ ...mockProductWithoutPrice, condition: "Reacondicionado" }}
+          brandName="Delphi"
+        />
+      </CatalogCartProvider>,
+    );
+
+    const badgeReacondicionado = screen.getByTestId("badge-condition-prod-200");
+    expect(badgeReacondicionado).toHaveTextContent("Reacondicionado");
+    expect(badgeReacondicionado.className).toContain("text-badge-refurbished");
+    expect(badgeReacondicionado.className).toContain("border-badge-refurbished/50");
+  });
 });
+
+

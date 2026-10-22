@@ -159,7 +159,7 @@ export function ProductToolbar({
           type="button"
           onClick={onNewProduct}
           data-testid="new-product-btn"
-          className="h-10 gap-2 font-medium shadow-sm cursor-pointer"
+          className="h-10 gap-2 font-semibold shadow-xs cursor-pointer bg-admin-btn-primary hover:bg-admin-btn-primary-hover text-white transition-colors"
         >
           <Plus className="size-4" />
           <span>Nuevo Producto</span>

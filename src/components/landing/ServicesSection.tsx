@@ -13,6 +13,7 @@
 import { motion } from "framer-motion";
 import { Wrench, Gauge, Activity, Package, ShieldCheck, type LucideIcon } from "lucide-react";
 import { SITE_CONFIG } from "@/config/site-config";
+import { useScrollReveal } from "@/components/landing/scroll-reveal";
 
 interface ServicesSectionProps {
   className?: string;
@@ -35,15 +36,32 @@ const BENTO_GRID_CLASSES: Record<string, string> = {
 const ROMAN_NUMERALS = ["I", "II", "III", "IV"];
 
 export function ServicesSection({ className = "" }: ServicesSectionProps) {
+  const {
+    ref,
+    isInstant,
+    containerVariants,
+    itemVariants,
+    singleVariants,
+    viewportConfig,
+    handleAnimationComplete,
+  } = useScrollReveal("servicios");
+
   return (
     <section
       id="servicios"
+      ref={ref}
       className={`scroll-mt-20 border-b border-white/10 bg-zinc-950 py-24 md:py-32 ${className}`}
       aria-labelledby="servicios-heading"
     >
       <div className="site-container">
         {/* Encabezado Editorial Estilo Longbow */}
-        <div className="mb-20 max-w-4xl">
+        <motion.div
+          variants={singleVariants}
+          initial={isInstant ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={viewportConfig}
+          className="mb-20 max-w-4xl"
+        >
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-600 mb-4">
             Pilares Técnicos y Capacidad Operativa
           </p>
@@ -57,19 +75,27 @@ export function ServicesSection({ className = "" }: ServicesSectionProps) {
             Diagnóstico avanzado y calibración milimétrica con equipamiento computarizado de precisión
             para motores diésel livianos, medianos, pesados y agrícolas.
           </p>
-        </div>
+        </motion.div>
 
         {/* Sección de Pilares: Lista de servicios con líneas horizontales finas (border-t border-white/10) */}
         <div className="border-b border-white/10">
-          {/* Grilla contenedora compatible con arquitectura de 12 columnas */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-16 gap-x-12">
+          {/* Grilla contenedora compatible con arquitectura de 12 columnas con animación escalonada (stagger 0.12s) */}
+          <motion.div
+            variants={containerVariants}
+            initial={isInstant ? "visible" : "hidden"}
+            whileInView="visible"
+            viewport={viewportConfig}
+            onAnimationComplete={handleAnimationComplete}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-y-16 gap-x-12"
+          >
             {SITE_CONFIG.services.map((service, index) => {
               const bentoColSpan = BENTO_GRID_CLASSES[service.id] ?? "lg:col-span-6";
               const roman = ROMAN_NUMERALS[index] ?? `0${index + 1}`;
 
               return (
-                <article
+                <motion.article
                   key={service.id}
+                  variants={itemVariants}
                   className={`border-t border-white/10 pt-12 pb-16 flex flex-col justify-between group transition-colors ${bentoColSpan}`}
                 >
                   <div>
@@ -106,7 +132,7 @@ export function ServicesSection({ className = "" }: ServicesSectionProps) {
                     <img
                       src={service.image}
                       alt={service.title}
-                      className="h-full w-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-700 ease-out"
+                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                       loading="lazy"
                     />
                     <div
@@ -114,14 +140,20 @@ export function ServicesSection({ className = "" }: ServicesSectionProps) {
                       aria-hidden="true"
                     />
                   </div>
-                </article>
+                </motion.article>
               );
             })}
-          </div>
+          </motion.div>
         </div>
 
         {/* Cláusula Formal de Transparencia sobre Repuestos Originales y Alternativos */}
-        <div className="mt-16 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <motion.div
+          variants={singleVariants}
+          initial={isInstant ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={viewportConfig}
+          className="mt-16 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+        >
           <div className="flex items-center gap-3 text-zinc-500 font-mono text-[10px] uppercase tracking-[0.25em]">
             <ShieldCheck className="size-4 text-zinc-400 shrink-0" />
             <span>Especificaciones de Repuesto</span>
@@ -129,7 +161,7 @@ export function ServicesSection({ className = "" }: ServicesSectionProps) {
           <p className="font-mono text-xs text-zinc-400 max-w-2xl text-left sm:text-right">
             {SITE_CONFIG.servicesTransparencyClause}
           </p>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

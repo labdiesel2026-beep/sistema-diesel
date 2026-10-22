@@ -1,4 +1,5 @@
-@import "tailwindcss" source(none);
+@import "tailwindcss";
+@config "../tailwind.config.js";
 @source "../src";
 @import "tw-animate-css";
 
@@ -10,18 +11,55 @@
  * The @theme inline block maps CSS custom properties to Tailwind utility
  * classes (e.g. --color-primary -> bg-primary, text-primary).
  *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
+ * The :root and .dark blocks define the actual color values using oklch / hex.
  *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ * Spec 010: Retro-documentación y Refinamiento del Rediseño UI Premium.
  */
 
 @theme inline {
   --font-sans: "Manrope", sans-serif;
   --font-display: "Barlow", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Spec 010 — Breakpoints Canónicos */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  /* Spec 010 — Tokens Entorno Público (Modo Oscuro Premium) */
+  --color-canvas: var(--surface-canvas);
+  --color-card-surface: var(--surface-card);
+  --color-media: var(--surface-media);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-hover: var(--border-hover);
+  --color-shimmer-beam: var(--shimmer-beam);
+  --color-text-primary: var(--text-primary);
+  --color-text-muted: var(--text-muted);
+  --color-industrial: var(--accent-action);
+  --color-industrial-hover: var(--accent-hover);
+  --color-industrial-dark: var(--admin-btn-primary-hover);
+  --color-badge-refurbished: var(--badge-refurbished);
+  --color-channel-support: var(--channel-support);
+
+  /* Spec 010 — Animaciones canónicas */
+  --animate-marquee: marquee-half 35s linear infinite;
+  --animate-shimmer: shimmer-slide 5.2s ease-in-out infinite;
+  --animate-arrow: arrow-oscillate 1.5s ease-in-out infinite;
+
+  /* Spec 010 — Tokens Entorno Operativo (Admin Modo Claro SaaS) */
+  --color-admin-bg: var(--admin-bg);
+  --color-admin-surface: var(--admin-surface);
+  --color-admin-border: var(--admin-border);
+  --color-admin-text-main: var(--admin-text-main);
+  --color-admin-text-sub: var(--admin-text-sub);
+  --color-admin-btn-primary: var(--admin-btn-primary);
+  --color-admin-btn-primary-hover: var(--admin-btn-primary-hover);
+  --color-admin-btn-secondary: var(--admin-btn-secondary);
+  --color-admin-btn-danger: var(--admin-btn-danger);
+
+  /* Variables Semánticas Existentes */
   --color-whatsapp: var(--whatsapp);
   --color-whatsapp-foreground: var(--whatsapp-foreground);
   --color-whatsapp-hover: var(--whatsapp-hover);
@@ -75,89 +113,144 @@
 }
 
 :root {
+  /* ==========================================================================
+     Spec 010 — Entorno Público (Landing Page y Catálogo) — Modo Oscuro Premium
+     ========================================================================== */
+  --surface-canvas: #0a0a0a;          /* Fondo base inerte de la página */
+  --surface-card: #111111;            /* Fondo de tarjetas y módulos */
+  --surface-media: #1c1c1e;           /* Fondo de cajas cuadradas 1:1 de fotos */
+  --border-subtle: rgba(255, 255, 255, 0.10); /* Borde perimetral estándar de 1px */
+  --border-hover: rgba(255, 255, 255, 0.25);  /* Borde de tarjeta al hacer hover */
+  --shimmer-beam: rgba(255, 255, 255, 0.15);  /* Haz de luz diagonal en botones */
+  
+  --text-primary: #f3f4f6;            /* Títulos, códigos OEM y llamadas a acción */
+  --text-muted: #a1a1aa;              /* Subtítulos técnicos y firma institucional */
+  
+  --accent-action: #ea580c;           /* Naranja Industrial / Calor Diésel */
+  --accent-hover: #f97316;            /* Hover y estado activo de acento */
+  --badge-refurbished: #71717a;       /* Gris Metalizado Técnico para Reacondicionados */
+  --channel-support: #22c55e;         /* Isotipo del canal WhatsApp */
+
+  /* ==========================================================================
+     Spec 010 — Entorno Operativo (Panel de Administración) — Modo Claro SaaS
+     ========================================================================== */
+  --admin-bg: #f9fafb;                /* Fondo general del Backoffice */
+  --admin-surface: #ffffff;           /* Tablas, modales y tarjetas (100% opaco) */
+  --admin-border: #e5e7eb;            /* Bordes de tablas e inputs */
+  --admin-header-shadow: 0 1px 0 rgba(0, 0, 0, 0.10); /* Sombra de sticky header */
+  
+  --admin-text-main: #111827;         /* Texto principal y datos de inventario */
+  --admin-text-sub: #4b5563;          /* Etiquetas de formulario y metadatos */
+  
+  --admin-btn-primary: #ea580c;       /* Botón de acción primaria (Guardar, Crear) */
+  --admin-btn-primary-hover: #c2410c; /* Hover de botón primario en Admin */
+  --admin-btn-secondary: #6b7280;     /* Botón secundario u outline */
+  --admin-btn-danger: #dc2626;        /* Botón destructivo (Eliminar) */
+
+  /* Dinámica de Layout Móvil */
+  --bottom-bar-height: 64px;          /* Altura base recalculada por ResizeObserver */
+
+  /* Variables Semánticas */
   --whatsapp: oklch(0.55 0.16 160);
   --whatsapp-hover: oklch(0.48 0.17 160);
-  --success-foreground: oklch(0.4 0.12 149);
-  --whatsapp-foreground: oklch(0.99 0 0);
-  --hero: oklch(0.19 0.04 260);
-  --hero-foreground: oklch(0.99 0.002 250);
-  --hero-muted: oklch(0.75 0.025 255);
-  --hero-border: oklch(0.36 0.045 260);
-  --hero-surface: oklch(0.25 0.04 260);
+  --success-foreground: #15803d;
+  --whatsapp-foreground: #ffffff;
+  --hero: #111111;
+  --hero-foreground: #f3f4f6;
+  --hero-muted: #a1a1aa;
+  --hero-border: rgba(255, 255, 255, 0.12);
+  --hero-surface: #18181b;
   --radius: 0.625rem;
-  --background: oklch(0.984 0.003 250);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.546 0.245 262.88);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --border-hover: oklch(0.85 0.015 255);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --background: #ffffff;
+  --foreground: #111827;
+  --card: #ffffff;
+  --card-foreground: #111827;
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+  --primary: #ea580c;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #111827;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #f3f4f6;
+  --accent-foreground: #111827;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --border-hover: #d1d5db;
+  --input: #e5e7eb;
+  --ring: #ea580c;
+  --chart-1: #ea580c;
+  --chart-2: #22c55e;
+  --chart-3: #f59e0b;
+  --chart-4: #64748b;
+  --chart-5: #71717a;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #111827;
+  --sidebar-primary: #ea580c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f3f4f6;
+  --sidebar-accent-foreground: #111827;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #ea580c;
+}
+
+/* En pantallas de escritorio (>= 768px), la barra móvil no existe: compensación a 0px (RF-07, TASK-15) */
+@media (min-width: 768px) {
+  :root {
+    --bottom-bar-height: 0px;
+  }
+}
+
+/* Compensación dinámica de layout para barra fija móvil en Landing Page (RF-07, TASK-15) */
+.landing-bottom-bar-pad {
+  padding-bottom: calc(var(--bottom-bar-height, 64px) + env(safe-area-inset-bottom, 0px));
 }
 
 .dark {
   --whatsapp: oklch(0.55 0.16 160);
   --whatsapp-hover: oklch(0.48 0.17 160);
-  --whatsapp-foreground: oklch(0.99 0 0);
-  --success-foreground: oklch(0.8 0.15 149);
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 10%);
-  --border-hover: oklch(1 0 0 / 25%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --whatsapp-foreground: #ffffff;
+  --success-foreground: #22c55e;
+  --background: #0a0a0a;
+  --foreground: #f3f4f6;
+  --card: #111111;
+  --card-foreground: #f3f4f6;
+  --popover: #111111;
+  --popover-foreground: #f3f4f6;
+  --primary: #ea580c;
+  --primary-foreground: #ffffff;
+  --secondary: #18181b;
+  --secondary-foreground: #f3f4f6;
+  --muted: #18181b;
+  --muted-foreground: #a1a1aa;
+  --accent: #18181b;
+  --accent-foreground: #f3f4f6;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.10);
+  --border-hover: rgba(255, 255, 255, 0.25);
+  --input: rgba(255, 255, 255, 0.15);
+  --ring: #ea580c;
+  --hero: #0a0a0a;
+  --hero-foreground: #f3f4f6;
+  --hero-muted: #a1a1aa;
+  --hero-border: rgba(255, 255, 255, 0.10);
+  --hero-surface: #111111;
+  --chart-1: #ea580c;
+  --chart-2: #22c55e;
+  --chart-3: #f59e0b;
+  --chart-4: #64748b;
+  --chart-5: #71717a;
+  --sidebar: #111111;
+  --sidebar-foreground: #f3f4f6;
+  --sidebar-primary: #ea580c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #18181b;
+  --sidebar-accent-foreground: #f3f4f6;
+  --sidebar-border: rgba(255, 255, 255, 0.10);
+  --sidebar-ring: #ea580c;
 }
 
 @layer base {
@@ -231,32 +324,52 @@
     linear-gradient(28deg, transparent 46%, var(--border) 47%, var(--border) 49%, transparent 50%),
     linear-gradient(95deg, transparent 45%, var(--border) 46%, var(--border) 48%, transparent 49%);
 }
-@theme {
-  --animate-shimmer: shimmer 2s infinite linear;
-  --animate-marquee: marquee 35s linear infinite;
-  @keyframes shimmer {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
+
+@keyframes marquee-half {
+  0% {
+    transform: translateX(0%);
   }
-  @keyframes marquee {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
+  100% {
+    transform: translateX(-50%);
   }
 }
+
+@keyframes shimmer-slide {
+  0% {
+    transform: translateX(-150%) rotate(45deg);
+  }
+  23.07% {
+    transform: translateX(150%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(150%) rotate(45deg);
+  }
+}
+
+@keyframes arrow-oscillate {
+  0%, 100% {
+    transform: translateX(0px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
 .animate-shimmer {
-  animation: var(--animate-shimmer);
+  animation: shimmer-slide 5.2s ease-in-out infinite;
+  will-change: transform;
 }
+
 .animate-marquee {
-  animation: var(--animate-marquee);
+  animation: marquee-half 35s linear infinite;
+  will-change: transform;
 }
+
+.animate-arrow {
+  animation: arrow-oscillate 1.5s ease-in-out infinite;
+  will-change: transform;
+}
+
 @media (max-width: 767px) {
   .site-container {
     width: calc(100% - 36px);
@@ -275,6 +388,7 @@
     background: linear-gradient(90deg, var(--hero), transparent);
   }
 }
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -286,7 +400,7 @@
 }
 
 /* ==========================================================================
-   Spec 009 — Utilidades de Dirección de Arte Industrial Premium
+   Spec 009 & Spec 010 — Utilidades de Dirección de Arte Industrial Premium
    ========================================================================== */
 
 .text-macro {
@@ -338,5 +452,110 @@
   scrollbar-width: thin;
   scrollbar-color: oklch(1 0 0 / 15%) transparent;
 }
+
+/* ==========================================================================
+   Spec 010 (RF-05): Degradación Elegante para Animaciones de Scroll Reveal
+   ========================================================================== */
+
+/* Estado por defecto (Resiliente: si JS falla o está deshabilitado, visibilidad total) */
+.scroll-reveal {
+  opacity: 1;
+  transform: none;
+}
+
+/* Estado condicionado exclusivamente a la confirmación de JS activo */
+.js-enabled .scroll-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+/* Estado activado tras intersección (IntersectionObserver una sola vez) */
+.js-enabled .scroll-reveal.revealed,
+.js-enabled .scroll-reveal.is-visible,
+.js-enabled .scroll-reveal.opacity-100 {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-enabled .scroll-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ==========================================================================
+   Spec 010: Animaciones Globales (Marquee, Shimmer, Arrow)
+   ========================================================================== */
+@keyframes marquee-half {
+  0% { transform: translate3d(0%, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes marquee {
+  0% { transform: translate3d(0%, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes shimmer-slide {
+  0% { transform: translateX(-150%) rotate(45deg); }
+  23.07% { transform: translateX(150%) rotate(45deg); }
+  100% { transform: translateX(150%) rotate(45deg); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-150%) rotate(45deg); }
+  23.07% { transform: translateX(150%) rotate(45deg); }
+  100% { transform: translateX(150%) rotate(45deg); }
+}
+
+@keyframes arrow-oscillate {
+  0%, 100% { transform: translateX(0px); }
+  50% { transform: translateX(4px); }
+}
+
+@keyframes arrow {
+  0%, 100% { transform: translateX(0px); }
+  50% { transform: translateX(4px); }
+}
+
+.animate-marquee {
+  animation: marquee-half 35s linear infinite !important;
+  will-change: transform;
+}
+
+.animate-shimmer {
+  animation: shimmer-slide 5.2s ease-in-out infinite !important;
+  will-change: transform;
+}
+
+.animate-arrow {
+  animation: arrow-oscillate 1.5s ease-in-out infinite !important;
+  will-change: transform;
+}
+
+.scroll-reveal {
+  opacity: 0 !important;
+  transform: translateY(30px) !important;
+  transition: all 0.7s ease-out !important;
+}
+.scroll-reveal.is-visible {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+@keyframes slow-zoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.15); }
+}
+.animate-slow-zoom {
+  animation: slow-zoom 12s ease-in-out 0.8s infinite alternate both !important;
+  will-change: transform;
+}
+
+
 
 

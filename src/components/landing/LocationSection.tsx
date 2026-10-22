@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { MapPin, Clock, ExternalLink, Navigation } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { SITE_CONFIG } from "@/config/site-config";
 import { Button } from "@/components/ui/button";
+import { useScrollReveal } from "@/components/landing/scroll-reveal";
 import fachadaImg from "@/assets/workshop/fachada-local.webp";
 
 interface LocationSectionProps {
@@ -9,15 +10,32 @@ interface LocationSectionProps {
 }
 
 export function LocationSection({ className = "" }: LocationSectionProps) {
+  const {
+    ref,
+    isInstant,
+    containerVariants,
+    itemVariants,
+    singleVariants,
+    viewportConfig,
+    handleAnimationComplete,
+  } = useScrollReveal("ubicacion");
+
   return (
     <section
       id="ubicacion"
+      ref={ref}
       className={`scroll-mt-20 border-b border-white/10 bg-zinc-950 py-24 md:py-32 text-foreground ${className}`}
       aria-labelledby="ubicacion-heading"
     >
       <div className="site-container">
         {/* Encabezado Editorial */}
-        <div className="mb-16 max-w-3xl">
+        <motion.div
+          variants={singleVariants}
+          initial={isInstant ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={viewportConfig}
+          className="mb-16 max-w-3xl"
+        >
           <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-600 block mb-3">
             Ubicación & Logística
           </span>
@@ -31,19 +49,29 @@ export function LocationSection({ className = "" }: LocationSectionProps) {
             Estamos ubicados estratégicamente para recibir tu vehículo, maquinaria o coordinar
             envíos de repuestos e inyectores.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Contenido dividido ortogonal: 12 columnas (5/7) */}
-        <div className="grid grid-cols-1 items-stretch gap-12 lg:grid-cols-12 border-t border-white/10 pt-16">
+        {/* Contenido dividido ortogonal: 12 columnas (5/7) con animación escalonada */}
+        <motion.div
+          variants={containerVariants}
+          initial={isInstant ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={viewportConfig}
+          onAnimationComplete={handleAnimationComplete}
+          className="grid grid-cols-1 items-stretch gap-12 lg:grid-cols-12 border-t border-white/10 pt-16"
+        >
           {/* Columna de datos físicos, fotografía y horarios (5 columnas) */}
-          <div className="flex flex-col justify-between border border-white/10 bg-zinc-950 p-8 lg:col-span-5">
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-col justify-between border border-white/10 bg-zinc-950 p-8 lg:col-span-5"
+          >
             <div>
               {/* Fotografía real de la fachada */}
               <div className="relative mb-8 aspect-video w-full overflow-hidden border border-white/10 bg-black">
                 <img
                   src={fachadaImg}
                   alt="Fachada oficial del taller Laboratorio Diésel en Av. Pres. Perón 1215"
-                  className="h-full w-full object-cover grayscale brightness-90 transition-all duration-700 hover:grayscale-0 hover:brightness-100"
+                  className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
                   loading="lazy"
                   width={800}
                   height={450}
@@ -97,20 +125,23 @@ export function LocationSection({ className = "" }: LocationSectionProps) {
                 </a>
               </Button>
             </div>
-          </div>
+          </motion.div>
 
           {/* Columna Iframe Google Maps (7 columnas, min-h-[420px]) */}
-          <div className="relative min-h-[420px] overflow-hidden border border-white/10 bg-zinc-950 lg:col-span-7">
+          <motion.div
+            variants={itemVariants}
+            className="relative min-h-[420px] overflow-hidden border border-white/10 bg-zinc-950 lg:col-span-7"
+          >
             <iframe
               title="Mapa de ubicación del taller Laboratorio Diésel"
               src={SITE_CONFIG.googleMapsEmbedUrl}
-              className="absolute inset-0 h-full w-full border-0 grayscale invert contrast-125 opacity-75 hover:opacity-100 transition-opacity duration-500"
+              className="absolute inset-0 h-full w-full border-0 opacity-90 hover:opacity-100 transition-opacity duration-500"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               tabIndex={-1}
             />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );

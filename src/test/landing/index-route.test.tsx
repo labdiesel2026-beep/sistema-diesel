@@ -4,6 +4,7 @@ import { LandingPage } from "@/routes/index";
 
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (options: unknown) => options,
+  useLocation: () => ({ pathname: "/" }),
   Link: ({
     children,
     to,

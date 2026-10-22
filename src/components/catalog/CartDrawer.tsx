@@ -159,16 +159,16 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetContent
         side="right"
-        className="flex w-full flex-col gap-0 p-0 sm:max-w-lg"
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-lg bg-canvas text-white border-l border-white/10"
         data-testid="cart-drawer-sheet"
       >
         {/* Cabecera del Carrito */}
-        <SheetHeader className="border-b border-border px-6 py-5 text-left">
+        <SheetHeader className="border-b border-white/10 px-6 py-5 text-left bg-canvas">
           <div className="flex items-center justify-between pr-10">
-            <SheetTitle className="flex items-center gap-2.5 font-display text-xl">
-              <ShoppingCart className="size-5 text-primary" />
+            <SheetTitle className="flex items-center gap-2.5 font-display text-xl text-white">
+              <ShoppingCart className="size-5 text-industrial" />
               <span>Tu Carrito de Consultas</span>
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 font-mono text-xs font-bold text-primary">
+              <span className="rounded-full bg-industrial/20 px-2 py-0.5 font-mono text-xs font-bold text-industrial">
                 {count}
               </span>
             </SheetTitle>
@@ -207,19 +207,19 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
         )}
 
         {/* Lista de Ítems */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 divide-y divide-border">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-2 bg-canvas space-y-3">
           {items.length === 0 ? (
             <div
               className="flex flex-col items-center justify-center py-20 text-center"
               data-testid="empty-cart-state"
             >
-              <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
+              <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-card text-zinc-500 border border-white/10">
                 <ShoppingCart className="size-8 stroke-1" />
               </div>
-              <h3 className="font-display text-lg font-semibold text-foreground">
+              <h3 className="font-display text-lg font-semibold text-white">
                 Tu carrito de consultas está vacío
               </h3>
-              <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-muted-foreground">
+              <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-zinc-400">
                 Explorá el catálogo de repuestos diésel y agregá piezas para enviar una solicitud de
                 cotización consolidada por WhatsApp.
               </p>
@@ -234,11 +234,11 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
-                  className="flex gap-4 py-5 overflow-hidden"
+                  className="flex gap-4 py-5 px-4 my-2 overflow-hidden rounded-xl border border-white/10 bg-[#111111] text-white"
                   data-testid={`cart-item-${item.productId}`}
                 >
                   {/* Imagen del Ítem */}
-                  <div className="size-20 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+                  <div className="size-20 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-canvas">
                     <ProductImageWithFallback
                       src={item.imageUrl}
                       alt={item.name}
@@ -250,16 +250,16 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-1.5 mb-1">
                       {item.brandName && (
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-industrial">
                           {item.brandName}
                         </span>
                       )}
-                      <span className="rounded-md border border-border bg-muted px-1.5 py-0.2 text-[10px] font-semibold text-muted-foreground">
+                      <span className="rounded-md border border-white/10 bg-zinc-800 px-1.5 py-0.2 text-[10px] font-semibold text-zinc-300">
                         {item.condition}
                       </span>
                     </div>
 
-                    <h4 className="font-display text-base font-semibold leading-tight text-foreground line-clamp-2">
+                    <h4 className="font-display text-base font-semibold leading-tight text-white line-clamp-2">
                       {item.name}
                     </h4>
 
@@ -352,21 +352,21 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
 
         {/* Footer del Carrito con Subtotal y Checkout */}
         {items.length > 0 && (
-          <div className="border-t border-border bg-card p-6 space-y-4">
+          <div className="border-t border-white/10 bg-zinc-900/90 p-6 space-y-4">
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-base">
-                <span className="font-medium text-muted-foreground">
+                <span className="font-medium text-zinc-400">
                   {cartSummary.hasPricedItems ? "Subtotal estimado:" : "Presupuesto:"}
                 </span>
                 <span
-                  className="font-display text-lg font-bold text-foreground"
+                  className="font-display text-lg font-bold text-white"
                   data-testid="cart-subtotal"
                 >
                   {cartSummary.hasPricedItems ? (
                     <>
                       <span>{formatPrice(cartSummary.numericalTotal)}</span>
                       {cartSummary.quoteItemsCount > 0 && (
-                        <span className="ml-1.5 text-xs font-mono font-bold text-primary uppercase">
+                        <span className="ml-1.5 text-xs font-mono font-bold text-industrial uppercase">
                           + ÍTEMS A COTIZAR
                         </span>
                       )}

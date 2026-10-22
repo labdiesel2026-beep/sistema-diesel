@@ -54,7 +54,7 @@ export function ProductImageWithFallback({
           strokeWidth="1.3"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="size-11 stroke-muted-foreground/50 transition-opacity hover:stroke-white/60"
+          className="size-14 stroke-white opacity-20 transition-opacity"
           aria-hidden="true"
         >
           {/* Conector y cabezal electromagnético */}

@@ -9,6 +9,7 @@ import { IntroSection } from "@/components/landing/IntroSection";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LocationSection } from "@/components/landing/LocationSection";
+import { MobileStickyBar } from "@/components/landing/MobileStickyBar";
 import { ServicesSection } from "@/components/landing/ServicesSection";
 import { WarrantySection } from "@/components/landing/WarrantySection";
 import { useHashNavigation } from "@/components/landing/use-hash-navigation";
@@ -62,7 +63,8 @@ export function LandingPage() {
         <LocationSection />
       </main>
       <LandingFooter />
-      <FloatingWhatsApp />
+      <FloatingWhatsApp className="max-md:hidden" />
+      <MobileStickyBar />
     </div>
   );
 }

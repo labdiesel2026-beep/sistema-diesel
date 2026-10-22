@@ -33,7 +33,7 @@ describe("Sección Hero (HeroSection.tsx)", () => {
     expect(section).toBeInTheDocument();
     expect(section?.className).toContain("min-h-[100dvh]");
     expect(section?.className).toContain("border-b");
-    expect(section?.className).toContain("border-blue-500/20");
+    expect(section?.className).toContain("border-white/10");
   });
 
   it("renderiza la fotografía real del taller con alt descriptivo y clases de resiliencia móvil (RF-01.1)", () => {
@@ -46,7 +46,7 @@ describe("Sección Hero (HeroSection.tsx)", () => {
     expect(img).toHaveAttribute("src", "taller-hero-mock.webp");
     expect(img.className).toContain("object-cover");
     expect(img.className).toContain("max-md:[object-position:center_35%]");
-    expect(img.className).toContain("max-md:opacity-30");
+    expect(img.className).toContain("max-md:opacity-35");
   });
 
   it("muestra la denominación tipográfica 'Laboratorio Diésel' y el eslogan estático (RF-02)", () => {

@@ -24,7 +24,7 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
   return (
     <>
       <footer
-        className={`border-t border-white/5 bg-zinc-950 text-zinc-400 ${className}`}
+        className={`border-t border-white/10 bg-canvas text-zinc-400 ${className}`}
         role="contentinfo"
       >
         <div className="site-container py-24 lg:py-32">
@@ -37,7 +37,7 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
                 aria-label={`${SITE_CONFIG.name} - Ir al inicio`}
               >
                 <span className="font-display">
-                  Laboratorio <span className="text-blue-500">Diésel</span>
+                  Laboratorio <span className="text-zinc-400">Diésel</span>
                 </span>
               </a>
               <p className="max-w-sm text-sm leading-relaxed text-zinc-400">
@@ -45,7 +45,7 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
                 Rail. Tecnología de precisión y respaldo técnico para su motor.
               </p>
               <div className="flex items-start gap-3 pt-3 text-xs text-zinc-400">
-                <MapPin className="mt-0.5 size-4 shrink-0 text-blue-500" />
+                <MapPin className="mt-0.5 size-4 shrink-0 text-industrial" />
                 <span>{SITE_CONFIG.address}</span>
               </div>
             </div>
@@ -75,7 +75,7 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
                 <li>
                   <Link
                     to="/catalogo"
-                    className="font-medium text-blue-400 transition-colors hover:text-blue-300 hover:underline"
+                    className="font-medium text-industrial transition-colors hover:text-industrial-hover hover:underline"
                   >
                     Explorar Catálogo Completo →
                   </Link>
@@ -95,7 +95,7 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
                   <button
                     type="button"
                     onClick={handleOpenPolicies}
-                    className="inline-flex items-center gap-1.5 text-left text-blue-400 transition-colors hover:text-blue-300 hover:underline cursor-pointer"
+                    className="inline-flex items-center gap-1.5 text-left text-industrial transition-colors hover:text-industrial-hover hover:underline cursor-pointer"
                   >
                     <ShieldCheck className="size-3.5 shrink-0" />
                     <span>{SITE_CONFIG.commercialPolicies.footerLinkText}</span>
@@ -105,8 +105,8 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
             </div>
           </div>
 
-          {/* Barra inferior de copyright y derechos */}
-          <div className="mt-24 flex flex-col items-center justify-between gap-6 border-t border-white/5 pt-12 text-xs sm:flex-row">
+          {/* Barra inferior de copyright, firma GEPI SOFTWARE y derechos */}
+          <div className="mt-24 flex flex-col items-center justify-between gap-6 border-t border-white/10 pt-12 text-xs sm:flex-row">
             <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-zinc-500">
               <p>
                 © {currentYear} {SITE_CONFIG.name}. Todos los derechos reservados.
@@ -123,9 +123,22 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
               </button>
             </div>
 
+            {/* Mención explícita institucional GEPI SOFTWARE (RF-06) */}
+            <p className="font-mono text-[11px] text-[#a1a1aa] tracking-wider text-center">
+              Desarrollada por{" "}
+              <a
+                href="https://www.gepisoftware.com"
+                target="_self"
+                rel="noopener"
+                className="text-zinc-300 hover:text-industrial underline decoration-zinc-700 hover:decoration-industrial transition-colors"
+              >
+                GEPI SOFTWARE
+              </a>
+            </p>
+
             <a
               href="#inicio"
-              className="inline-flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase text-zinc-500 transition-colors hover:text-white"
+              className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.25em] uppercase text-zinc-500 transition-colors hover:text-white"
               aria-label="Volver arriba de la página"
             >
               <span>Volver arriba</span>

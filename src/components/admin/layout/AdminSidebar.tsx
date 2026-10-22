@@ -34,7 +34,7 @@ export function AdminSidebar({ collapsed }: AdminSidebarProps) {
 
   return (
     <aside
-      className={`sticky top-0 flex h-dvh shrink-0 flex-col border-r border-hero-border bg-hero text-hero-foreground transition-all duration-200 ${
+      className={`sticky top-0 flex h-dvh shrink-0 flex-col border-r border-[#e5e7eb] bg-white text-[#111827] shadow-xs transition-all duration-200 ${
         collapsed ? "w-16" : "w-16 md:w-60"
       }`}
       aria-label="Menú de administración"
@@ -43,20 +43,20 @@ export function AdminSidebar({ collapsed }: AdminSidebarProps) {
       <Link
         to="/"
         title="Laboratorio Diésel — Inicio"
-        className="flex h-20 items-center gap-3 border-b border-hero-border px-4 transition-colors hover:bg-hero-border/20"
+        className="flex h-20 items-center gap-3 border-b border-[#e5e7eb] px-4 transition-colors hover:bg-gray-50"
       >
-        <SlidersHorizontal className="size-6 shrink-0 text-primary" />
+        <SlidersHorizontal className="size-6 shrink-0 text-industrial" />
         {!collapsed && (
-          <span className="hidden font-display text-xl font-bold leading-tight md:block">
+          <span className="hidden font-display text-xl font-bold leading-tight text-gray-900 md:block">
             Laboratorio
             <br />
-            Diésel<span className="text-primary">.</span>
+            Diésel<span className="text-industrial">.</span>
           </span>
         )}
       </Link>
 
       {!collapsed && (
-        <p className="hidden px-6 pb-2 pt-6 text-[10px] font-bold uppercase tracking-wider text-hero-muted md:block">
+        <p className="hidden px-6 pb-2 pt-6 text-[10px] font-bold uppercase tracking-wider text-gray-400 md:block">
           Backoffice
         </p>
       )}
@@ -70,12 +70,12 @@ export function AdminSidebar({ collapsed }: AdminSidebarProps) {
           return (
             <Button
               key={item.to}
-              variant="technical"
+              variant="ghost"
               asChild
-              className={`h-11 w-full justify-start border-transparent px-3 transition-colors ${
+              className={`h-11 w-full justify-start rounded-md px-3 transition-colors ${
                 active
-                  ? "bg-primary text-primary-foreground font-semibold shadow-sm hover:bg-primary/90"
-                  : "bg-transparent text-hero-muted hover:bg-hero-border/30 hover:text-hero-foreground"
+                  ? "bg-orange-50 text-industrial font-semibold border-r-2 border-industrial shadow-xs hover:bg-orange-100/60"
+                  : "bg-transparent text-gray-600 hover:bg-gray-100/80 hover:text-gray-900"
               }`}
             >
               <Link
@@ -93,11 +93,11 @@ export function AdminSidebar({ collapsed }: AdminSidebarProps) {
       </nav>
 
       {/* Acceso a Tienda / Catálogo */}
-      <div className="mt-auto border-t border-hero-border px-2 py-4">
+      <div className="mt-auto border-t border-[#e5e7eb] px-2 py-4">
         <Button
-          variant="technical"
+          variant="ghost"
           asChild
-          className="h-11 w-full justify-start border-transparent bg-transparent px-3 text-hero-muted hover:bg-hero-border/30 hover:text-hero-foreground"
+          className="h-11 w-full justify-start rounded-md px-3 text-gray-500 hover:bg-gray-100/80 hover:text-gray-900"
         >
           <Link to="/catalogo" title="Ver catálogo público en tienda">
             <ArrowUpRight className="size-5 shrink-0" />

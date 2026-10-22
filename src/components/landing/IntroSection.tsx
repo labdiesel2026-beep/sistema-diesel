@@ -1,17 +1,35 @@
+import { motion } from "framer-motion";
 import { SITE_CONFIG } from "@/config/site-config";
+import { useScrollReveal } from "@/components/landing/scroll-reveal";
 
 interface IntroSectionProps {
   className?: string;
 }
 
 export function IntroSection({ className = "" }: IntroSectionProps) {
+  const {
+    ref,
+    isInstant,
+    singleVariants,
+    viewportConfig,
+    handleAnimationComplete,
+  } = useScrollReveal("intro");
+
   return (
     <section
+      ref={ref}
       aria-label="Introducción institucional"
       className={`relative bg-zinc-950 py-32 border-b border-white/10 ${className}`}
     >
       <div className="site-container">
-        <div className="max-w-4xl mx-auto text-center">
+        <motion.div
+          variants={singleVariants}
+          initial={isInstant ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={viewportConfig}
+          onAnimationComplete={handleAnimationComplete}
+          className="max-w-4xl mx-auto text-center"
+        >
           <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-zinc-600 block mb-6">
             Ingeniería & Calibración
           </span>
@@ -25,7 +43,7 @@ export function IntroSection({ className = "" }: IntroSectionProps) {
             </span>
             <span className="h-px w-12 bg-white/20" />
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

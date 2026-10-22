@@ -1,9 +1,10 @@
-import { useState, useEffect, type FormEvent, type ChangeEvent, type FocusEvent } from "react";
+import { useState, useEffect, useMemo, type FormEvent, type ChangeEvent, type FocusEvent } from "react";
 import { Loader2, AlertCircle, PackagePlus } from "lucide-react";
 import type { AdminProduct, ProductCondition } from "@/types/admin";
 import { useAdmin } from "@/context/admin-context";
 import { productFormSchema, PRODUCT_CONDITIONS } from "@/lib/validations/admin-schemas";
 import { ProductImageUpload } from "@/components/admin/products/ProductImageUpload";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import {
   Dialog,
   DialogContent,
@@ -132,6 +133,65 @@ export function ProductFormModal({
       setIsUploadingImage(false);
     }
   }, [open, productToEdit]);
+
+  // Detección de cambios sin guardar (dirty state) para prevención de beforeunload (Caso Límite 10, RNF-05, TASK-21)
+  const isDirty = useMemo(() => {
+    if (!open) return false;
+    if (isEditing && productToEdit) {
+      return (
+        name !== productToEdit.name ||
+        description !== productToEdit.description ||
+        imageUrl !== productToEdit.imageUrl ||
+        brandId !== productToEdit.brandId ||
+        vehicleCompatibility !== (productToEdit.vehicleCompatibility || "") ||
+        condition !== productToEdit.condition ||
+        priceInput !==
+          (productToEdit.price !== null && productToEdit.price !== undefined
+            ? String(productToEdit.price)
+            : "") ||
+        showPrice !== productToEdit.showPrice ||
+        visible !== productToEdit.visible ||
+        oem !== (productToEdit.oem || "") ||
+        isFeatured !== Boolean(productToEdit.isFeatured) ||
+        JSON.stringify(categoryIds.slice().sort()) !==
+          JSON.stringify((productToEdit.categoryIds || []).slice().sort())
+      );
+    }
+    // Modo creación: dirty si se ha completado cualquier campo
+    return (
+      name.trim() !== "" ||
+      description.trim() !== "" ||
+      imageUrl.trim() !== "" ||
+      categoryIds.length > 0 ||
+      brandId !== "" ||
+      vehicleCompatibility.trim() !== "" ||
+      condition !== "Nuevo" ||
+      priceInput.trim() !== "" ||
+      !showPrice ||
+      !visible ||
+      oem.trim() !== "" ||
+      isFeatured
+    );
+  }, [
+    open,
+    isEditing,
+    productToEdit,
+    name,
+    description,
+    imageUrl,
+    categoryIds,
+    brandId,
+    vehicleCompatibility,
+    condition,
+    priceInput,
+    showPrice,
+    visible,
+    oem,
+    isFeatured,
+  ]);
+
+  // Hook constitucional para prevenir pérdida accidental ante F5 o cierre de pestaña (TASK-21)
+  useUnsavedChangesWarning(isDirty);
 
   const parsePrice = (val: string): number | null => {
     const trimmed = val.trim();
@@ -268,7 +328,7 @@ export function ProductFormModal({
         aria-describedby="product-form-description"
       >
         <DialogHeader>
-          <div className="flex items-center gap-2 text-primary mb-1">
+          <div className="flex items-center gap-2 text-industrial mb-1">
             <PackagePlus className="size-5" />
             <span className="text-xs font-bold uppercase tracking-wider">
               {isEditing ? "Modificación de Repuesto" : "Alta de Repuesto"}
@@ -475,8 +535,8 @@ export function ProductFormModal({
                     <label
                       key={cat.id}
                       className={`flex items-center gap-2.5 rounded-md px-2 py-1 text-sm cursor-pointer transition-colors hover:bg-muted/60 ${
-                        isChild ? "ml-5 border-l-2 border-primary/40 pl-3" : "font-medium"
-                      } ${isChecked ? "bg-primary/10 text-primary font-medium" : "text-foreground"}`}
+                        isChild ? "ml-5 border-l-2 border-industrial/40 pl-3" : "font-medium"
+                      } ${isChecked ? "bg-industrial/10 text-industrial font-medium" : "text-foreground"}`}
                     >
                       <input
                         type="checkbox"
@@ -484,7 +544,7 @@ export function ProductFormModal({
                         onChange={() => toggleCategory(cat.id)}
                         disabled={isSubmitting}
                         data-testid={`category-checkbox-${cat.id}`}
-                        className="size-4 rounded border-input text-primary focus:ring-primary cursor-pointer"
+                        className="size-4 rounded border-input text-industrial focus:ring-industrial accent-[#ea580c] cursor-pointer"
                       />
                       <span className="text-xs sm:text-sm">{cat.name}</span>
                     </label>

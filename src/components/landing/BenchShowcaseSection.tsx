@@ -1,4 +1,6 @@
+import { motion } from "framer-motion";
 import { SITE_CONFIG } from "@/config/site-config";
+import { useScrollReveal } from "@/components/landing/scroll-reveal";
 import bancoPruebasImg from "@/assets/workshop/banco-pruebas.webp";
 import inyectoresDetalleImg from "@/assets/workshop/inyectores-detalle.webp";
 
@@ -7,31 +9,54 @@ interface BenchShowcaseSectionProps {
 }
 
 export function BenchShowcaseSection({ className = "" }: BenchShowcaseSectionProps) {
+  const {
+    ref,
+    isInstant,
+    containerVariants,
+    itemVariants,
+    singleVariants,
+    viewportConfig,
+    handleAnimationComplete,
+  } = useScrollReveal("equipamiento");
+
   return (
     <section
+      ref={ref}
       aria-label="Exhibición técnica de bancos de prueba"
       className={`relative overflow-hidden bg-zinc-950 py-24 md:py-32 border-b border-white/10 ${className}`}
     >
       <div className="site-container">
         {/* Cabecera de la exhibición */}
-        <div className="mb-20">
+        <motion.div
+          variants={singleVariants}
+          initial={isInstant ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={viewportConfig}
+          className="mb-20"
+        >
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-600 mb-3">
             Infraestructura y Banco Computarizado
           </p>
           <h2 className="text-4xl md:text-6xl font-light tracking-tighter text-white uppercase">
             Equipamiento de Calibración
           </h2>
-        </div>
+        </motion.div>
 
         <div className="space-y-32">
           {/* Ficha 1: Banco Computarizado Goliath V2 */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          <motion.div
+            variants={singleVariants}
+            initial={isInstant ? "visible" : "hidden"}
+            whileInView="visible"
+            viewport={viewportConfig}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center"
+          >
             {/* Columna 1: Foto edge-to-edge asimétrica */}
             <div className="lg:col-span-7 relative overflow-hidden border border-white/10 group">
               <img
                 src={bancoPruebasImg}
                 alt="Banco de pruebas computarizado de alta presión"
-                className="w-full h-[400px] md:h-[550px] object-cover grayscale brightness-90 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-700 ease-out"
+                className="w-full h-[400px] md:h-[550px] object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 loading="lazy"
               />
               <div className="absolute bottom-4 left-4 font-mono text-[10px] tracking-widest uppercase text-white/70 bg-zinc-950/80 px-3 py-1.5 border border-white/10">
@@ -53,38 +78,51 @@ export function BenchShowcaseSection({ className = "" }: BenchShowcaseSectionPro
                 </p>
               </div>
 
-              {/* Fichas de datos duros estilo Longbow */}
-              <div className="grid grid-cols-2 gap-8 border-t border-white/10 pt-8">
-                <div>
+              {/* Fichas de datos duros con stagger */}
+              <motion.div
+                variants={containerVariants}
+                initial={isInstant ? "visible" : "hidden"}
+                whileInView="visible"
+                viewport={viewportConfig}
+                className="grid grid-cols-2 gap-8 border-t border-white/10 pt-8"
+              >
+                <motion.div variants={itemVariants}>
                   <div className="text-5xl font-light text-white tracking-tight">2.500</div>
                   <div className="mt-2 text-xs uppercase tracking-widest text-zinc-500 font-mono">
                     Bar Presión Max
                   </div>
-                </div>
-                <div>
+                </motion.div>
+                <motion.div variants={itemVariants}>
                   <div className="text-5xl font-light text-white tracking-tight">4</div>
                   <div className="mt-2 text-xs uppercase tracking-widest text-zinc-500 font-mono">
                     Canales Simultáneos
                   </div>
-                </div>
-                <div>
+                </motion.div>
+                <motion.div variants={itemVariants}>
                   <div className="text-5xl font-light text-white tracking-tight">0.01</div>
                   <div className="mt-2 text-xs uppercase tracking-widest text-zinc-500 font-mono">
                     mm Tolerancia
                   </div>
-                </div>
-                <div>
+                </motion.div>
+                <motion.div variants={itemVariants}>
                   <div className="text-5xl font-light text-white tracking-tight">OEM</div>
                   <div className="mt-2 text-xs uppercase tracking-widest text-zinc-500 font-mono">
                     Calibración
                   </div>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Ficha 2: Fuentes Electrónicas y Ajuste Micrométrico */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          <motion.div
+            variants={singleVariants}
+            initial={isInstant ? "visible" : "hidden"}
+            whileInView="visible"
+            viewport={viewportConfig}
+            onAnimationComplete={handleAnimationComplete}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center"
+          >
             {/* Columna 1 (en desktop a la derecha): Título y fichas */}
             <div className="lg:col-span-5 lg:order-1 order-2 flex flex-col justify-center space-y-10">
               <div>
@@ -99,21 +137,27 @@ export function BenchShowcaseSection({ className = "" }: BenchShowcaseSectionPro
                 </p>
               </div>
 
-              {/* Fichas de datos duros */}
-              <div className="grid grid-cols-2 gap-8 border-t border-white/10 pt-8">
-                <div>
+              {/* Fichas de datos duros con stagger */}
+              <motion.div
+                variants={containerVariants}
+                initial={isInstant ? "visible" : "hidden"}
+                whileInView="visible"
+                viewport={viewportConfig}
+                className="grid grid-cols-2 gap-8 border-t border-white/10 pt-8"
+              >
+                <motion.div variants={itemVariants}>
                   <div className="text-5xl font-light text-white tracking-tight">100%</div>
                   <div className="mt-2 text-xs uppercase tracking-widest text-zinc-500 font-mono">
                     Trazabilidad
                   </div>
-                </div>
-                <div>
+                </motion.div>
+                <motion.div variants={itemVariants}>
                   <div className="text-5xl font-light text-white tracking-tight">30 D</div>
                   <div className="mt-2 text-xs uppercase tracking-widest text-zinc-500 font-mono">
                     Garantía Escrita
                   </div>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             </div>
 
             {/* Columna 2: Foto asimétrica */}
@@ -121,14 +165,14 @@ export function BenchShowcaseSection({ className = "" }: BenchShowcaseSectionPro
               <img
                 src={inyectoresDetalleImg}
                 alt="Detalle de inyectores Common Rail en calibración de precisión"
-                className="w-full h-[400px] md:h-[550px] object-cover grayscale brightness-90 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-700 ease-out"
+                className="w-full h-[400px] md:h-[550px] object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 loading="lazy"
               />
               <div className="absolute bottom-4 left-4 font-mono text-[10px] tracking-widest uppercase text-white/70 bg-zinc-950/80 px-3 py-1.5 border border-white/10">
                 Inyectores Inductivos y Piezoeléctricos
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

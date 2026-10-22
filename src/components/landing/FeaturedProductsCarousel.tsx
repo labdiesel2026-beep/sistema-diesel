@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CatalogCTAButton } from "@/components/ui/CatalogCTAButton";
 import { ProductImageWithFallback } from "@/components/catalog/ProductImageWithFallback";
 import { formatPrice } from "@/lib/catalog-whatsapp";
 import { fetchFeaturedProducts, type FeaturedProductItem } from "@/services/landing.service";
@@ -147,7 +148,7 @@ export function FeaturedProductsCarousel({
                       <ProductImageWithFallback
                         src={product.imageUrl ?? null}
                         alt={product.name}
-                        className="size-full object-cover grayscale brightness-90 transition-transform duration-700 ease-out group-hover:scale-105 group-hover:grayscale-0 group-hover:brightness-100"
+                        className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                       />
 
                       {/* Badge de Marca */}
@@ -211,18 +212,14 @@ export function FeaturedProductsCarousel({
           </motion.div>
         </div>
 
-        {/* CTA al Catálogo Completo estilo Longbow */}
+        {/* CTA al Catálogo Completo */}
         <div className="mt-20 flex flex-col items-center justify-center text-center">
-          <Button
-            variant="outline"
-            asChild
-            className="h-12 px-8 rounded-none border border-white/20 bg-white/[0.04] text-xs font-mono uppercase tracking-widest text-white hover:bg-white hover:text-black hover:border-white transition-all shadow-none"
-          >
-            <Link to="/catalogo" className="flex items-center gap-3">
-              <span>Ver Catálogo Completo</span>
-              <ArrowRight className="size-4" />
-            </Link>
-          </Button>
+          <CatalogCTAButton
+            to="/catalogo"
+            label="Ver Catálogo Completo"
+            size="lg"
+            className="shadow-xl"
+          />
           <p className="mt-4 font-mono text-xs text-zinc-500 flex items-center gap-2">
             <Check className="size-3.5 text-zinc-400" />
             <span>Más de 500 referencias en inyectores, toberas y bombas con garantía</span>

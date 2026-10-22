@@ -122,3 +122,20 @@ export const productFormSchema = z
   .strict();
 
 export type ProductFormData = z.infer<typeof productFormSchema>;
+
+// ==========================================
+// 6. Confirmación de Eliminación Destructiva (RF-09, TASK-20, TASK-26)
+// ==========================================
+
+export const DELETE_CONFIRMATION_WORD = "ELIMINAR" as const;
+
+export const deleteConfirmationSchema = z
+  .string({ required_error: 'La confirmación es obligatoria' })
+  .trim()
+  .refine((val) => val === DELETE_CONFIRMATION_WORD, {
+    message: 'Debe ingresar exactamente la palabra "ELIMINAR"',
+  });
+
+export function isDeleteConfirmationValid(text: string): boolean {
+  return text.trim() === DELETE_CONFIRMATION_WORD;
+}

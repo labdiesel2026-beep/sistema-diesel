@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { ProductFormModal } from "@/components/admin/products/ProductFormModal";
 import { AdminProvider, useAdmin } from "@/context/admin-context";
 import type { AdminProduct } from "@/types/admin";
@@ -97,5 +97,30 @@ describe("ProductFormModal — Control y Bloqueo Preventivo de Destacados (Tarea
     const switchEl = screen.getByTestId("product-featured-switch");
     expect(switchEl).not.toBeDisabled();
     expect(screen.queryByTestId("product-featured-limit-warning")).not.toBeInTheDocument();
+  });
+
+  it("activa preventivamente beforeunload ante cambios sin guardar en el formulario (TASK-21, Caso Límite 10)", async () => {
+    const addEventListenerSpy = vi.spyOn(window, "addEventListener");
+
+    render(
+      <AdminProvider initialProducts={[]}>
+        <ProductFormModal open={true} onOpenChange={vi.fn()} productToEdit={null} />
+      </AdminProvider>,
+    );
+
+    const nameInput = screen.getByTestId("product-name-input");
+
+    // Al escribir en el campo, el formulario pasa a estar dirty
+    fireEvent.change(nameInput, { target: { value: "Inyector Cummins ISX" } });
+
+    expect(addEventListenerSpy).toHaveBeenCalledWith("beforeunload", expect.any(Function));
+
+    // Despachar evento beforeunload
+    const event = new Event("beforeunload", { cancelable: true }) as BeforeUnloadEvent;
+    const preventDefaultSpy = vi.spyOn(event, "preventDefault");
+    window.dispatchEvent(event);
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+    expect(event.defaultPrevented).toBe(true);
   });
 });

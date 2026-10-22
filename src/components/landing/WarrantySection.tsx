@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { ShieldCheck, CheckCircle2 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { SITE_CONFIG } from "@/config/site-config";
 import { buildWhatsAppUrl } from "@/lib/whatsapp-utils";
+import { useScrollReveal } from "@/components/landing/scroll-reveal";
 import videoSrc from "@/assets/workshop/banco-en-vivo.mp4";
 import posterImg from "@/assets/workshop/inyectores-detalle.webp";
 
@@ -15,6 +17,16 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
   const warrantyUrl = buildWhatsAppUrl(SITE_CONFIG.phone, SITE_CONFIG.whatsappMessages.warranty);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldFallback, setShouldFallback] = useState(false);
+
+  const {
+    ref,
+    isInstant,
+    containerVariants,
+    itemVariants,
+    singleVariants,
+    viewportConfig,
+    handleAnimationComplete,
+  } = useScrollReveal("garantias");
 
   useEffect(() => {
     // Detección de directiva de ahorro de datos o conexiones móviles lentas (RF-01.2, RNF-02)
@@ -63,6 +75,7 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
   return (
     <section
       id="garantias"
+      ref={ref}
       className={`scroll-mt-20 border-b border-white/10 bg-zinc-950 py-24 md:py-32 text-foreground ${className}`}
       aria-labelledby="garantias-heading"
     >
@@ -70,7 +83,13 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
         <div className="border-t border-white/10 pt-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
             {/* Columna Informativa (7 columnas en desktop) */}
-            <div className="lg:col-span-7 space-y-8">
+            <motion.div
+              variants={singleVariants}
+              initial={isInstant ? "visible" : "hidden"}
+              whileInView="visible"
+              viewport={viewportConfig}
+              className="lg:col-span-7 space-y-8"
+            >
               {/* Badge superior de garantía */}
               <div>
                 <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-600 block mb-3">
@@ -87,20 +106,27 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
                 </p>
               </div>
 
-              {/* Lista de condiciones y detalles de garantía en formato plano */}
-              <div className="border-t border-white/10 pt-6 space-y-4">
+              {/* Lista de condiciones y detalles de garantía en formato plano con stagger */}
+              <motion.div
+                variants={containerVariants}
+                initial={isInstant ? "visible" : "hidden"}
+                whileInView="visible"
+                viewport={viewportConfig}
+                className="border-t border-white/10 pt-6 space-y-4"
+              >
                 {SITE_CONFIG.warrantyTerms.details.map((detail) => (
-                  <div
+                  <motion.div
                     key={detail}
+                    variants={itemVariants}
                     className="flex items-start gap-4 border-b border-white/5 pb-4"
                   >
                     <CheckCircle2 className="mt-1 size-4 shrink-0 text-zinc-400" />
                     <span className="text-sm font-light text-zinc-300 leading-relaxed">
                       {detail}
                     </span>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
 
               {/* Acción de posventa WhatsApp */}
               <div className="pt-4 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
@@ -119,16 +145,23 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
                   Atención técnica directa de Lun a Vie
                 </p>
               </div>
-            </div>
+            </motion.div>
 
             {/* Columna Multimedia (5 columnas en desktop) */}
-            <div className="lg:col-span-5">
+            <motion.div
+              variants={singleVariants}
+              initial={isInstant ? "visible" : "hidden"}
+              whileInView="visible"
+              viewport={viewportConfig}
+              onAnimationComplete={handleAnimationComplete}
+              className="lg:col-span-5"
+            >
               <div className="relative aspect-video w-full overflow-hidden border border-white/10 bg-black">
                 {shouldFallback ? (
                   <img
                     src={posterImg}
                     alt="Banco de ensayo y calibración de precisión Common Rail"
-                    className="h-full w-full object-cover grayscale brightness-90"
+                    className="h-full w-full object-cover"
                   />
                 ) : (
                   <video
@@ -141,7 +174,7 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
                     playsInline
                     preload="metadata"
                     onError={() => setShouldFallback(true)}
-                    className="h-full w-full object-cover grayscale brightness-90"
+                    className="h-full w-full object-cover"
                     aria-label="Ensayo y prueba de inyectores diésel en banco computarizado"
                   />
                 )}
@@ -158,7 +191,7 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
                   </span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>

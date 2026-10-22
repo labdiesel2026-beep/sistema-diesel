@@ -44,13 +44,13 @@ export class AppError extends Error {
 
 /**
  * Middleware global de manejo de excepciones.
- * (RF-01, 4.5, D-07, Principio 6)
+ * (Spec 010, Caso Límite 4, Caso Límite 13, Principio 6: Errores Opacos en Producción)
  *
- * - Errores Operativos (AppError, códigos 400, 401, 403, 404, 409): devuelven mensaje legible y detalles estructurados.
- * - Errores Relacionales Prisma conocidos (P2002, P2003): mapeados a 409 Conflict legibles.
- * - Errores No Controlados (500 o fallos de Prisma): generan UUID opaco, registran el error y stack trace
- *   internamente en consola/logger, y retornan exclusivamente `{ error: "Error interno del servidor", referencia: "<uuid>" }`
- *   anulando cualquier filtración de stack trace o arquitectura interna.
+ * - Fallos de autenticación (401) y no controlados (500): devuelven única y taxativamente
+ *   `{ "error": "Referencia: <uuid>" }`, confinando trazas técnicas, queries y contextos
+ *   a los logs estructurados internos.
+ * - Errores Operativos de Validación/Negocio (400, 403, 404, 409): devuelven mensajes y detalles operacionales.
+ * - Errores Relacionales Prisma conocidos (P2002, P2003): mapeados a 409 Conflict.
  */
 export const errorHandler: ErrorRequestHandler = (
   err: any,
@@ -58,7 +58,27 @@ export const errorHandler: ErrorRequestHandler = (
   res: Response,
   _next: NextFunction,
 ): void => {
-  // 1. Errores operativos conocidos
+  // 1. Fallos de autenticación (401) - Principio 6: Errores Opacos
+  if (
+    (err instanceof AppError && err.statusCode === 401) ||
+    err?.status === 401 ||
+    err?.statusCode === 401
+  ) {
+    const referenceId = crypto.randomUUID();
+    console.error(`🔒 [Fallo de Autenticación 401 - Ref: ${referenceId}]`, {
+      name: err?.name,
+      message: err?.message,
+      stack: err?.stack,
+      timestamp: new Date().toISOString(),
+    });
+
+    res.status(401).json({
+      error: `Referencia: ${referenceId}`,
+    });
+    return;
+  }
+
+  // 2. Errores operativos conocidos (400, 403, 404, 409)
   if (err instanceof AppError) {
     const payload: Record<string, unknown> = {
       error: err.message,
@@ -70,7 +90,7 @@ export const errorHandler: ErrorRequestHandler = (
     return;
   }
 
-  // 2. Errores relacionales conocidos de Prisma (Integridad referencial y unicidad)
+  // 3. Errores relacionales conocidos de Prisma (Integridad referencial y unicidad)
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code === "P2002") {
       res.status(409).json({
@@ -93,7 +113,7 @@ export const errorHandler: ErrorRequestHandler = (
     }
   }
 
-  // 3. Error de sintaxis JSON en el cuerpo del request
+  // 4. Error de sintaxis JSON en el cuerpo del request
   if (err instanceof SyntaxError && "status" in err && err.status === 400 && "body" in err) {
     res.status(400).json({
       error: "JSON malformado en el cuerpo de la petición",
@@ -101,7 +121,7 @@ export const errorHandler: ErrorRequestHandler = (
     return;
   }
 
-  // 4. Errores de CORS
+  // 5. Errores de CORS
   if (err instanceof Error && err.message.includes("Bloqueado por política CORS")) {
     res.status(403).json({
       error: err.message,
@@ -109,9 +129,9 @@ export const errorHandler: ErrorRequestHandler = (
     return;
   }
 
-  // 5. Errores no controlados (500) - Principio 6: Opacidad absoluta al exterior
+  // 6. Errores no controlados (500) - Principio 6: Opacidad absoluta al exterior
   const referenceId = crypto.randomUUID();
-  console.error(`💥 [Error No Controlado - Ref: ${referenceId}]`, {
+  console.error(`💥 [Error No Controlado 500 - Ref: ${referenceId}]`, {
     name: err?.name,
     message: err?.message,
     stack: err?.stack,
@@ -119,8 +139,7 @@ export const errorHandler: ErrorRequestHandler = (
   });
 
   res.status(500).json({
-    error: "Error interno del servidor",
-    referencia: referenceId,
+    error: `Referencia: ${referenceId}`,
   });
 };
 

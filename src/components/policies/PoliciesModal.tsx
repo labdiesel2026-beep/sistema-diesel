@@ -42,47 +42,47 @@ export function PoliciesModal({ open, onOpenChange }: PoliciesModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border-slate-200/90 bg-white/95 p-6 shadow-2xl backdrop-blur-md ring-1 ring-blue-500/20 dark:border-blue-900/50 dark:bg-slate-900/95 dark:ring-blue-400/20"
+        className="sm:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-white/10 bg-canvas p-6 shadow-2xl backdrop-blur-md ring-1 ring-orange-500/20 text-white"
         aria-describedby="policies-modal-description"
       >
         <DialogHeader className="space-y-1.5 pb-2 text-left">
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+          <div className="inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider text-industrial">
             <ShieldCheck className="size-4" />
             Marco Regulatorio y Comercial
           </div>
-          <DialogTitle className="font-display text-2xl font-extrabold text-slate-900 dark:text-slate-100">
+          <DialogTitle className="font-display text-2xl font-light tracking-tight text-white uppercase">
             Políticas Comerciales y de Garantía
           </DialogTitle>
           <DialogDescription
             id="policies-modal-description"
-            className="text-xs text-slate-500 dark:text-slate-400"
+            className="text-xs text-zinc-400"
           >
             Términos técnicos, condiciones de garantía y protocolos operativos de Laboratorio Diésel.
           </DialogDescription>
         </DialogHeader>
 
         {/* Contenedor con scroll interno accesible (RF-04.4, max-h-[60vh]) */}
-        <div className="my-2 max-h-[60vh] overflow-y-auto pr-2 space-y-3.5 scrollbar-thin">
+        <div className="my-2 max-h-[60vh] overflow-y-auto pr-2 space-y-3.5 technical-scrollbar">
           {SITE_CONFIG.commercialPolicies.axes.map((policy) => {
             const Icon = AXIS_ICON_MAP[policy.id] ?? ShieldCheck;
 
             return (
               <article
                 key={policy.id}
-                className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 transition-colors dark:border-slate-800 dark:bg-slate-950/60"
+                className="rounded-xl border border-white/10 bg-[#111111] p-4 text-white"
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-blue-500/20 bg-blue-100/60 text-blue-700 dark:border-blue-800 dark:bg-blue-950/70 dark:text-blue-300">
-                    <Icon className="size-4.5" />
+                  <div className="flex size-9 shrink-0 items-center justify-center border border-orange-500/30 bg-orange-500/10 text-industrial">
+                    <Icon className="size-4" />
                   </div>
                   <div>
-                    <h3 className="font-display text-sm font-bold text-slate-900 dark:text-slate-100">
-                      <span className="text-blue-600 dark:text-blue-400 mr-1.5">
+                    <h3 className="font-display text-sm font-semibold text-zinc-100">
+                      <span className="text-industrial mr-1.5">
                         Eje {policy.number}:
                       </span>
                       {policy.shortTitle}
                     </h3>
-                    <p className="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                    <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">
                       {policy.content}
                     </p>
                   </div>
@@ -93,16 +93,16 @@ export function PoliciesModal({ open, onOpenChange }: PoliciesModalProps) {
         </div>
 
         {/* Pie del diálogo interactivo con sincronización reactiva */}
-        <DialogFooter className="mt-2 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+        <DialogFooter className="mt-2 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-white/10 pt-4">
           {hasAccepted ? (
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-              <span className="flex size-4.5 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950/80">
-                <Check className="size-3 text-emerald-600 dark:text-emerald-400" />
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+              <span className="flex size-4 items-center justify-center rounded-full bg-emerald-950/80 border border-emerald-500/30">
+                <Check className="size-3 text-emerald-400" />
               </span>
               <span>Políticas comerciales aceptadas previamente</span>
             </div>
           ) : (
-            <span className="text-xs text-slate-500 dark:text-slate-400">
+            <span className="text-xs text-zinc-500">
               Al continuar, confirma haber leído los 4 ejes normativos.
             </span>
           )}
@@ -111,9 +111,9 @@ export function PoliciesModal({ open, onOpenChange }: PoliciesModalProps) {
             {hasAccepted ? (
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 onClick={() => onOpenChange(false)}
-                className="h-9 px-4 text-xs font-semibold"
+                className="h-9 px-4 text-xs font-semibold rounded-none bg-transparent text-white border border-white/20 hover:bg-white/10 transition-colors"
               >
                 Cerrar políticas
               </Button>
@@ -121,7 +121,7 @@ export function PoliciesModal({ open, onOpenChange }: PoliciesModalProps) {
               <Button
                 type="button"
                 onClick={handleAcceptAndClose}
-                className="h-9 rounded-lg bg-blue-600 px-4 text-xs font-bold text-white shadow-md hover:bg-blue-700 active:scale-[0.98] transition-all dark:bg-blue-600 dark:hover:bg-blue-500"
+                className="h-9 rounded-none bg-industrial px-4 text-xs font-bold text-white shadow-md hover:bg-industrial-hover active:scale-[0.98] transition-all cursor-pointer"
               >
                 Aceptar y Continuar
                 <ArrowRight className="ml-1.5 size-3.5" />

@@ -132,7 +132,7 @@ export function CatalogFilters({
               >
                 {/* Categoría Padre */}
                 <div className="flex items-center justify-between py-1 text-sm">
-                  <label className="flex cursor-pointer items-center gap-2.5 font-medium text-foreground select-none hover:text-primary transition-colors">
+                  <label className="flex cursor-pointer items-center gap-2.5 font-medium text-foreground select-none hover:text-industrial transition-colors">
                     <Checkbox
                       id={`${prefix}-cat-${root.id}`}
                       checked={isRootChecked}
@@ -208,7 +208,7 @@ export function CatalogFilters({
                 className="flex items-center justify-between py-1 text-sm"
                 data-testid={`brand-item-${brand.id}`}
               >
-                <label className="flex cursor-pointer items-center gap-2.5 text-foreground select-none hover:text-primary transition-colors">
+                <label className="flex cursor-pointer items-center gap-2.5 text-foreground select-none hover:text-industrial transition-colors">
                   <Checkbox
                     id={`${prefix}-brand-${brand.id}`}
                     checked={isChecked}
@@ -243,10 +243,10 @@ export function CatalogFilters({
           data-testid="open-mobile-filters-button"
         >
           <span className="flex items-center gap-2">
-            <SlidersHorizontal className="size-4 text-primary" />
+            <SlidersHorizontal className="size-4 text-industrial" />
             <span>Filtros Técnicos</span>
             {activeFiltersCount > 0 && (
-              <span className="rounded-full bg-primary px-2 py-0.5 font-mono text-[10px] font-bold text-primary-foreground">
+              <span className="rounded-full bg-industrial px-2 py-0.5 font-mono text-[10px] font-bold text-white">
                 {activeFiltersCount}
               </span>
             )}
@@ -272,7 +272,7 @@ export function CatalogFilters({
       >
         <div className="mb-5 flex items-center justify-between border-b border-border pb-4">
           <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-foreground">
-            <SlidersHorizontal className="size-4 text-primary" />
+            <SlidersHorizontal className="size-4 text-industrial" />
             <span>Filtros</span>
           </h2>
           {activeFiltersCount > 0 && (
@@ -280,7 +280,7 @@ export function CatalogFilters({
               variant="ghost"
               size="sm"
               onClick={onResetFilters}
-              className="h-8 gap-1.5 px-2 font-mono text-xs font-semibold text-muted-foreground hover:text-primary"
+              className="h-8 gap-1.5 px-2 font-mono text-xs font-semibold text-muted-foreground hover:text-industrial"
               data-testid="reset-filters-desktop-button"
             >
               <RotateCcw className="size-3.5" />

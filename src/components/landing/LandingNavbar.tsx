@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Menu, X, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CatalogCTAButton } from "@/components/ui/CatalogCTAButton";
 import { SITE_CONFIG } from "@/config/site-config";
 
 interface LandingNavbarProps {
@@ -81,16 +82,9 @@ export function LandingNavbar({ className = "", isCatalog }: LandingNavbarProps)
               </Link>
             </Button>
           ) : (
-            <Button
-              variant="outline"
-              asChild
-              className="h-9 px-5 rounded-none border border-white/20 bg-white/[0.04] text-xs font-mono uppercase tracking-widest text-white hover:bg-white hover:text-black hover:border-white transition-all"
-            >
-              <Link to="/catalogo" className="flex items-center">
-                <span>Ver Catálogo</span>
-                <ArrowRight className="ml-2 size-3.5" />
-              </Link>
-            </Button>
+            <CatalogCTAButton size="sm" to="/catalogo">
+              Ver Catálogo
+            </CatalogCTAButton>
           )}
         </div>
 
@@ -144,17 +138,14 @@ export function LandingNavbar({ className = "", isCatalog }: LandingNavbarProps)
                   </Link>
                 </Button>
               ) : (
-                <Button
-                  variant="outline"
-                  asChild
-                  className="w-full justify-center h-10 rounded-none border border-white/20 bg-white/[0.08] text-xs font-mono uppercase tracking-widest text-white"
+                <CatalogCTAButton
+                  size="default"
+                  to="/catalogo"
+                  className="w-full justify-center"
                   onClick={() => setIsOpen(false)}
                 >
-                  <Link to="/catalogo" className="flex items-center justify-center">
-                    <span>Ver Catálogo</span>
-                    <ArrowRight className="ml-2 size-3.5" />
-                  </Link>
-                </Button>
+                  Ver Catálogo
+                </CatalogCTAButton>
               )}
             </div>
           </nav>

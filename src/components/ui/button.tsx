@@ -9,18 +9,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        industrial: "bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl",
+        industrial: "bg-industrial text-white hover:bg-industrial-hover active:scale-[0.98] rounded-xl font-semibold shadow-xs transition-all",
         whatsapp:
           "bg-whatsapp text-whatsapp-foreground ring-1 ring-emerald-400/20 shadow-sm hover:brightness-105 active:scale-[0.98] rounded-xl transition-all duration-200",
         technical:
-          "border border-hero-border bg-hero-surface text-hero-foreground hover:bg-hero-border rounded-xl",
-        default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+          "border border-border/80 bg-zinc-900 text-white hover:bg-zinc-800 rounded-xl",
+        default: "bg-industrial text-white shadow-xs hover:bg-industrial-hover active:scale-[0.98] transition-all",
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:
           "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
         ghost:
           "border border-border/60 dark:border-white/10 bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-white/5 dark:hover:border-white/25 dark:hover:text-foreground transition-all duration-300 ease-out",
-        link: "text-primary underline-offset-4 hover:underline",
+        link: "text-industrial underline-offset-4 hover:underline",
       },
       size: {
         default: "h-9 px-4 py-2",

@@ -4,9 +4,9 @@ import { pageHead } from "@/components/diesel-site";
 import type { AdminProduct } from "@/types/admin";
 import { useAdmin } from "@/context/admin-context";
 import { ProductToolbar } from "@/components/admin/products/ProductToolbar";
-import { ProductTable } from "@/components/admin/products/ProductTable";
+import { ProductList } from "@/components/admin/products/ProductList";
 import { ProductFormModal } from "@/components/admin/products/ProductFormModal";
-import { ProductDeleteModal } from "@/components/admin/products/ProductDeleteModal";
+import { DeleteConfirmModal } from "@/components/admin/products/DeleteConfirmModal";
 
 export const Route = createFileRoute("/admin/")({
   head: () =>
@@ -92,7 +92,7 @@ function AdminProductsPage() {
       />
 
       {/* Grilla interactiva de repuestos con resolución relacional de marcas y switches de visibilidad */}
-      <ProductTable
+      <ProductList
         searchQuery={searchQuery}
         onlyFeatured={onlyFeatured}
         onEdit={handleEdit}
@@ -102,8 +102,8 @@ function AdminProductsPage() {
       {/* Modal de Creación y Edición de Producto con validación Zod */}
       <ProductFormModal open={formOpen} onOpenChange={setFormOpen} productToEdit={productToEdit} />
 
-      {/* Modal de Eliminación con confirmación destructiva */}
-      <ProductDeleteModal
+      {/* Modal de Eliminación con confirmación destructiva y validación tipada */}
+      <DeleteConfirmModal
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         product={productToDelete}

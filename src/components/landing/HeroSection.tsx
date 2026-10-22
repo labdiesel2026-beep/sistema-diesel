@@ -1,19 +1,20 @@
 /**
  * Sección Principal (Hero) — Inmersión Edge-to-Edge Industrial con Contraste Localizado.
- * (Spec 009, RF-03, RNF-01, CL-04, Bloque 3 - Tarea 3.2)
+ * (Spec 010, RF-03, Módulo C, RF-04, RNF-01, RNF-02)
  *
- * Características:
- * - Fotografía real del taller (taller-hero.webp) ocupando el 100% del contenedor sin veladuras generales en el 75% superior.
- * - Gradiente oscuro neutro estrictamente acotado detrás del bloque tipográfico inferior.
- * - Sombras de texto multicapa garantizando ratio de contraste WCAG AAA (> 7:1) en títulos y AA (> 4.5:1) en párrafos.
- * - Micro-animación de zoom ultralento continuo (12s) y resiliencia de encuadre en dispositivos móviles.
+ * Jerarquía visual y cinemática:
+ * 1. Título principal: "LABORATORIO DIÉSEL" con animación fade-in slide-up en 0.8s (Y: 20px a 0).
+ * 2. Subtítulo: "Especialistas en inyección diésel" con mecanografía técnica a 50ms/char tras 800ms de retardo,
+ *    con cursor parpadeante permanente en barra vertical (|) coloreado en Naranja Técnico (#ea580c).
+ * 3. Acciones primarias integrando CatalogCTAButton con micro-interacción shimmer y compresión física activa.
+ * 4. Erradicación absoluta de tonos azules residuales.
  */
 
-import { Link } from "@tanstack/react-router";
-import { motion, type Variants } from "framer-motion";
-import { ArrowRight, CheckCircle2, Wrench } from "lucide-react";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { FaWhatsapp } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
+import { CatalogCTAButton } from "@/components/ui/CatalogCTAButton";
 import { SITE_CONFIG } from "@/config/site-config";
 import tallerHeroImg from "@/assets/workshop/taller-hero.webp";
 
@@ -21,113 +22,121 @@ interface HeroSectionProps {
   className?: string;
 }
 
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.08,
-    },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: "easeOut" },
-  },
-};
+const FULL_SUBTITLE = "Especialistas en inyección diésel";
 
 export function HeroSection({ className = "" }: HeroSectionProps) {
+  const [displayedSubtitle, setDisplayedSubtitle] = useState("");
+
+  // Mecanografía técnica (40-60ms/carácter) tras retardo inicial de 800ms (RF-03)
+  useEffect(() => {
+    // Si el usuario tiene activa la preferencia de reducción de movimiento, renderizar de inmediato
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setDisplayedSubtitle(FULL_SUBTITLE);
+      return;
+    }
+
+    const delayTimer = setTimeout(() => {
+      let currentIndex = 0;
+      const interval = setInterval(() => {
+        currentIndex++;
+        setDisplayedSubtitle(FULL_SUBTITLE.slice(0, currentIndex));
+        if (currentIndex >= FULL_SUBTITLE.length) {
+          clearInterval(interval);
+        }
+      }, 35);
+
+      return () => clearInterval(interval);
+    }, 300);
+
+    return () => clearTimeout(delayTimer);
+  }, []);
+
   return (
     <section
       id="inicio"
-      className={`relative h-screen w-full min-h-[100dvh] overflow-hidden border-b border-white/10 border-blue-500/20 bg-zinc-950 text-foreground flex flex-col justify-between ${className}`}
+      className={`relative min-h-[100dvh] w-full overflow-hidden border-b border-white/10 bg-zinc-950 text-foreground flex flex-col justify-between ${className}`}
     >
-      {/* 1. Fotografía del laboratorio a pantalla completa (h-screen w-full object-cover) */}
-      <motion.img
+      {/* 1. Fotografía real del taller a pantalla completa a todo color sin desaturación */}
+      <img
         src={tallerHeroImg}
         alt="Instalaciones y banco de pruebas computarizado de Laboratorio Diésel"
         width={1920}
         height={1080}
-        initial={{ scale: 1.02 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 10, ease: "easeOut" }}
-        className="absolute inset-0 h-full w-full object-cover brightness-[0.7] max-md:[object-position:center_35%] max-md:opacity-30 md:object-center"
+        className="absolute inset-0 h-full w-full object-cover brightness-[0.7] max-md:[object-position:center_35%] max-md:opacity-35 md:object-center animate-slow-zoom"
         fetchPriority="high"
       />
 
-      {/* Sutil viñeta para profundidad visual sin veladuras genéricas */}
+      {/* Sutil viñeta degradada neutra para contraste y protección WCAG AA */}
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-zinc-950/40 via-transparent to-zinc-950/80"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-zinc-950/60 via-transparent to-zinc-950/90"
         aria-hidden="true"
       />
 
-      {/* 2. Texto principal colosal y centrado al estilo Longbow ("Speed of Lightness") */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center px-4 pointer-events-none select-none z-10 text-center">
-        <motion.p
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-4 font-mono text-[11px] md:text-xs uppercase tracking-[0.35em] text-zinc-300 mix-blend-difference"
-        >
-          <span>Especialistas en Inyección</span>
-          <span className="mx-3 text-white/40">·</span>
-          <span>{SITE_CONFIG.tagline}</span>
-        </motion.p>
+      {/* Espaciador superior para compensar el navbar fijo superpuesto */}
+      <div className="h-24 sm:h-28" aria-hidden="true" />
 
+      {/* 2. Bloque Central: Jerarquía Vertical Estricta (RF-03) */}
+      <div className="relative z-10 mx-auto my-auto max-w-5xl px-4 py-8 flex flex-col items-center justify-center text-center">
         <motion.h1
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          className="text-6xl md:text-[8rem] leading-none tracking-tighter text-white text-center absolute inset-0 flex items-center justify-center mix-blend-difference font-light uppercase"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="font-display text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] font-bold uppercase tracking-tight text-white leading-none text-center drop-shadow-lg"
         >
           {SITE_CONFIG.name}
         </motion.h1>
+
+        {/* Paso 2: Subtítulo inmediatamente inferior con mecanografía técnica y cursor naranja */}
+        <div className="mt-4 sm:mt-6 font-mono text-xs sm:text-sm md:text-base uppercase tracking-[0.25em] text-zinc-300 text-center flex items-center justify-center min-h-[2rem]">
+          <span className="sr-only">Especialistas en inyección diésel</span>
+          <span aria-hidden="true">{displayedSubtitle}</span>
+          <span
+            aria-hidden="true"
+            className="inline-block ml-1 font-bold select-none animate-[pulse_1s_cubic-bezier(0.4,0,0.6,1)_infinite]"
+            style={{ color: "#ea580c" }}
+          >
+            |
+          </span>
+        </div>
+
+        {/* Paso 3: Acciones Primarias de Acceso al Catálogo y Contacto */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+          className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4"
+        >
+          <CatalogCTAButton size="lg" className="rounded-none border-white/20">
+            Ver Catálogo de Inyectores
+          </CatalogCTAButton>
+
+          <Button
+            variant="ghost"
+            asChild
+            className="h-12 px-7 rounded-none border border-white/10 bg-zinc-950/60 backdrop-blur-md text-xs font-mono uppercase tracking-widest text-zinc-300 hover:text-white hover:bg-white/10 hover:border-white/30 transition-all shadow-none"
+          >
+            <a href="#contacto" className="flex items-center gap-2">
+              <FaWhatsapp className="size-4 text-channel-support" />
+              <span>Contactar al Taller</span>
+            </a>
+          </Button>
+        </motion.div>
       </div>
 
-      {/* Espaciador superior para compensar el navbar superpuesto */}
-      <div className="h-20" aria-hidden="true" />
-
-      {/* 3. Barra inferior ortogonal de especificaciones y acciones institucionales */}
-      <div className="relative z-20 border-t border-white/10 bg-zinc-950/70 backdrop-blur-md px-6 py-6 sm:px-12">
-        <div className="site-container flex flex-col gap-6 md:flex-row md:items-center md:justify-between p-0">
-          {/* Propuestas de Valor Técnicas como especificaciones de alto nivel */}
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-10 text-xs font-mono uppercase tracking-widest text-zinc-400">
+      {/* 3. Barra inferior ortogonal de especificaciones técnicas institucionales */}
+      <div className="relative z-20 border-t border-white/10 bg-zinc-950/80 backdrop-blur-md px-6 py-5 sm:px-12">
+        <div className="site-container flex flex-col gap-4 md:flex-row md:items-center md:justify-between p-0">
+          {/* Propuestas de Valor Técnicas */}
+          <div className="flex flex-wrap items-center gap-4 sm:gap-8 text-xs font-mono uppercase tracking-widest text-zinc-400">
             {SITE_CONFIG.valueProps.map((prop) => (
               <div key={prop} className="flex items-center gap-2.5">
-                <span className="size-1.5 bg-zinc-400" />
+                <span className="size-1.5 bg-industrial" />
                 <span className="text-zinc-300">{prop}</span>
               </div>
             ))}
-          </div>
-
-          {/* Acciones principales ortogonales estilo Longbow */}
-          <div className="flex items-center gap-4 shrink-0">
-            <Button
-              variant="outline"
-              asChild
-              className="h-10 px-6 rounded-none border border-white/20 bg-white/[0.06] text-xs font-mono uppercase tracking-widest text-white hover:bg-white hover:text-black hover:border-white transition-all shadow-none"
-            >
-              <Link to="/catalogo" className="flex items-center">
-                <span>Ver Catálogo de Inyectores</span>
-                <ArrowRight className="ml-2 size-3.5" />
-              </Link>
-            </Button>
-
-            <Button
-              variant="ghost"
-              asChild
-              className="h-10 px-6 rounded-none border border-white/10 bg-transparent text-xs font-mono uppercase tracking-widest text-zinc-400 hover:text-white hover:border-white/30 transition-all shadow-none"
-            >
-              <a href="#contacto" className="flex items-center">
-                <FaWhatsapp className="mr-2 size-3.5 text-whatsapp" />
-                <span>Contactar al Taller</span>
-              </a>
-            </Button>
           </div>
         </div>
       </div>

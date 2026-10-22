@@ -135,9 +135,9 @@ export function ProductImageUpload({
       {isUploading ? (
         <div
           data-testid="image-uploading-state"
-          className="flex min-h-36 flex-col items-center justify-center rounded-xl border border-dashed border-primary/60 bg-primary/5 p-6 text-center"
+          className="flex min-h-36 flex-col items-center justify-center rounded-xl border border-dashed border-industrial/60 bg-industrial/5 p-6 text-center"
         >
-          <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <div className="flex size-10 items-center justify-center rounded-full bg-industrial/10 text-industrial">
             <Loader2 className="size-5 animate-spin" />
           </div>
           <p className="mt-2 text-sm font-semibold text-foreground">Subiendo imagen...</p>
@@ -194,10 +194,10 @@ export function ProductImageUpload({
           className={`flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors ${
             activeError
               ? "border-destructive/60 bg-destructive/5 hover:border-destructive"
-              : "border-border bg-muted/20 hover:border-primary/50 hover:bg-muted/40"
+              : "border-border bg-muted/20 hover:border-industrial/50 hover:bg-muted/40"
           } ${disabled || isUploading ? "cursor-not-allowed opacity-50" : ""}`}
         >
-          <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <div className="flex size-10 items-center justify-center rounded-full bg-industrial/10 text-industrial">
             <Upload className="size-5" />
           </div>
           <p className="mt-2 text-sm font-semibold text-foreground">

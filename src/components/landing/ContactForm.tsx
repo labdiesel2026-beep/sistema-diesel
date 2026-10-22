@@ -71,7 +71,7 @@ export function ContactForm({ className = "" }: ContactFormProps) {
             className={`w-full rounded-lg border bg-background px-3.5 py-2.5 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 ${
               errors.nombre
                 ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                : "border-input focus:border-blue-500 focus:ring-blue-500/20"
+                : "border-input focus:border-industrial focus:ring-industrial/20"
             }`}
           />
         </div>
@@ -105,7 +105,7 @@ export function ContactForm({ className = "" }: ContactFormProps) {
             className={`w-full rounded-lg border bg-background px-3.5 py-2.5 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 ${
               errors.contacto
                 ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                : "border-input focus:border-blue-500 focus:ring-blue-500/20"
+                : "border-input focus:border-industrial focus:ring-industrial/20"
             }`}
           />
         </div>
@@ -139,7 +139,7 @@ export function ContactForm({ className = "" }: ContactFormProps) {
             className={`w-full rounded-lg border bg-background px-3.5 py-2.5 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 ${
               errors.mensaje
                 ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                : "border-input focus:border-blue-500 focus:ring-blue-500/20"
+                : "border-input focus:border-industrial focus:ring-industrial/20"
             }`}
           />
         </div>

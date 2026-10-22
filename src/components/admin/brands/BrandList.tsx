@@ -75,7 +75,7 @@ export function BrandList({ onEdit, onDelete }: BrandListProps) {
                 {/* Nombre de la marca e ID UUID */}
                 <TableCell className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-industrial/10 text-industrial">
                       <BadgeCheck className="size-4" />
                     </div>
                     <div>

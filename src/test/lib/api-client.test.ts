@@ -16,6 +16,17 @@ vi.mock("sonner", () => ({
   },
 }));
 
+interface InterceptorHandler {
+  fulfilled: (value: any) => any;
+  rejected: (error: any) => any;
+}
+
+const getResponseHandler = (): InterceptorHandler =>
+  (apiClient.interceptors.response as any).handlers[0];
+
+const getRequestHandler = (): InterceptorHandler =>
+  (apiClient.interceptors.request as any).handlers[0];
+
 describe("TASK-22: apiClient - Configuración withCredentials y Manejo de Red", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -62,8 +73,7 @@ describe("TASK-22: apiClient - Configuración withCredentials y Manejo de Red", 
     const error = new AxiosError("Internet disconnected", "ERR_INTERNET_DISCONNECTED");
     error.request = {};
 
-    // @ts-expect-error accessing private axios interceptor handlers for test
-    const responseHandler = apiClient.interceptors.response.handlers[0];
+    const responseHandler = getResponseHandler();
 
     await expect(responseHandler.rejected(error)).rejects.toMatchObject({
       code: "ERR_INTERNET_DISCONNECTED",
@@ -85,8 +95,7 @@ describe("TASK-22: apiClient - Configuración withCredentials y Manejo de Red", 
     const error = new AxiosError("Network Error");
     error.request = { responseURL: "http://localhost:3001/api/admin/products" };
 
-    // @ts-expect-error accessing private axios interceptor handlers for test
-    const responseHandler = apiClient.interceptors.response.handlers[0];
+    const responseHandler = getResponseHandler();
 
     await expect(responseHandler.rejected(error)).rejects.toMatchObject({
       isNetworkError: true,
@@ -98,8 +107,7 @@ describe("TASK-22: apiClient - Configuración withCredentials y Manejo de Red", 
   });
 
   it("asegura que el interceptor de request inyecta withCredentials: true y X-Requested-With", async () => {
-    // @ts-expect-error accessing private axios interceptor handlers for test
-    const requestHandler = apiClient.interceptors.request.handlers[0];
+    const requestHandler = getRequestHandler();
     const headersMap = new axios.AxiosHeaders();
     const config = {
       headers: headersMap,
@@ -153,8 +161,7 @@ describe("TASK-23: Interceptor Axios para Refresh Silencioso JWT (Caso Límite 8
       config: originalConfig as any,
     };
 
-    // @ts-expect-error accessing private axios interceptor handlers for test
-    const responseHandler = apiClient.interceptors.response.handlers[0];
+    const responseHandler = getResponseHandler();
 
     const result = await responseHandler.rejected(error401);
 
@@ -204,8 +211,7 @@ describe("TASK-23: Interceptor Axios para Refresh Silencioso JWT (Caso Límite 8
       config: originalConfig as any,
     };
 
-    // @ts-expect-error accessing private axios interceptor handlers for test
-    const responseHandler = apiClient.interceptors.response.handlers[0];
+    const responseHandler = getResponseHandler();
 
     await expect(responseHandler.rejected(error401)).rejects.toMatchObject({
       response: { status: 500 },
@@ -259,8 +265,7 @@ describe("TASK-23: Interceptor Axios para Refresh Silencioso JWT (Caso Límite 8
       config: originalConfig as any,
     };
 
-    // @ts-expect-error accessing private axios interceptor handlers for test
-    const responseHandler = apiClient.interceptors.response.handlers[0];
+    const responseHandler = getResponseHandler();
 
     await expect(responseHandler.rejected(error401)).rejects.toMatchObject({
       response: { status: 401 },
@@ -276,10 +281,11 @@ describe("TASK-23: Interceptor Axios para Refresh Silencioso JWT (Caso Límite 8
     // Verifica que la petición fallida fue retenida en memoria con su FormData intacto
     const retained = getRetainedRequests();
     expect(retained.length).toBeGreaterThan(0);
-    expect(retained[0].url).toBe("/api/admin/products");
-    expect(retained[0].data).toBe(formData);
-    expect(retained[0].data.get("codigo_oem")).toBe("0445110001");
-    expect(retained[0].data.get("file")).toBe(mockFile);
+    const firstRetained = retained[0]!;
+    expect(firstRetained.url).toBe("/api/admin/products");
+    expect(firstRetained.data).toBe(formData);
+    expect(firstRetained.data.get("codigo_oem")).toBe("0445110001");
+    expect(firstRetained.data.get("file")).toBe(mockFile);
   });
 
   it("4. No dispara refresh recursivo si la petición que falló con 401 era /api/auth/login", async () => {
@@ -302,8 +308,7 @@ describe("TASK-23: Interceptor Axios para Refresh Silencioso JWT (Caso Límite 8
       config: loginConfig as any,
     };
 
-    // @ts-expect-error accessing private axios interceptor handlers for test
-    const responseHandler = apiClient.interceptors.response.handlers[0];
+    const responseHandler = getResponseHandler();
 
     await expect(responseHandler.rejected(loginError)).rejects.toMatchObject({
       response: { status: 401 },
@@ -325,8 +330,7 @@ describe("TASK-23: Interceptor Axios para Refresh Silencioso JWT (Caso Límite 8
       data: { success: true },
     } as any);
 
-    // @ts-expect-error accessing private axios interceptor handlers for test
-    const responseHandler = apiClient.interceptors.response.handlers[0];
+    const responseHandler = getResponseHandler();
 
     const error1 = new AxiosError("Unauthorized", "401");
     error1.config = { url: "/api/admin/products", headers: new axios.AxiosHeaders() } as any;

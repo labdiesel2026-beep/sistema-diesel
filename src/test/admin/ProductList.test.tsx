@@ -18,8 +18,6 @@ const sampleProduct: AdminProduct = {
   isFeatured: true,
   imageUrl: "/uploads/prod-list-1.webp",
   description: "Inyector piezoeléctrico original Bosch",
-  createdAt: "2026-01-01T00:00:00Z",
-  updatedAt: "2026-01-01T00:00:00Z",
 };
 
 describe("ProductList — Cabeceras Fijas, Tema Claro y Códigos OEM (TASK-18, RF-09, Apéndice 10.2)", () => {

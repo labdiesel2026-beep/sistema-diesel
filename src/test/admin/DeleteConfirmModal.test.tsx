@@ -18,8 +18,6 @@ const sampleProduct: AdminProduct = {
   isFeatured: false,
   imageUrl: "/uploads/prod-delete-1.webp",
   description: "Bomba nueva original",
-  createdAt: "2026-01-01T00:00:00Z",
-  updatedAt: "2026-01-01T00:00:00Z",
 };
 
 describe("DeleteConfirmModal — Validación Tipada ELIMINAR (TASK-20, RF-09)", () => {

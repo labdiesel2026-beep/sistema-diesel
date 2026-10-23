@@ -41,6 +41,7 @@ export const CatalogCTAButton = React.forwardRef<
       onTouchStart,
       onTouchEnd,
       onTouchCancel,
+      href,
       ...props
     },
     ref,
@@ -137,7 +138,7 @@ export const CatalogCTAButton = React.forwardRef<
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           onTouchCancel={handleTouchCancel}
-          {...props}
+          {...(props as any)}
         >
           {innerContent}
         </Link>
@@ -147,7 +148,7 @@ export const CatalogCTAButton = React.forwardRef<
     return (
       <a
         ref={ref}
-        href="#catalogo"
+        href={href ?? "#catalogo"}
         className={baseClasses}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}

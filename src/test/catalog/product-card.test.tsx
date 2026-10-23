@@ -193,7 +193,7 @@ describe("ProductCard y ProductGridSkeleton", () => {
     const { rerender } = render(
       <CatalogCartProvider>
         <ProductCard
-          product={{ ...mockProductWithPrice, imageUrl: null, condition: "Nuevo" }}
+          product={{ ...mockProductWithPrice, imageUrl: null as unknown as string, condition: "Nuevo" }}
           brandName="Bosch"
         />
       </CatalogCartProvider>,

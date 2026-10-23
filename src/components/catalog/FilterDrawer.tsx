@@ -27,14 +27,14 @@ export function FilterDrawer({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="left"
-        className="z-40 w-[300px] max-w-[340px] border-r border-border bg-card p-6 overflow-y-auto technical-scrollbar sm:w-[340px]"
+        className="z-50 w-[300px] max-w-[340px] border-r border-zinc-800 bg-zinc-900 text-white p-6 overflow-y-auto technical-scrollbar sm:w-[340px] shadow-2xl"
         data-testid="filter-drawer-content"
       >
         <SheetHeader className="mb-4 text-left">
-          <SheetTitle className="flex items-center justify-between font-display text-lg text-foreground">
+          <SheetTitle className="flex items-center justify-between font-display text-lg text-white">
             <span className="flex items-center gap-2">
-              <SlidersHorizontal className="size-4 text-primary" />
-              <span className="font-mono text-xs uppercase tracking-wider font-bold">
+              <SlidersHorizontal className="size-4 text-industrial" />
+              <span className="font-mono text-xs uppercase tracking-wider font-bold text-white">
                 Filtros Técnicos
               </span>
             </span>
@@ -46,7 +46,7 @@ export function FilterDrawer({
                   onResetFilters();
                   onOpenChange(false);
                 }}
-                className="h-8 gap-1.5 font-mono text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                className="h-8 gap-1.5 font-mono text-[11px] uppercase tracking-wider text-zinc-400 hover:text-white cursor-pointer"
                 data-testid="reset-filters-mobile-button"
               >
                 <RotateCcw className="size-3" />

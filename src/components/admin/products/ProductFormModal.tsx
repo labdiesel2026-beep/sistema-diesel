@@ -289,6 +289,38 @@ export function ProductFormModal({
       }
       setFieldErrors(newErrors);
       setFormError("Por favor revise los campos con error antes de continuar.");
+
+      // Auto-scroll suave hacia el primer campo que presente error de validación
+      const firstErrorField = (validationResult.error.errors[0]?.path[0] as string) || "";
+      setTimeout(() => {
+        const fieldSelectors: Record<string, string> = {
+          imageUrl: '[data-testid="upload-dropzone"], [data-testid="product-image-upload"]',
+          name: "#product-name",
+          oem: "#product-oem",
+          brandId: "#product-brand",
+          condition: "#product-condition",
+          vehicleCompatibility: "#product-vehicle-compat",
+          categoryIds: '[data-testid="product-categories-container"]',
+          price: "#product-price",
+          description: "#product-description",
+        };
+
+        const selector = fieldSelectors[firstErrorField] || `[name="${firstErrorField}"]`;
+        const errorElement = document.querySelector(selector) as HTMLElement | null;
+
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          if (typeof errorElement.focus === "function" && errorElement.tabIndex >= 0) {
+            errorElement.focus({ preventScroll: true });
+          }
+        } else {
+          const fallbackAlert = document.querySelector(
+            '[role="alert"], [aria-invalid="true"]',
+          ) as HTMLElement | null;
+          fallbackAlert?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 50);
+
       return;
     }
 
@@ -323,7 +355,7 @@ export function ProductFormModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-h-[92vh] overflow-y-auto sm:max-w-2xl"
+        className="max-h-[92vh] overflow-y-auto sm:max-w-2xl bg-white border border-admin-border text-admin-text-main shadow-2xl sm:rounded-xl"
         data-testid="product-form-modal"
         aria-describedby="product-form-description"
       >
@@ -334,10 +366,10 @@ export function ProductFormModal({
               {isEditing ? "Modificación de Repuesto" : "Alta de Repuesto"}
             </span>
           </div>
-          <DialogTitle className="text-xl font-bold font-display">
+          <DialogTitle className="text-xl font-bold font-display text-admin-text-main">
             {isEditing ? "Editar Repuesto" : "Nuevo Repuesto"}
           </DialogTitle>
-          <DialogDescription id="product-form-description">
+          <DialogDescription id="product-form-description" className="text-sm text-admin-text-sub">
             {isEditing
               ? "Modifique los detalles técnicos, precio, taxonomías y visibilidad del repuesto."
               : "Complete la ficha técnica del repuesto. Los campos con asterisco (*) son obligatorios."}
@@ -713,14 +745,14 @@ export function ProductFormModal({
             </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0 pt-3">
+          <DialogFooter className="gap-2 sm:gap-0 pt-3 border-t border-admin-border/60">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
               data-testid="product-form-cancel-btn"
-              className="cursor-pointer"
+              className="cursor-pointer border-admin-border bg-white text-admin-text-main hover:bg-slate-100 hover:text-admin-text-main font-medium shadow-xs"
             >
               Cancelar
             </Button>

@@ -174,18 +174,19 @@ describe("ProductCard y ProductGridSkeleton", () => {
     // 3. Ausencia total de traslación física vertical (no debe tener hover:-translate-y-1)
     expect(article?.className).not.toContain("hover:-translate-y-1");
 
-    // 4. Contenedor de fotografía cuadrado 1:1 con marco uniforme de 16px (p-4)
+    // 4. Contenedor de fotografía cuadrado 1:1 estandarizado con fondo blanco (bg-white p-2)
     const mediaContainer = article?.querySelector(".aspect-square");
     expect(mediaContainer).toBeInTheDocument();
-    expect(mediaContainer?.className).toContain("bg-media");
-    expect(mediaContainer?.className).toContain("p-4");
+    expect(mediaContainer?.className).toContain("bg-white");
+    expect(mediaContainer?.className).toContain("p-2");
+    expect(mediaContainer?.className).toContain("rounded-t-lg");
 
-    // 5. Imagen con ajuste proporcional polaroid redondeado sin modo de mezcla multiply
+    // 5. Imagen con ajuste proporcional object-contain sin recorte
     const img = screen.getByRole("img", { name: "Inyector Common Rail Bosch CRI2.2" });
     expect(img.className).toContain("object-contain");
-    expect(img.className).toContain("rounded-md");
+    expect(img.className).toContain("max-w-full");
+    expect(img.className).toContain("max-h-full");
     expect(img.className).not.toContain("mix-blend-multiply");
-    expect(img.className).not.toContain("multiply");
   });
 
   it("cumple con TASK-17: contingencia de isotipo vectorial al 20% y diferenciación cromática de badges", () => {

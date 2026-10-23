@@ -46,13 +46,13 @@ export function ProductCard({
       className={`group flex min-w-0 flex-col h-full overflow-hidden rounded-lg border border-white/10 bg-[#111111] shadow-xs transition-all duration-300 ease-out hover:border-white/25 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)] ${className}`}
       data-testid={`product-card-${product.id}`}
     >
-      {/* Contenedor Multimedia Cuadrado 1:1 (#1c1c1e con marco interno de 16px) */}
-      <div className="relative aspect-square w-full overflow-hidden border-b border-white/10 bg-media p-4 flex items-center justify-center">
+      {/* Contenedor Multimedia Cuadrado 1:1 Estandarizado */}
+      <div className="relative aspect-square w-full bg-white flex items-center justify-center p-2 rounded-t-lg overflow-hidden border-b border-white/10">
         <ProductImageWithFallback
           src={product.imageUrl}
           alt={product.name}
-          className="size-full object-contain rounded-md transition-transform duration-500 ease-out group-hover:scale-105"
-          fallbackClassName="flex size-full flex-col items-center justify-center bg-transparent p-2 text-center"
+          className="max-w-full max-h-full object-contain object-center rounded-md transition-transform duration-500 ease-out group-hover:scale-105"
+          fallbackClassName="flex size-full flex-col items-center justify-center bg-zinc-900 rounded-md p-2 text-center"
         />
 
         {/* Badges superiores sobre imagen */}

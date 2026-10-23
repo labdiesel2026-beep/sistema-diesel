@@ -55,7 +55,7 @@ describe("ProductToolbar — Contador y Filtro Solo Destacados (Tarea 8.3, RF-04
     },
   ];
 
-  it("renderiza el badge informativo con el formato 'Destacados: X / 10' (CA-04.2)", () => {
+  it("renderiza el badge informativo con el formato 'Destacados: X / 10' para count >= 3 (CA-04.2)", () => {
     render(
       <ProductToolbar
         searchQuery=""
@@ -68,6 +68,32 @@ describe("ProductToolbar — Contador y Filtro Solo Destacados (Tarea 8.3, RF-04
     const badge = screen.getByTestId("featured-counter-badge");
     expect(badge).toBeInTheDocument();
     expect(badge.textContent).toContain("Destacados: 4 / 10");
+    expect(badge.textContent).not.toContain("(Mín. 3)");
+    expect(badge.className).toContain("bg-emerald-500/10");
+    expect(badge.className).toContain("text-emerald-700");
+  });
+
+  it("renderiza estado de advertencia con aviso '(Mín. 3)' y tooltip explicativo si count < 3", () => {
+    render(
+      <ProductToolbar
+        searchQuery=""
+        onSearchChange={vi.fn()}
+        featuredCount={2}
+        totalCount={20}
+      />,
+    );
+
+    const badge = screen.getByTestId("featured-counter-badge");
+    expect(badge).toBeInTheDocument();
+    expect(badge.textContent).toContain("Destacados: 2 / 10");
+    expect(badge.textContent).toContain("(Mín. 3)");
+    expect(badge.className).toContain("bg-amber-100");
+    expect(badge.className).toContain("text-amber-800");
+    expect(badge.className).toContain("border-amber-300");
+    expect(badge).toHaveAttribute(
+      "title",
+      "Se requieren al menos 3 productos para activar el carrusel en el catálogo público",
+    );
   });
 
   it("conmuta el filtro rápido 'Solo Destacados' al hacer clic", () => {
@@ -153,5 +179,47 @@ describe("ProductToolbar — Contador y Filtro Solo Destacados (Tarea 8.3, RF-04
 
     expect(screen.getByTestId("product-row-prod-1")).toBeInTheDocument();
     expect(screen.queryByTestId("product-row-prod-3")).not.toBeInTheDocument(); // prod-3 es destacado pero no Hilux
+  });
+
+  it("renderiza selects de categorías, marcas y estado (sin select redundante de destacados) y permite restablecerlos", () => {
+    const onCategoryMock = vi.fn();
+    const onBrandMock = vi.fn();
+    const onStatusMock = vi.fn();
+    const onResetMock = vi.fn();
+
+    render(
+      <AdminProvider>
+        <ProductToolbar
+          searchQuery=""
+          onSearchChange={vi.fn()}
+          selectedCategory=""
+          onCategoryChange={onCategoryMock}
+          selectedBrand=""
+          onBrandChange={onBrandMock}
+          selectedStatus="visible"
+          onStatusChange={onStatusMock}
+          onResetAllFilters={onResetMock}
+        />
+      </AdminProvider>,
+    );
+
+    const categorySelect = screen.getByTestId("filter-category-select");
+    const brandSelect = screen.getByTestId("filter-brand-select");
+    const statusSelect = screen.getByTestId("filter-status-select");
+
+    expect(categorySelect).toBeInTheDocument();
+    expect(brandSelect).toBeInTheDocument();
+    expect(statusSelect).toBeInTheDocument();
+    // Dropdown redundante de destacados debe haber sido removido
+    expect(screen.queryByTestId("filter-featured-select")).not.toBeInTheDocument();
+
+    fireEvent.change(statusSelect, { target: { value: "hidden" } });
+    expect(onStatusMock).toHaveBeenCalledWith("hidden");
+
+    // Botón de reset presente cuando hay filtros activos (selectedStatus === 'visible')
+    const resetBtn = screen.getByTestId("reset-filters-btn");
+    expect(resetBtn).toBeInTheDocument();
+    fireEvent.click(resetBtn);
+    expect(onResetMock).toHaveBeenCalledTimes(1);
   });
 });

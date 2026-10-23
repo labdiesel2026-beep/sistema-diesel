@@ -57,7 +57,7 @@ describe("DeleteConfirmModal — Validación Tipada ELIMINAR (TASK-20, RF-09)", 
     expect(input).toHaveAttribute("spellcheck", "false");
   });
 
-  it("solo habilita el botón si el texto ingresado es estrictamente 'ELIMINAR' (case-sensitive + trim)", async () => {
+  it("habilita el botón si el texto ingresado es 'ELIMINAR' (tolerante a minúsculas y espacios)", async () => {
     render(
       <AdminProvider>
         <DeleteConfirmModal
@@ -73,31 +73,25 @@ describe("DeleteConfirmModal — Validación Tipada ELIMINAR (TASK-20, RF-09)", 
     const input = screen.getByTestId("delete-confirm-input");
     const submitBtn = screen.getByTestId("delete-confirm-submit-btn");
 
-    // 1. Minúsculas "eliminar" -> Bloqueado
+    // 1. Minúsculas "eliminar" -> Se convierte a mayúsculas y se habilita
     await act(async () => {
       fireEvent.change(input, { target: { value: "eliminar" } });
     });
-    expect(submitBtn).toBeDisabled();
+    expect(submitBtn).toBeEnabled();
 
-    // 2. Mayúscula inicial "Eliminar" -> Bloqueado
-    await act(async () => {
-      fireEvent.change(input, { target: { value: "Eliminar" } });
-    });
-    expect(submitBtn).toBeDisabled();
-
-    // 3. Palabra incompleta "ELIMINA" -> Bloqueado
+    // 2. Palabra incompleta "ELIMINA" -> Bloqueado
     await act(async () => {
       fireEvent.change(input, { target: { value: "ELIMINA" } });
     });
     expect(submitBtn).toBeDisabled();
 
-    // 4. Palabra exacta con espacios accidentales "  ELIMINAR  " -> Habilitado (gracias a .trim())
+    // 3. Palabra exacta con espacios accidentales "  ELIMINAR  " -> Habilitado (gracias a .trim())
     await act(async () => {
       fireEvent.change(input, { target: { value: "  ELIMINAR  " } });
     });
     expect(submitBtn).toBeEnabled();
 
-    // 5. Borrado o cambio a texto erróneo -> Vuelve a deshabilitarse
+    // 4. Borrado o cambio a texto erróneo -> Vuelve a deshabilitarse
     await act(async () => {
       fireEvent.change(input, { target: { value: "ELIMINAR1" } });
     });

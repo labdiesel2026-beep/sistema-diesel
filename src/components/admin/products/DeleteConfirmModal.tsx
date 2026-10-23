@@ -61,8 +61,8 @@ export function DeleteConfirmModal({
     return null;
   }
 
-  // Validación estrictamente case-sensitive con .trim() (RF-09, TASK-20)
-  const isConfirmed = confirmationText.trim() === "ELIMINAR";
+  // Validación flexible e insensible a mayúsculas/minúsculas con .trim()
+  const isConfirmed = confirmationText.trim().toUpperCase() === "ELIMINAR";
 
   const executeDelete = async () => {
     if (!isConfirmed || isDeleting) return;
@@ -160,7 +160,7 @@ export function DeleteConfirmModal({
                 htmlFor="delete-confirm-input"
                 className="text-xs font-medium text-red-900 leading-snug cursor-pointer"
               >
-                Para confirmar la eliminación destructiva, escriba exactamente{" "}
+                Para confirmar la eliminación destructiva, escriba{" "}
                 <span className="font-mono font-bold tracking-wider text-red-700 bg-red-100 px-1 py-0.5 rounded">
                   ELIMINAR
                 </span>{" "}
@@ -172,7 +172,7 @@ export function DeleteConfirmModal({
               id="delete-confirm-input"
               type="text"
               value={confirmationText}
-              onChange={(e) => setConfirmationText(e.target.value)}
+              onChange={(e) => setConfirmationText(e.target.value.toUpperCase())}
               placeholder="Escriba ELIMINAR para habilitar"
               disabled={isDeleting}
               autoComplete="off"

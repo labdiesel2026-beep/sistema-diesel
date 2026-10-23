@@ -150,12 +150,12 @@ export function ProductImageUpload({
           data-testid="image-preview-container"
           className="relative flex flex-col items-center justify-center overflow-hidden rounded-xl border border-border bg-card p-4"
         >
-          <div className="relative aspect-video max-h-48 w-full overflow-hidden rounded-lg border border-border bg-muted/40">
+          <div className="relative aspect-square max-h-48 w-48 mx-auto overflow-hidden rounded-lg border border-border bg-muted/40 shadow-xs">
             <img
               src={displayImage}
               alt="Previsualización del repuesto"
               data-testid="image-upload-preview"
-              className="size-full object-contain object-center"
+              className="size-full object-cover object-center"
             />
           </div>
 
@@ -208,6 +208,14 @@ export function ProductImageUpload({
           </p>
         </div>
       )}
+
+      {/* Aclaración de Formato y Relación de Aspecto (Helper Text) */}
+      <p
+        data-testid="image-upload-helper-text"
+        className="text-[11px] text-muted-foreground leading-normal"
+      >
+        Formato recomendado: WebP, JPG o PNG. Relación de aspecto 1:1 (Cuadrada).
+      </p>
 
       {/* Input nativo oculto */}
       <input

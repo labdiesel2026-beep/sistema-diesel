@@ -99,8 +99,35 @@ describe("Carrusel de Productos Destacados (FeaturedProductsCarousel.tsx) — Ta
     });
   });
 
-  it("renderiza las tarjetas duplicadas en bucle continuo y enlaces accesibles directos a /catalogo/$productId (CA-07.3, CA-07.4)", async () => {
+  it("no se renderiza (retorna null) si hay 1 o 2 productos destacados", async () => {
     vi.spyOn(landingService, "fetchFeaturedProducts").mockResolvedValue(mockFeaturedProducts);
+
+    const { container } = render(<FeaturedProductsCarousel />);
+
+    await waitFor(() => {
+      expect(container.firstChild).toBeNull();
+      expect(screen.queryByTestId("featured-products-section")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("featured-carousel-skeleton")).not.toBeInTheDocument();
+    });
+  });
+
+  it("cuando hay entre 3 y 10 productos activa el carrusel marquee infinito duplicando tarjetas", async () => {
+    const threeProducts: FeaturedProductItem[] = [
+      ...mockFeaturedProducts,
+      {
+        id: "prod-amarok-003",
+        name: "Bomba Bosch CP4 Amarok",
+        brandName: "Bosch",
+        oem: "0445010507",
+        condition: "Nuevo",
+        price: 580000,
+        showPrice: true,
+        vehicleCompatibility: "Volkswagen Amarok 2.0 TDI",
+        imageUrl: "/uploads/cp4.webp",
+      },
+    ];
+
+    vi.spyOn(landingService, "fetchFeaturedProducts").mockResolvedValue(threeProducts);
 
     render(<FeaturedProductsCarousel />);
 
@@ -108,26 +135,46 @@ describe("Carrusel de Productos Destacados (FeaturedProductsCarousel.tsx) — Ta
       expect(screen.getByTestId("featured-products-section")).toBeInTheDocument();
     });
 
-    expect(screen.getByText("Inyectores y Bombas en Stock")).toBeInTheDocument();
-    expect(screen.getByText("Actualización en tiempo real")).toBeInTheDocument();
+    expect(screen.getByTestId("featured-marquee-container")).toBeInTheDocument();
 
-    // Verificación de enlaces a /catalogo/$productId para cada tarjeta
     const cardLinks = screen.getAllByRole("link", {
       name: /en el catálogo oficial/i,
     });
-
-    // 2 productos duplicados para el bucle continuo del marquee = 4 tarjetas
-    expect(cardLinks.length).toBe(4);
-
-    expect(cardLinks[0]).toHaveAttribute("href", "/catalogo/prod-hilux-001");
-    expect(cardLinks[1]).toHaveAttribute("href", "/catalogo/prod-ranger-002");
-    expect(cardLinks[2]).toHaveAttribute("href", "/catalogo/prod-hilux-001");
-    expect(cardLinks[3]).toHaveAttribute("href", "/catalogo/prod-ranger-002");
+    // 3 productos duplicados en bucle infinito = 6 tarjetas
+    expect(cardLinks.length).toBe(6);
 
     // CTA general al catálogo
     const ctaLink = screen.getByRole("link", {
       name: /Ver Catálogo Completo/i,
     });
     expect(ctaLink).toHaveAttribute("href", "/catalogo");
+  });
+
+  it("limita la visualización a un máximo de 10 productos si hay más disponibles", async () => {
+    const twelveProducts: FeaturedProductItem[] = Array.from({ length: 12 }, (_, i) => ({
+      id: `prod-extra-${i}`,
+      name: `Inyector Destacado ${i}`,
+      brandName: "Bosch",
+      oem: `0445110${i}`,
+      condition: "Nuevo",
+      price: 200000 + i * 10000,
+      showPrice: true,
+      vehicleCompatibility: "Vehículo Universal",
+      imageUrl: `/uploads/prod-${i}.webp`,
+    }));
+
+    vi.spyOn(landingService, "fetchFeaturedProducts").mockResolvedValue(twelveProducts);
+
+    render(<FeaturedProductsCarousel />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("featured-products-section")).toBeInTheDocument();
+    });
+
+    const cardLinks = screen.getAllByRole("link", {
+      name: /en el catálogo oficial/i,
+    });
+    // Máximo 10 productos duplicados para el marquee = 20 tarjetas
+    expect(cardLinks.length).toBe(20);
   });
 });

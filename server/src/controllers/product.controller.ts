@@ -128,9 +128,13 @@ export async function deleteProduct(
   try {
     const deleted = await productService.deleteProduct(req.params.id as string);
 
-    // Limpieza física del archivo de imagen en disco post-commit
-    if (deleted.imageUrl) {
-      await deleteFile(deleted.imageUrl);
+    // Limpieza física del archivo de imagen en disco post-commit (asíncrona y aislada)
+    if (deleted?.imageUrl) {
+      deleteFile(deleted.imageUrl).catch((fileErr: any) => {
+        console.warn(
+          `[FileStorage Warning] No se pudo eliminar físicamente el archivo ${deleted.imageUrl}: ${fileErr?.message || fileErr}`,
+        );
+      });
     }
 
     res.status(200).json({

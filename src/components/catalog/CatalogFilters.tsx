@@ -107,8 +107,8 @@ export function CatalogFilters({
   const FilterContent = ({ prefix = "desk" }: { prefix?: string }) => (
     <div className="space-y-6" data-testid="catalog-filter-content">
       {/* Sección Categorías */}
-      <div className="border-b border-border pb-5">
-        <h3 className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+      <div className="border-b border-zinc-800 pb-5">
+        <h3 className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">
           Categorías
         </h3>
         <div className="space-y-1.5" role="group" aria-label="Filtro por Categorías">
@@ -132,17 +132,18 @@ export function CatalogFilters({
               >
                 {/* Categoría Padre */}
                 <div className="flex items-center justify-between py-1 text-sm">
-                  <label className="flex cursor-pointer items-center gap-2.5 font-medium text-foreground select-none hover:text-industrial transition-colors">
+                  <label className="flex cursor-pointer items-center gap-2.5 font-medium text-zinc-100 select-none hover:text-industrial transition-colors">
                     <Checkbox
                       id={`${prefix}-cat-${root.id}`}
                       checked={isRootChecked}
                       onCheckedChange={() => onCategoryToggle(root.id)}
+                      className="border-zinc-600 bg-zinc-950/60"
                       data-testid={`checkbox-cat-${root.id}`}
                     />
                     <span>{root.name}</span>
                   </label>
                   <span
-                    className="font-mono text-xs text-muted-foreground"
+                    className="font-mono text-xs text-zinc-400"
                     data-testid={`count-cat-${root.id}`}
                   >
                     ({rootCount})
@@ -152,7 +153,7 @@ export function CatalogFilters({
                 {/* Subcategorías Hijas Indentadas */}
                 {children.length > 0 && (
                   <div
-                    className="ml-3.5 space-y-1 border-l-2 border-border/60 pl-3.5 py-0.5"
+                    className="ml-3.5 space-y-1 border-l-2 border-zinc-700/60 pl-3.5 py-0.5"
                     data-testid={`category-children-${root.id}`}
                   >
                     {children.map((child) => {
@@ -165,18 +166,18 @@ export function CatalogFilters({
                           className="flex items-center justify-between py-0.5 text-xs"
                           data-testid={`category-child-${child.id}`}
                         >
-                          <label className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground select-none transition-colors">
+                          <label className="flex cursor-pointer items-center gap-2 text-zinc-300 hover:text-white select-none transition-colors">
                             <Checkbox
                               id={`${prefix}-cat-${child.id}`}
                               checked={isChildChecked}
                               onCheckedChange={() => onCategoryToggle(child.id)}
-                              className="size-3.5"
+                              className="size-3.5 border-zinc-600 bg-zinc-950/60"
                               data-testid={`checkbox-cat-${child.id}`}
                             />
                             <span>{child.name}</span>
                           </label>
                           <span
-                            className="font-mono text-[11px] text-muted-foreground"
+                            className="font-mono text-[11px] text-zinc-400"
                             data-testid={`count-cat-${child.id}`}
                           >
                             ({childCount})
@@ -194,7 +195,7 @@ export function CatalogFilters({
 
       {/* Sección Marcas */}
       <div>
-        <h3 className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        <h3 className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">
           Marcas
         </h3>
         <div className="space-y-1.5" role="group" aria-label="Filtro por Marcas">
@@ -208,17 +209,18 @@ export function CatalogFilters({
                 className="flex items-center justify-between py-1 text-sm"
                 data-testid={`brand-item-${brand.id}`}
               >
-                <label className="flex cursor-pointer items-center gap-2.5 text-foreground select-none hover:text-industrial transition-colors">
+                <label className="flex cursor-pointer items-center gap-2.5 text-zinc-100 select-none hover:text-industrial transition-colors">
                   <Checkbox
                     id={`${prefix}-brand-${brand.id}`}
                     checked={isChecked}
                     onCheckedChange={() => onBrandToggle(brand.id)}
+                    className="border-zinc-600 bg-zinc-950/60"
                     data-testid={`checkbox-brand-${brand.id}`}
                   />
                   <span>{brand.name}</span>
                 </label>
                 <span
-                  className="font-mono text-xs text-muted-foreground"
+                  className="font-mono text-xs text-zinc-400"
                   data-testid={`count-brand-${brand.id}`}
                 >
                   ({count})

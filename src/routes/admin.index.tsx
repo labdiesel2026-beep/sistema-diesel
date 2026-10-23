@@ -23,9 +23,13 @@ export const Route = createFileRoute("/admin/")({
  * (RF-05, RF-06, RF-07)
  */
 function AdminProductsPage() {
-  const { products } = useAdmin();
+  const { products, getBrandById } = useAdmin();
   const [searchQuery, setSearchQuery] = useState("");
   const [onlyFeatured, setOnlyFeatured] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedBrand, setSelectedBrand] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<"all" | "visible" | "hidden">("all");
+  const [selectedFeatured, setSelectedFeatured] = useState<"all" | "featured" | "standard">("all");
   const [formOpen, setFormOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<AdminProduct | null>(null);
 
@@ -50,16 +54,34 @@ function AdminProductsPage() {
   // Conteo de repuestos destacados en memoria
   const featuredCount = products.filter((p) => p.isFeatured).length;
 
-  // Conteo reactivo de repuestos filtrados según término de búsqueda y filtro solo destacados (RF-04, CA-04.3)
+  // Conteo reactivo de repuestos filtrados según término de búsqueda y filtros combinados (RF-04, CA-04.3)
   const clean = searchQuery.trim().toLowerCase();
   const filteredCount = products.filter((p) => {
-    if (onlyFeatured && !p.isFeatured) return false;
+    if (onlyFeatured || selectedFeatured === "featured") {
+      if (!p.isFeatured) return false;
+    } else if (selectedFeatured === "standard") {
+      if (p.isFeatured) return false;
+    }
+
+    if (selectedStatus === "visible" && !p.visible) return false;
+    if (selectedStatus === "hidden" && p.visible) return false;
+    if (selectedBrand && p.brandId !== selectedBrand) return false;
+    if (
+      selectedCategory &&
+      (!p.categoryIds || !p.categoryIds.includes(selectedCategory))
+    ) {
+      return false;
+    }
+
     if (!clean) return true;
+    const brand = getBrandById(p.brandId);
+    const brandName = brand ? brand.name.toLowerCase() : "";
     return (
       p.name.toLowerCase().includes(clean) ||
       p.oem.toLowerCase().includes(clean) ||
       p.description.toLowerCase().includes(clean) ||
-      p.vehicleCompatibility.toLowerCase().includes(clean)
+      p.vehicleCompatibility.toLowerCase().includes(clean) ||
+      brandName.includes(clean)
     );
   }).length;
 
@@ -79,7 +101,7 @@ function AdminProductsPage() {
         </p>
       </header>
 
-      {/* Barra de herramientas: Buscador sanitizado, filtro solo destacados y botón Nuevo Producto */}
+      {/* Barra de herramientas: Buscador sanitizado, selects de categorías, marcas, estado y destacados */}
       <ProductToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -89,12 +111,32 @@ function AdminProductsPage() {
         featuredCount={featuredCount}
         showOnlyFeatured={onlyFeatured}
         onToggleOnlyFeatured={setOnlyFeatured}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        selectedBrand={selectedBrand}
+        onBrandChange={setSelectedBrand}
+        selectedStatus={selectedStatus}
+        onStatusChange={setSelectedStatus}
+        selectedFeatured={selectedFeatured}
+        onFeaturedChange={setSelectedFeatured}
+        onResetAllFilters={() => {
+          setSelectedCategory("");
+          setSelectedBrand("");
+          setSelectedStatus("all");
+          setSelectedFeatured("all");
+          setOnlyFeatured(false);
+          setSearchQuery("");
+        }}
       />
 
       {/* Grilla interactiva de repuestos con resolución relacional de marcas y switches de visibilidad */}
       <ProductList
         searchQuery={searchQuery}
         onlyFeatured={onlyFeatured}
+        selectedCategory={selectedCategory}
+        selectedBrand={selectedBrand}
+        selectedStatus={selectedStatus}
+        selectedFeatured={selectedFeatured}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />

@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 import { CatalogCTAButton } from "@/components/ui/CatalogCTAButton";
 import { ProductImageWithFallback } from "@/components/catalog/ProductImageWithFallback";
 import { formatPrice } from "@/lib/catalog-whatsapp";
@@ -23,8 +22,9 @@ export interface FeaturedProductsCarouselProps {
  * - Hidratación dinámica desde GET /api/products/featured con degradación silenciosa.
  * - Prevención de CLS mediante contenedor de reserva de altura mínima (min-h-[460px]).
  * - Desmontaje automático y limpio (retorna null) si hay 0 destacados o fallo de API.
+ * - Comportamiento inteligente para pocos productos (< 3): desactiva loop infinito y centra los items elegantemente.
+ * - Aspect ratio 1:1 (cuadrado) con object-cover uniforme para prevenir distorsión visual de fotos.
  * - Envoltura semántica de tarjeta en Link directo a /catalogo/$productId.
- * - Animación de bucle continuo infinito con framer-motion.
  */
 export function FeaturedProductsCarousel({
   products: propProducts,
@@ -77,13 +77,90 @@ export function FeaturedProductsCarousel({
 
   const activeProducts = loadedProducts ?? [];
 
-  // Si no hay productos destacados o la petición falló, desmontaje silencioso (CA-07.2, CL-01, CL-02)
-  if (activeProducts.length === 0) {
+  // Solo debe renderizarse si hay un mínimo de 3 productos y un máximo de 10 (si hay 0, 1 o 2 retorna null)
+  if (activeProducts.length < 3) {
     return null;
   }
 
-  // Duplicamos internamente el array para que el bucle continuo no se corte visualmente
-  const marqueeProducts = [...activeProducts, ...activeProducts];
+  const displayProducts = activeProducts.slice(0, 10);
+  const marqueeProducts = [...displayProducts, ...displayProducts];
+
+  const renderCard = (product: FeaturedProductItem, key: string) => (
+    <article
+      key={key}
+      className="group relative flex w-[290px] shrink-0 flex-col overflow-hidden rounded-lg border border-white/10 bg-zinc-950 transition-all duration-300 hover:border-white/30 sm:w-[320px] md:w-[340px] cursor-pointer shadow-lg"
+    >
+      <Link
+        to="/catalogo/$productId"
+        params={{ productId: product.id }}
+        className="flex flex-col h-full focus:outline-none"
+        aria-label={`Ver ${product.name} en el catálogo oficial`}
+      >
+        {/* Contenedor Multimedia Cuadrado 1:1 Estandarizado */}
+        <div className="relative aspect-square w-full bg-white flex items-center justify-center p-2 rounded-t-lg overflow-hidden border-b border-white/10">
+          <ProductImageWithFallback
+            src={product.imageUrl ?? null}
+            alt={product.name}
+            className="max-w-full max-h-full object-contain object-center transition-transform duration-700 ease-out group-hover:scale-105"
+          />
+
+          {/* Badge de Marca */}
+          {product.brandName && (
+            <span className="absolute left-3 top-3 border border-white/10 bg-zinc-950/90 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-white">
+              {product.brandName}
+            </span>
+          )}
+
+          {/* Badge de Condición */}
+          <span className="absolute right-3 top-3 border border-white/10 bg-zinc-950/90 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-zinc-400">
+            {product.condition}
+          </span>
+        </div>
+
+        {/* Contenido Técnico */}
+        <div className="flex flex-1 flex-col p-6">
+          {/* Código OEM */}
+          <span className="mb-3 font-mono text-xs uppercase tracking-widest text-zinc-500">
+            OEM {product.oem}
+          </span>
+
+          {/* Título de Producto */}
+          <h3
+            className="font-light text-base md:text-lg leading-snug text-white transition-colors group-hover:text-zinc-300 line-clamp-2"
+            title={product.name}
+          >
+            {product.name}
+          </h3>
+
+          {/* Compatibilidad Vehicular */}
+          {product.vehicleCompatibility && (
+            <p className="mt-2 line-clamp-2 text-xs font-light text-zinc-400">
+              {product.vehicleCompatibility}
+            </p>
+          )}
+
+          {/* Fila de Precio y Navegación */}
+          <div className="mt-auto pt-6 flex items-center justify-between border-t border-white/10">
+            <div>
+              {product.showPrice && product.price !== null ? (
+                <p className="font-light text-xl text-white">
+                  {formatPrice(product.price)}
+                </p>
+              ) : (
+                <span className="font-mono text-xs uppercase tracking-widest text-zinc-500">
+                  Consultar precio
+                </span>
+              )}
+            </div>
+            <span className="inline-flex items-center gap-1 font-mono text-xs uppercase tracking-widest text-zinc-400 transition-colors group-hover:text-white">
+              Ficha
+              <ArrowRight className="size-3" />
+            </span>
+          </div>
+        </div>
+      </Link>
+    </article>
+  );
 
   return (
     <section
@@ -110,15 +187,18 @@ export function FeaturedProductsCarousel({
             </p>
           </div>
 
-          {/* Indicador de movimiento continuo autónomo */}
+          {/* Indicador de movimiento o estado */}
           <div className="hidden sm:inline-flex items-center gap-2 border border-white/10 bg-zinc-950 px-3.5 py-1 font-mono text-[10px] uppercase tracking-widest text-zinc-400">
             <span className="size-1.5 bg-emerald-400 animate-pulse" />
             <span>Actualización en tiempo real</span>
           </div>
         </div>
 
-        {/* Carrusel Marquee Autónomo Infinito */}
-        <div className="relative w-full overflow-hidden py-4">
+        {/* Carrusel Marquee infinito (mínimo 3, hasta 10 productos) */}
+        <div
+          className="relative w-full overflow-hidden py-4"
+          data-testid="featured-marquee-container"
+        >
           <div className="pointer-events-none absolute left-0 top-0 z-20 h-full w-12 sm:w-24 bg-gradient-to-r from-zinc-950 to-transparent" />
           <div className="pointer-events-none absolute right-0 top-0 z-20 h-full w-12 sm:w-24 bg-gradient-to-l from-zinc-950 to-transparent" />
 
@@ -131,84 +211,9 @@ export function FeaturedProductsCarousel({
               ease: "linear",
             }}
           >
-            {marqueeProducts.map((product, index) => {
-              return (
-                <article
-                  key={`${product.id}-${index}`}
-                  className="group relative flex w-[290px] shrink-0 flex-col overflow-hidden border border-white/10 bg-zinc-950 transition-all duration-300 hover:border-white/30 sm:w-[320px] md:w-[340px] cursor-pointer"
-                >
-                  <Link
-                    to="/catalogo/$productId"
-                    params={{ productId: product.id }}
-                    className="flex flex-col h-full focus:outline-none"
-                    aria-label={`Ver ${product.name} en el catálogo oficial`}
-                  >
-                    {/* Contenedor Multimedia */}
-                    <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-white/10 bg-black">
-                      <ProductImageWithFallback
-                        src={product.imageUrl ?? null}
-                        alt={product.name}
-                        className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                      />
-
-                      {/* Badge de Marca */}
-                      {product.brandName && (
-                        <span className="absolute left-3 top-3 border border-white/10 bg-zinc-950/90 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-white">
-                          {product.brandName}
-                        </span>
-                      )}
-
-                      {/* Badge de Condición */}
-                      <span className="absolute right-3 top-3 border border-white/10 bg-zinc-950/90 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-zinc-400">
-                        {product.condition}
-                      </span>
-                    </div>
-
-                    {/* Contenido Técnico */}
-                    <div className="flex flex-1 flex-col p-6">
-                      {/* Código OEM */}
-                      <span className="mb-3 font-mono text-xs uppercase tracking-widest text-zinc-500">
-                        OEM {product.oem}
-                      </span>
-
-                      {/* Título de Producto */}
-                      <h3
-                        className="font-light text-base md:text-lg leading-snug text-white transition-colors group-hover:text-zinc-300 line-clamp-2"
-                        title={product.name}
-                      >
-                        {product.name}
-                      </h3>
-
-                      {/* Compatibilidad Vehicular */}
-                      {product.vehicleCompatibility && (
-                        <p className="mt-2 line-clamp-2 text-xs font-light text-zinc-400">
-                          {product.vehicleCompatibility}
-                        </p>
-                      )}
-
-                      {/* Fila de Precio y Navegación */}
-                      <div className="mt-auto pt-6 flex items-center justify-between border-t border-white/10">
-                        <div>
-                          {product.showPrice && product.price !== null ? (
-                            <p className="font-light text-xl text-white">
-                              {formatPrice(product.price)}
-                            </p>
-                          ) : (
-                            <span className="font-mono text-xs uppercase tracking-widest text-zinc-500">
-                              Consultar precio
-                            </span>
-                          )}
-                        </div>
-                        <span className="inline-flex items-center gap-1 font-mono text-xs uppercase tracking-widest text-zinc-400 transition-colors group-hover:text-white">
-                          Ficha
-                          <ArrowRight className="size-3" />
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                </article>
-              );
-            })}
+            {marqueeProducts.map((product, index) =>
+              renderCard(product, `${product.id}-${index}`),
+            )}
           </motion.div>
         </div>
 
@@ -218,16 +223,10 @@ export function FeaturedProductsCarousel({
             to="/catalogo"
             label="Ver Catálogo Completo"
             size="lg"
-            className="shadow-xl"
+            variant="industrial"
           />
-          <p className="mt-4 font-mono text-xs text-zinc-500 flex items-center gap-2">
-            <Check className="size-3.5 text-zinc-400" />
-            <span>Más de 500 referencias en inyectores, toberas y bombas con garantía</span>
-          </p>
         </div>
       </div>
     </section>
   );
 }
-
-export default FeaturedProductsCarousel;

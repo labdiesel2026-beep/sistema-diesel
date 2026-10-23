@@ -46,7 +46,7 @@ describe("FilterDrawer y MobileFilterTrigger", () => {
 
     const content = screen.getByTestId("filter-drawer-content");
     expect(content).toBeInTheDocument();
-    expect(content.className).toContain("z-40");
+    expect(content.className).toContain("z-50");
     expect(content.className).toContain("max-w-[340px]");
     expect(screen.getByTestId("test-filter-children")).toBeInTheDocument();
 

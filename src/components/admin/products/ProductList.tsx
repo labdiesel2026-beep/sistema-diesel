@@ -83,6 +83,10 @@ export interface ProductListProps {
   products?: AdminProduct[] | undefined;
   searchQuery?: string | undefined;
   onlyFeatured?: boolean | undefined;
+  selectedCategory?: string | undefined;
+  selectedBrand?: string | undefined;
+  selectedStatus?: "all" | "visible" | "hidden" | undefined;
+  selectedFeatured?: "all" | "featured" | "standard" | undefined;
   onEdit?: ((product: AdminProduct) => void) | undefined;
   onDelete?: ((product: AdminProduct) => void) | undefined;
   onToggleVisibility?: ((product: AdminProduct) => void) | undefined;
@@ -97,6 +101,10 @@ export function ProductList({
   products: propProducts,
   searchQuery = "",
   onlyFeatured = false,
+  selectedCategory = "",
+  selectedBrand = "",
+  selectedStatus = "all",
+  selectedFeatured = "all",
   onEdit,
   onDelete,
   onToggleVisibility,
@@ -123,13 +131,38 @@ export function ProductList({
   const effectiveError = rawError ? formatOpaqueServerError(rawError) : null;
   const effectiveLoading = propLoading !== undefined ? propLoading : contextLoading;
 
-  // Filtrado con búsqueda literal insensible a mayúsculas y filtro solo destacados (RF-04, CA-04.3, CL-11)
+  // Filtrado con búsqueda literal insensible a mayúsculas y filtros multifaceta (RF-04, CA-04.3, CL-11)
   const cleanQuery = searchQuery.trim().toLowerCase();
   const filteredProducts = baseProducts.filter((product) => {
-    if (onlyFeatured && !product.isFeatured) {
+    // 1. Filtro Destacados
+    if (onlyFeatured || selectedFeatured === "featured") {
+      if (!product.isFeatured) return false;
+    } else if (selectedFeatured === "standard") {
+      if (product.isFeatured) return false;
+    }
+
+    // 2. Filtro Estado de Visibilidad
+    if (selectedStatus === "visible" && !product.visible) {
+      return false;
+    }
+    if (selectedStatus === "hidden" && product.visible) {
       return false;
     }
 
+    // 3. Filtro Marca
+    if (selectedBrand && product.brandId !== selectedBrand) {
+      return false;
+    }
+
+    // 4. Filtro Categoría
+    if (
+      selectedCategory &&
+      (!product.categoryIds || !product.categoryIds.includes(selectedCategory))
+    ) {
+      return false;
+    }
+
+    // 5. Búsqueda de Texto
     if (!cleanQuery) return true;
 
     const brand = getBrandById(product.brandId);

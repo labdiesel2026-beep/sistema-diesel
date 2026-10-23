@@ -1,0 +1,51 @@
+import { a as cn } from "./api-DBBCsKQc.js";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { X } from "lucide-react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+//#region src/components/ui/dialog.tsx
+var Dialog = DialogPrimitive.Root;
+var DialogPortal = DialogPrimitive.Portal;
+var DialogOverlay = React.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx(DialogPrimitive.Overlay, {
+	ref,
+	className: cn("fixed inset-0 z-50 bg-black/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className),
+	...props
+}));
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
+var DialogContent = React.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsxs(DialogPortal, { children: [/* @__PURE__ */ jsx(DialogOverlay, {}), /* @__PURE__ */ jsxs(DialogPrimitive.Content, {
+	ref,
+	className: cn("fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-white/10 bg-zinc-950 text-white p-6 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-none", className),
+	...props,
+	children: [children, /* @__PURE__ */ jsxs(DialogPrimitive.Close, {
+		className: "absolute right-4 top-4 rounded-none opacity-70 ring-offset-background cursor-pointer text-zinc-400 transition-opacity hover:opacity-100 hover:text-white focus:outline-none focus:ring-2 focus:ring-industrial focus:ring-offset-2 disabled:pointer-events-none",
+		children: [/* @__PURE__ */ jsx(X, { className: "h-4 w-4" }), /* @__PURE__ */ jsx("span", {
+			className: "sr-only",
+			children: "Cerrar"
+		})]
+	})]
+})] }));
+DialogContent.displayName = DialogPrimitive.Content.displayName;
+var DialogHeader = ({ className, ...props }) => /* @__PURE__ */ jsx("div", {
+	className: cn("flex flex-col space-y-1.5 text-center sm:text-left", className),
+	...props
+});
+DialogHeader.displayName = "DialogHeader";
+var DialogFooter = ({ className, ...props }) => /* @__PURE__ */ jsx("div", {
+	className: cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className),
+	...props
+});
+DialogFooter.displayName = "DialogFooter";
+var DialogTitle = React.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx(DialogPrimitive.Title, {
+	ref,
+	className: cn("text-lg font-semibold leading-none tracking-normal", className),
+	...props
+}));
+DialogTitle.displayName = DialogPrimitive.Title.displayName;
+var DialogDescription = React.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx(DialogPrimitive.Description, {
+	ref,
+	className: cn("text-sm text-muted-foreground", className),
+	...props
+}));
+DialogDescription.displayName = DialogPrimitive.Description.displayName;
+//#endregion
+export { DialogHeader as a, DialogFooter as i, DialogContent as n, DialogTitle as o, DialogDescription as r, Dialog as t };

@@ -1,0 +1,1 @@
+import{f as e,h as t}from"./api-gZpjJPH6.js";import{r as n}from"./link-C8aLzEfm.js";var r=t(e(),1),i=r.use,a=r.useLayoutEffect;function o(e){let t=n();return r.useCallback(n=>t.navigate({...n,from:n.from??e?.from}),[e?.from,t])}function s(e){let t=n(),i=o(),s=r.useRef(null);return a(()=>{s.current!==e&&(i(e),s.current=e)},[t,e,i]),null}export{a as i,o as n,i as r,s as t};

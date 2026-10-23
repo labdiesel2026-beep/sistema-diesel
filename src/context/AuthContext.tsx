@@ -322,18 +322,23 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Rehidratación silenciosa de sesión al montar mediante GET a http://localhost:3001/api/auth/me
+  // Rehidratación silenciosa de sesión al montar mediante GET a /api/auth/me
   const checkSession = async (): Promise<void> => {
     try {
-      const currentUser = await api.get<AdminUser>("http://localhost:3001/api/auth/me", {
+      const currentUser = await api.get<AdminUser>("/api/auth/me", {
         credentials: "include",
       });
       if (currentUser && currentUser.id) {
         setUser(currentUser);
         setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
       }
     } catch {
-      // Si la sesión no existe o falla la red, no sobreescribir si ya está autenticado
+      // Estado por defecto seguro ante 401 (Unauthorized) o fallo de red
+      setUser(null);
+      setIsAuthenticated(false);
     } finally {
       setIsLoading(false);
     }
@@ -376,10 +381,10 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       };
     }
 
-    // 3. Entorno real (development / production): llamada a POST http://localhost:3001/api/auth/login
+    // 3. Entorno real (development / production): llamada a POST /api/auth/login
     try {
       const response = await api.post<{ user: AdminUser }>(
-        "http://localhost:3001/api/auth/login",
+        "/api/auth/login",
         {
           email,
           password,
@@ -425,7 +430,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     });
 
     void api
-      .post("http://localhost:3001/api/auth/logout", undefined, { credentials: "include" })
+      .post("/api/auth/logout", undefined, { credentials: "include" })
       .catch(() => {});
   };
 

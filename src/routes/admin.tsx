@@ -30,11 +30,11 @@ function AdminLayout() {
 
   return (
     <AdminAuthProvider>
-      {isLoginPage ? (
-        <Outlet />
-      ) : (
-        <AdminGuard>
-          <AdminProvider>
+      <AdminProvider>
+        {isLoginPage ? (
+          <Outlet />
+        ) : (
+          <AdminGuard>
             <div className="flex min-h-dvh w-full bg-[#f9fafb] text-[#111827] font-sans">
               <AdminSidebar collapsed={collapsed} />
               <div className="flex min-w-0 flex-1 flex-col">
@@ -47,9 +47,9 @@ function AdminLayout() {
                 </main>
               </div>
             </div>
-          </AdminProvider>
-        </AdminGuard>
-      )}
+          </AdminGuard>
+        )}
+      </AdminProvider>
     </AdminAuthProvider>
   );
 }

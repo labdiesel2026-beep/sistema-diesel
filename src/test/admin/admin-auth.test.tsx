@@ -131,6 +131,25 @@ describe("Contexto de Autenticación Zero-Trust (AdminAuthProvider) — Tarea 3.
     expect(sessionStorage.length).toBe(0);
   });
 
+  it("debe establecer una sesión vacía segura si checkSession recibe 401 Unauthorized", async () => {
+    const { api, ApiError } = await import("@/lib/api");
+    vi.spyOn(api, "get").mockRejectedValueOnce(
+      new ApiError("No autenticado", 401, { error: "No autenticado" }),
+    );
+
+    const { result } = renderHook(() => useAdminAuth(), {
+      wrapper: AdminAuthProvider,
+    });
+
+    await act(async () => {
+      await result.current.checkSession();
+    });
+
+    expect(result.current.isAuthenticated).toBe(false);
+    expect(result.current.user).toBeNull();
+    expect(result.current.isLoading).toBe(false);
+  });
+
   it("debe lanzar error explicativo si useAdminAuth se consume fuera de AdminAuthProvider", () => {
     // Suprimir temporalmente el console.error de React al capturar excepción
     const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});

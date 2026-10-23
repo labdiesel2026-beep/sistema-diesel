@@ -165,10 +165,10 @@ export function AdminProvider({
     try {
       const [fetchedBrands, fetchedCategories, fetchedProducts, fetchedMetrics] = await Promise.all(
         [
-          api.get<AdminBrand[]>("/api/brands"),
-          api.get<any[]>("/api/categories"),
-          api.get<any[]>("/api/products"),
-          api.get<CatalogMetrics>("/api/admin/metrics"),
+          api.get<AdminBrand[]>("/api/brands").catch(() => []),
+          api.get<any[]>("/api/categories").catch(() => []),
+          api.get<any[]>("/api/products").catch(() => []),
+          api.get<CatalogMetrics>("/api/admin/metrics").catch(() => null),
         ],
       );
 

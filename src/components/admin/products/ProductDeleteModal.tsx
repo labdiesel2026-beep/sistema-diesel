@@ -64,26 +64,26 @@ export function ProductDeleteModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-md"
+        className="sm:max-w-md bg-white border border-admin-border text-admin-text-main shadow-2xl sm:rounded-xl"
         data-testid="product-delete-modal"
         aria-describedby="product-delete-description"
       >
         <DialogHeader>
           <div className="flex items-center gap-2 mb-1">
-            <div className="flex size-9 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+            <div className="flex size-9 items-center justify-center rounded-full bg-red-50 text-destructive">
               <AlertTriangle className="size-5" />
             </div>
             <DialogTitle
-              className="text-lg font-bold font-display"
+              className="text-lg font-bold font-display text-admin-text-main"
               data-testid="product-delete-modal-title"
             >
               ¿Eliminar repuesto permanentemente?
             </DialogTitle>
           </div>
 
-          <DialogDescription id="product-delete-description">
+          <DialogDescription id="product-delete-description" className="text-sm text-admin-text-sub">
             Esta acción eliminará de forma definitiva el repuesto{" "}
-            <strong className="text-foreground font-semibold">&quot;{product.name}&quot;</strong>{" "}
+            <strong className="text-admin-text-main font-semibold">&quot;{product.name}&quot;</strong>{" "}
             {product.oem ? `(OEM: ${product.oem})` : ""} del catálogo general. Los datos no podrán
             recuperarse.
           </DialogDescription>
@@ -99,14 +99,14 @@ export function ProductDeleteModal({
           </div>
         )}
 
-        <DialogFooter className="gap-2 sm:gap-0 pt-4">
+        <DialogFooter className="gap-2 sm:gap-0 pt-4 border-t border-admin-border/60">
           <Button
             type="button"
             variant="outline"
             disabled={isDeleting}
             onClick={() => onOpenChange(false)}
             data-testid="product-delete-cancel-btn"
-            className="cursor-pointer"
+            className="cursor-pointer border-admin-border bg-white text-admin-text-main hover:bg-slate-100 hover:text-admin-text-main font-medium shadow-xs"
           >
             Cancelar
           </Button>
@@ -117,7 +117,7 @@ export function ProductDeleteModal({
             disabled={isDeleting}
             onClick={handleConfirmDelete}
             data-testid="product-delete-confirm-btn"
-            className="gap-2 cursor-pointer"
+            className="gap-2 cursor-pointer shadow-xs"
           >
             {isDeleting ? (
               <>

@@ -68,23 +68,23 @@ export function CategoryDeleteModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-md"
+        className="sm:max-w-md bg-white border border-admin-border text-admin-text-main shadow-2xl sm:rounded-xl"
         data-testid="category-delete-modal"
         aria-describedby="category-delete-description"
       >
         <DialogHeader>
           <div className="flex items-center gap-2 mb-1">
             {isBlocked ? (
-              <div className="flex size-9 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+              <div className="flex size-9 items-center justify-center rounded-full bg-red-50 text-destructive">
                 <ShieldAlert className="size-5" />
               </div>
             ) : (
-              <div className="flex size-9 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+              <div className="flex size-9 items-center justify-center rounded-full bg-red-50 text-destructive">
                 <AlertTriangle className="size-5" />
               </div>
             )}
             <DialogTitle
-              className="text-lg font-bold font-display"
+              className="text-lg font-bold font-display text-admin-text-main"
               data-testid="category-delete-modal-title"
             >
               {isBlocked
@@ -93,7 +93,7 @@ export function CategoryDeleteModal({
             </DialogTitle>
           </div>
 
-          <DialogDescription id="category-delete-description">
+          <DialogDescription id="category-delete-description" className="text-sm text-admin-text-sub">
             {isBlocked
               ? "Para proteger la integridad del catálogo, se impide la eliminación de categorías con dependencias activas."
               : `Esta acción eliminará definitivamente la categoría "${category.name}". Los datos no podrán recuperarse.`}
@@ -114,27 +114,27 @@ export function CategoryDeleteModal({
         {isBlocked && (
           <div
             data-testid="category-deletion-blocked-alert"
-            className="space-y-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm"
+            className="space-y-3 rounded-lg border border-red-200 bg-red-50/60 p-4 text-sm"
           >
             <div className="flex items-start gap-2 text-destructive font-semibold text-xs uppercase tracking-wider">
               <ShieldAlert className="size-4 shrink-0 mt-0.5" />
               <span>Bloqueo Impeditivo de Integridad</span>
             </div>
 
-            <p className="text-xs text-muted-foreground">{integrity.reason}</p>
+            <p className="text-xs text-admin-text-sub">{integrity.reason}</p>
 
             {integrity.affectedProducts && integrity.affectedProducts.length > 0 && (
-              <div className="mt-2 space-y-1.5 border-t border-destructive/20 pt-2">
-                <span className="text-[11px] font-semibold text-foreground uppercase tracking-wider">
+              <div className="mt-2 space-y-1.5 border-t border-red-200/60 pt-2">
+                <span className="text-[11px] font-semibold text-admin-text-main uppercase tracking-wider">
                   Productos afectados ({integrity.affectedProducts.length}):
                 </span>
                 <ul
                   data-testid="category-affected-products-list"
-                  className="max-h-32 overflow-y-auto space-y-1 text-xs text-muted-foreground pl-1"
+                  className="max-h-32 overflow-y-auto space-y-1 text-xs text-admin-text-sub pl-1"
                 >
                   {integrity.affectedProducts.map((prodName) => (
                     <li key={prodName} className="flex items-center gap-2">
-                      <Package className="size-3 text-muted-foreground shrink-0" />
+                      <Package className="size-3 text-admin-text-sub shrink-0" />
                       <span className="truncate">{prodName}</span>
                     </li>
                   ))}
@@ -144,14 +144,14 @@ export function CategoryDeleteModal({
           </div>
         )}
 
-        <DialogFooter className="gap-2 sm:gap-0 pt-4">
+        <DialogFooter className="gap-2 sm:gap-0 pt-4 border-t border-admin-border/60">
           {isBlocked ? (
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               data-testid="category-delete-close-btn"
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto cursor-pointer border-admin-border bg-white text-admin-text-main hover:bg-slate-100 hover:text-admin-text-main font-medium shadow-xs"
             >
               Entendido
             </Button>
@@ -163,6 +163,7 @@ export function CategoryDeleteModal({
                 disabled={isDeleting}
                 onClick={() => onOpenChange(false)}
                 data-testid="category-delete-cancel-btn"
+                className="cursor-pointer border-admin-border bg-white text-admin-text-main hover:bg-slate-100 hover:text-admin-text-main font-medium shadow-xs"
               >
                 Cancelar
               </Button>
@@ -172,7 +173,7 @@ export function CategoryDeleteModal({
                 disabled={isDeleting}
                 onClick={handleConfirmDelete}
                 data-testid="category-delete-confirm-btn"
-                className="gap-2"
+                className="gap-2 cursor-pointer shadow-xs"
               >
                 {isDeleting ? (
                   <>

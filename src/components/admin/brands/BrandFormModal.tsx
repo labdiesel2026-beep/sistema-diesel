@@ -125,7 +125,7 @@ export function BrandFormModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-md"
+        className="sm:max-w-md bg-white border border-admin-border text-admin-text-main shadow-2xl sm:rounded-xl"
         data-testid="brand-form-modal"
         aria-describedby="brand-form-description"
       >
@@ -133,13 +133,13 @@ export function BrandFormModal({
           <div className="flex items-center gap-2 text-industrial mb-1">
             <BadgeCheck className="size-5" />
             <span className="text-xs font-bold uppercase tracking-wider">
-              {isEditing ? "Modificación" : "Alta de Fabricante"}
+              {isEditing ? "Modificación de Fabricante" : "Alta de Fabricante"}
             </span>
           </div>
-          <DialogTitle className="text-xl font-bold font-display">
+          <DialogTitle className="text-xl font-bold font-display text-admin-text-main">
             {isEditing ? "Editar Marca" : "Nueva Marca"}
           </DialogTitle>
-          <DialogDescription id="brand-form-description">
+          <DialogDescription id="brand-form-description" className="text-sm text-admin-text-sub">
             {isEditing
               ? "Modifique el nombre de la marca. Los productos vinculados actualizarán su visualización relacional automáticamente."
               : "Ingrese el nombre del fabricante o marca para clasificar repuestos en el catálogo."}
@@ -159,8 +159,10 @@ export function BrandFormModal({
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="brand-name">Nombre de la Marca</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="brand-name" className="text-sm font-semibold text-admin-text-main">
+              Nombre de la Marca <span className="text-destructive">*</span>
+            </Label>
             <Input
               id="brand-name"
               name="name"
@@ -171,7 +173,9 @@ export function BrandFormModal({
               onBlur={handleBlur}
               disabled={isSubmitting}
               autoFocus
-              className={fieldError ? "border-destructive focus-visible:ring-destructive" : ""}
+              className={`h-10 border-admin-border bg-white text-admin-text-main placeholder:text-slate-400 shadow-xs focus-visible:ring-2 focus-visible:ring-industrial/30 focus-visible:border-industrial transition-colors ${
+                fieldError ? "border-destructive focus-visible:ring-destructive" : ""
+              }`}
               aria-invalid={Boolean(fieldError)}
               aria-describedby={fieldError ? "brand-name-error" : undefined}
               data-testid="brand-name-input"
@@ -188,13 +192,14 @@ export function BrandFormModal({
             )}
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0 pt-4">
+          <DialogFooter className="gap-2 sm:gap-0 pt-4 border-t border-admin-border/60">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
               data-testid="brand-form-cancel-btn"
+              className="cursor-pointer border-admin-border bg-white text-admin-text-main hover:bg-slate-100 hover:text-admin-text-main font-medium shadow-xs"
             >
               Cancelar
             </Button>
@@ -203,7 +208,7 @@ export function BrandFormModal({
               variant="industrial"
               disabled={isSubmitting}
               data-testid="brand-form-submit-btn"
-              className="min-w-28"
+              className="min-w-32 cursor-pointer"
             >
               {isSubmitting ? (
                 <>

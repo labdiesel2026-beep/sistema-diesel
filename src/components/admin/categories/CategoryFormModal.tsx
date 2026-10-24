@@ -158,7 +158,7 @@ export function CategoryFormModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-md"
+        className="sm:max-w-md bg-white border border-admin-border text-admin-text-main shadow-2xl sm:rounded-xl"
         data-testid="category-form-modal"
         aria-describedby="category-form-description"
       >
@@ -169,10 +169,10 @@ export function CategoryFormModal({
               {isEditing ? "Modificación de Taxonomía" : "Alta de Categoría"}
             </span>
           </div>
-          <DialogTitle className="text-xl font-bold font-display">
+          <DialogTitle className="text-xl font-bold font-display text-admin-text-main">
             {isEditing ? "Editar Categoría" : "Nueva Categoría"}
           </DialogTitle>
-          <DialogDescription id="category-form-description">
+          <DialogDescription id="category-form-description" className="text-sm text-admin-text-sub">
             {isEditing
               ? "Modifique los datos de la categoría. La jerarquía admite como máximo 1 nivel sin ciclos."
               : "Defina una categoría principal (raíz) o asigne una categoría padre para crear una subcategoría."}
@@ -193,8 +193,10 @@ export function CategoryFormModal({
           )}
 
           {/* Nombre de la Categoría */}
-          <div className="space-y-2">
-            <Label htmlFor="category-name">Nombre de la Categoría</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="category-name" className="text-sm font-semibold text-admin-text-main">
+              Nombre de la Categoría <span className="text-destructive">*</span>
+            </Label>
             <Input
               id="category-name"
               name="name"
@@ -205,7 +207,9 @@ export function CategoryFormModal({
               onBlur={handleBlur}
               disabled={isSubmitting}
               autoFocus
-              className={fieldError ? "border-destructive focus-visible:ring-destructive" : ""}
+              className={`h-10 border-admin-border bg-white text-admin-text-main placeholder:text-slate-400 shadow-xs focus-visible:ring-2 focus-visible:ring-industrial/30 focus-visible:border-industrial transition-colors ${
+                fieldError ? "border-destructive focus-visible:ring-destructive" : ""
+              }`}
               aria-invalid={Boolean(fieldError)}
               aria-describedby={fieldError ? "category-name-error" : undefined}
               data-testid="category-name-input"
@@ -223,11 +227,13 @@ export function CategoryFormModal({
           </div>
 
           {/* Selector de Categoría Padre (1 Nivel y Prevención de Ciclos) */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label htmlFor="category-parent">Categoría Padre</Label>
+              <Label htmlFor="category-parent" className="text-sm font-semibold text-admin-text-main">
+                Categoría Padre
+              </Label>
               {categoryHasChildren && (
-                <span className="text-[11px] font-semibold text-amber-500 flex items-center gap-1">
+                <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded flex items-center gap-1">
                   <Info className="size-3" />
                   Selector bloqueado
                 </span>
@@ -242,7 +248,7 @@ export function CategoryFormModal({
               disabled={isSubmitting || categoryHasChildren}
               data-testid="category-parent-select"
               aria-describedby={categoryHasChildren ? "category-parent-disabled-hint" : undefined}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
+              className="flex h-10 w-full rounded-md border border-admin-border bg-white px-3 py-2 text-sm text-admin-text-main shadow-xs ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-industrial/30 focus-visible:border-industrial disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-slate-50"
             >
               <option value="">Ninguna (Categoría Principal / Nivel Raíz)</option>
               {availableParents.map((parent) => (
@@ -256,25 +262,26 @@ export function CategoryFormModal({
               <p
                 id="category-parent-disabled-hint"
                 data-testid="category-parent-disabled-hint"
-                className="text-xs text-muted-foreground bg-muted/30 p-2 rounded border border-border"
+                className="text-xs text-admin-text-sub bg-slate-50 p-2.5 rounded-lg border border-admin-border"
               >
                 Esta categoría posee subcategorías vinculadas y no puede transformarse en
                 subcategoría hija (regla CL-05).
               </p>
             ) : (
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-[11px] text-admin-text-sub">
                 Seleccione una categoría raíz para crear una subcategoría de 1 nivel (CA-10.3).
               </p>
             )}
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0 pt-4">
+          <DialogFooter className="gap-2 sm:gap-0 pt-4 border-t border-admin-border/60">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
               data-testid="category-form-cancel-btn"
+              className="cursor-pointer border-admin-border bg-white text-admin-text-main hover:bg-slate-100 hover:text-admin-text-main font-medium shadow-xs"
             >
               Cancelar
             </Button>
@@ -283,7 +290,7 @@ export function CategoryFormModal({
               variant="industrial"
               disabled={isSubmitting}
               data-testid="category-form-submit-btn"
-              className="min-w-28"
+              className="min-w-32 cursor-pointer"
             >
               {isSubmitting ? (
                 <>

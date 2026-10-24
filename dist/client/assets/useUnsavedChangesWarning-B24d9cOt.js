@@ -1,1 +1,0 @@
-import{f as e,h as t}from"./api-gZpjJPH6.js";var n=t(e(),1);function r(e,t=!1){(0,n.useEffect)(()=>{if(!e&&!t)return;let n=e=>(e.preventDefault(),e.returnValue=``,``);return window.addEventListener(`beforeunload`,n),()=>{window.removeEventListener(`beforeunload`,n)}},[e,t])}export{r as t};

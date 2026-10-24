@@ -35,3 +35,5 @@ Thumbs.db
 .idea/
 
 # IMPORTANTE: docs/ y specs/ NUNCA se ignoran (Permanecen versionados en Git)
+dist/
+server/dist/

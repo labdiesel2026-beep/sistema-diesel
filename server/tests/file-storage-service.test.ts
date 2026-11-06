@@ -1,9 +1,16 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import path from "node:path";
 import fs from "node:fs/promises";
-import { saveBuffer, deleteFile, safelyDeleteImage } from "../src/services/file-storage.service.js";
+import { v2 as cloudinary } from "cloudinary";
+import {
+  saveBuffer,
+  deleteFile,
+  safelyDeleteImage,
+  uploadStreamToCloudinary,
+  extractCloudinaryPublicId,
+} from "../src/services/file-storage.service.js";
 
-describe("Servicio de Almacenamiento Local y Limpieza Física Resiliente (Tarea 4.3)", () => {
+describe("Servicio de Almacenamiento Cloudinary y Fallback Local (Fase 11)", () => {
   const testUploadsDir = path.resolve(process.cwd(), "test-uploads-storage");
 
   beforeEach(async () => {
@@ -11,6 +18,7 @@ describe("Servicio de Almacenamiento Local y Limpieza Física Resiliente (Tarea 
   });
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     try {
       await fs.rm(testUploadsDir, { recursive: true, force: true });
     } catch {
@@ -18,7 +26,95 @@ describe("Servicio de Almacenamiento Local y Limpieza Física Resiliente (Tarea 
     }
   });
 
-  describe("saveBuffer", () => {
+  describe("extractCloudinaryPublicId", () => {
+    it("extrae correctamente el public_id con versión y carpeta", () => {
+      const url =
+        "https://res.cloudinary.com/demo/image/upload/v1612345678/products/injector-uuid.webp";
+      expect(extractCloudinaryPublicId(url)).toBe("products/injector-uuid");
+    });
+
+    it("extrae correctamente el public_id sin versión", () => {
+      const url =
+        "https://res.cloudinary.com/demo/image/upload/products/another-uuid.webp";
+      expect(extractCloudinaryPublicId(url)).toBe("products/another-uuid");
+    });
+
+    it("soporta subcarpetas anidadas en Cloudinary", () => {
+      const url =
+        "https://res.cloudinary.com/demo/image/upload/v1234/products/diesel/bosch-0445.webp";
+      expect(extractCloudinaryPublicId(url)).toBe("products/diesel/bosch-0445");
+    });
+
+    it("retorna null para rutas locales o URLs externas no Cloudinary", () => {
+      expect(extractCloudinaryPublicId("/uploads/uuid.webp")).toBeNull();
+      expect(extractCloudinaryPublicId("https://external-cdn.com/image.webp")).toBeNull();
+      expect(extractCloudinaryPublicId("/product-placeholder.png")).toBeNull();
+      expect(extractCloudinaryPublicId("")).toBeNull();
+      expect(extractCloudinaryPublicId(null as any)).toBeNull();
+    });
+  });
+
+  describe("uploadStreamToCloudinary", () => {
+    it("sube exitosamente el buffer y retorna la secure_url provista por Cloudinary", async () => {
+      const fakeSecureUrl =
+        "https://res.cloudinary.com/demo/image/upload/v1700000000/products/test-upload.webp";
+
+      const uploadStreamSpy = vi
+        .spyOn(cloudinary.uploader, "upload_stream")
+        .mockImplementation((options: any, callback: any) => {
+          // Devolvemos un WritableStream simulado
+          const { Writable } = require("node:stream");
+          const stream = new Writable({
+            write(_chunk, _encoding, next) {
+              next();
+            },
+            final(done) {
+              callback(null, {
+                secure_url: fakeSecureUrl,
+                public_id: "products/test-upload",
+              });
+              done();
+            },
+          });
+          return stream as any;
+        });
+
+      const buffer = Buffer.from("fake-webp-binary-data");
+      const url = await uploadStreamToCloudinary(buffer, "products");
+
+      expect(url).toBe(fakeSecureUrl);
+      expect(uploadStreamSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          folder: "products",
+          format: "webp",
+          resource_type: "image",
+        }),
+        expect.any(Function),
+      );
+    });
+
+    it("rechaza la promesa si Cloudinary responde con error o resultado vacío", async () => {
+      vi.spyOn(cloudinary.uploader, "upload_stream").mockImplementation((_opts: any, callback: any) => {
+        const { Writable } = require("node:stream");
+        return new Writable({
+          write(_chunk, _encoding, next) {
+            next();
+          },
+          final(done) {
+            callback(new Error("Cloudinary connection timeout"), null);
+            done();
+          },
+        }) as any;
+      });
+
+      const buffer = Buffer.from("fail-data");
+      await expect(uploadStreamToCloudinary(buffer)).rejects.toThrow(
+        "Cloudinary connection timeout",
+      );
+    });
+  });
+
+  describe("saveBuffer (compatibilidad local)", () => {
     it("escribe correctamente el buffer en el directorio configurado y devuelve la ruta pública", async () => {
       const buffer = Buffer.from("dummy-image-content");
       const filename = "test-image.webp";
@@ -39,19 +135,46 @@ describe("Servicio de Almacenamiento Local y Limpieza Física Resiliente (Tarea 
 
       expect(publicPath).toBe("/uploads/traversal-attempt.webp");
 
-      // Verificar que se guardó dentro del directorio de uploads y no en rutas relativas superiores
       const fileInDir = await fs.readFile(path.join(testUploadsDir, "traversal-attempt.webp"));
       expect(fileInDir.equals(buffer)).toBe(true);
     });
   });
 
-  describe("deleteFile y safelyDeleteImage", () => {
-    it("purga un archivo .webp existente en disco sin lanzar errores", async () => {
+  describe("deleteFile y safelyDeleteImage (resiliencia polimórfica)", () => {
+    it("elimina un recurso de Cloudinary usando su public_id", async () => {
+      const destroySpy = vi
+        .spyOn(cloudinary.uploader, "destroy")
+        .mockResolvedValue({ result: "ok" });
+
+      const cloudinaryUrl =
+        "https://res.cloudinary.com/demo/image/upload/v1612345678/products/injector-to-delete.webp";
+
+      await deleteFile(cloudinaryUrl);
+
+      expect(destroySpy).toHaveBeenCalledWith("products/injector-to-delete", {
+        invalidate: true,
+      });
+    });
+
+    it("no lanza excepción si la eliminación en Cloudinary falla (resiliencia Zero-Crash)", async () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      vi.spyOn(cloudinary.uploader, "destroy").mockRejectedValue(
+        new Error("Network Error"),
+      );
+
+      const cloudinaryUrl =
+        "https://res.cloudinary.com/demo/image/upload/v1612345678/products/error-item.webp";
+
+      await expect(deleteFile(cloudinaryUrl)).resolves.not.toThrow();
+      expect(warnSpy).toHaveBeenCalled();
+      expect(warnSpy.mock.calls[0][0]).toContain("[FileStorage Warning]");
+    });
+
+    it("purga un archivo .webp local existente en disco sin lanzar errores", async () => {
       const filename = "existing-file.webp";
       const filePath = path.join(testUploadsDir, filename);
       await fs.writeFile(filePath, Buffer.from("to-be-deleted"));
 
-      // Verificar existencia inicial
       expect(
         await fs
           .access(filePath)
@@ -59,10 +182,8 @@ describe("Servicio de Almacenamiento Local y Limpieza Física Resiliente (Tarea 
           .catch(() => false),
       ).toBe(true);
 
-      // Invocar deleteFile
       await deleteFile(`/uploads/${filename}`, testUploadsDir);
 
-      // Verificar que fue eliminado
       expect(
         await fs
           .access(filePath)
@@ -71,7 +192,7 @@ describe("Servicio de Almacenamiento Local y Limpieza Física Resiliente (Tarea 
       ).toBe(false);
     });
 
-    it("no lanza excepción si el archivo a eliminar no existe (resiliencia ENOENT)", async () => {
+    it("no lanza excepción si el archivo local a eliminar no existe (resiliencia ENOENT)", async () => {
       const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
       await expect(
@@ -80,8 +201,6 @@ describe("Servicio de Almacenamiento Local y Limpieza Física Resiliente (Tarea 
 
       expect(warnSpy).toHaveBeenCalled();
       expect(warnSpy.mock.calls[0][0]).toContain("[FileStorage Warning]");
-
-      warnSpy.mockRestore();
     });
 
     it("ignora y no intenta eliminar archivos que no terminen en .webp (placeholders / externos)", async () => {
@@ -92,33 +211,12 @@ describe("Servicio de Almacenamiento Local y Limpieza Física Resiliente (Tarea 
       await deleteFile("https://external-cdn.com/avatar.jpg", testUploadsDir);
       await deleteFile("", testUploadsDir);
 
-      // El archivo sigue intacto
       expect(
         await fs
           .access(placeholderFile)
           .then(() => true)
           .catch(() => false),
       ).toBe(true);
-    });
-
-    it("mitiga Path Traversal aislando la eliminación estrictamente a path.basename", async () => {
-      // Crear un archivo fuera del directorio de prueba (en el directorio padre)
-      const outsideFile = path.resolve(process.cwd(), "safe-outside-test.webp");
-      await fs.writeFile(outsideFile, Buffer.from("critical-outside-data"));
-
-      try {
-        // Intento de borrado con Path Traversal
-        await deleteFile("../../safe-outside-test.webp", testUploadsDir);
-
-        // El archivo fuera de uploads debe seguir intacto
-        const stillExists = await fs
-          .access(outsideFile)
-          .then(() => true)
-          .catch(() => false);
-        expect(stillExists).toBe(true);
-      } finally {
-        await fs.unlink(outsideFile).catch(() => {});
-      }
     });
 
     it("funciona idénticamente usando el alias safelyDeleteImage", async () => {

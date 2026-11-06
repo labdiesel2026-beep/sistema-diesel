@@ -1,8 +1,7 @@
 import sharp, { type Sharp } from "sharp";
 import { fileTypeFromBuffer } from "file-type";
-import crypto from "node:crypto";
 import { AppError } from "../middleware/error.middleware.js";
-import { saveBuffer, DEFAULT_UPLOADS_DIR } from "./file-storage.service.js";
+import { uploadStreamToCloudinary } from "./file-storage.service.js";
 
 export const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 export const MAX_DIMENSION_PX = 4096; // Protección contra Pixel Flood / Bomba de Descompresión (D-08)
@@ -74,40 +73,42 @@ export async function reconstructToWebp(imageInstance: Sharp): Promise<Buffer> {
 }
 
 /**
- * Tubería Paranoica CDR Completa (Desarme y Reconstrucción).
- * (RF-04, RF-05, RF-06, D-08, D-09)
- *
+ * Tubería Paranoica CDR Completa en Memoria.
  * 1. Valida Magic Bytes (JPEG, PNG, WebP).
- * 2. Pre-inspecciona dimensiones (<= 4096px).
+ * 2. Pre-inspecciona dimensiones contra Pixel Flood (<= 4096px).
  * 3. Desarma y reconstruye a .webp (max 1080x1080, quality 80, strip EXIF).
- * 4. Genera nombre opaco con UUIDv4.
- * 5. Persiste en disco de forma segura en `uploadsDir`.
  *
- * @returns Ruta pública del archivo (/uploads/<uuid>.webp)
+ * @param fileBuffer Buffer de imagen recibido en memoria
+ * @returns Buffer WebP sanitizado y optimizado
+ */
+export async function sanitizeImageBuffer(fileBuffer: Buffer): Promise<Buffer> {
+  await validateImageMagicBytes(fileBuffer);
+  const imageInstance = sharp(fileBuffer);
+  await inspectImageDimensions(imageInstance);
+  return reconstructToWebp(imageInstance);
+}
+
+/**
+ * Tubería Completa CDR y Persistencia en Cloudinary.
+ *
+ * 1. Desinfecta y optimiza el buffer en memoria con sharp.
+ * 2. Transmite el buffer WebP mediante stream a Cloudinary.
+ * 3. Retorna la secure_url pública HTTPS entregada por Cloudinary.
+ *
+ * @param fileBuffer Buffer de imagen recibido
+ * @param folder Carpeta destino en Cloudinary (por defecto: "products")
+ * @returns secure_url de Cloudinary
  */
 export async function processImageUpload(
   fileBuffer: Buffer,
-  uploadsDir: string = DEFAULT_UPLOADS_DIR,
+  folder: string = "products",
 ): Promise<string> {
-  // 1. Verificación de Magic Bytes con file-type
-  await validateImageMagicBytes(fileBuffer);
-
-  // 2. Pre-inspección de dimensiones contra Pixel Flood
-  const imageInstance = sharp(fileBuffer);
-  await inspectImageDimensions(imageInstance);
-
-  // 3. Desarme y Reconstrucción segura
-  const sanitizedBuffer = await reconstructToWebp(imageInstance);
-
-  // 4. Renombramiento con UUIDv4 criptográfico
-  const fileUuid = crypto.randomUUID();
-  const safeFilename = `${fileUuid}.webp`;
-
-  // 5. Persistencia física delegada en FileStorageService
-  return saveBuffer(safeFilename, sanitizedBuffer, uploadsDir);
+  const sanitizedBuffer = await sanitizeImageBuffer(fileBuffer);
+  return uploadStreamToCloudinary(sanitizedBuffer, folder);
 }
 
 export default {
+  sanitizeImageBuffer,
   processImageUpload,
   validateImageMagicBytes,
   inspectImageDimensions,

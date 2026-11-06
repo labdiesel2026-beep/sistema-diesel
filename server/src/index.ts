@@ -2,9 +2,10 @@ import { ENV } from "./config/env.js";
 import { app } from "./app.js";
 
 const PORT = ENV.PORT;
+const HOST = "0.0.0.0";
 
-const server = app.listen(PORT, () => {
-  console.log(`🚀 [Server] Servidor backend escuchando en http://localhost:${PORT}`);
+const server = app.listen(PORT, HOST, () => {
+  console.log(`🚀 [Server] Servidor backend escuchando en http://${HOST}:${PORT}`);
   console.log(`🔒 [Server] CORS habilitado exclusivamente para: ${ENV.CORS_ORIGIN}`);
   console.log(`🛡️  [Server] Cabeceras de seguridad Helmet y Anti-Fingerprinting activas`);
 });

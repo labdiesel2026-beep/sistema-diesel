@@ -28,6 +28,9 @@ export const envSchema = z
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     ADMIN_INITIAL_EMAIL: z.string().email().optional(),
     ADMIN_INITIAL_PASSWORD: z.string().min(6).optional(),
+    CLOUDINARY_CLOUD_NAME: z.string().min(1, "CLOUDINARY_CLOUD_NAME es obligatorio"),
+    CLOUDINARY_API_KEY: z.string().min(1, "CLOUDINARY_API_KEY es obligatorio"),
+    CLOUDINARY_API_SECRET: z.string().min(1, "CLOUDINARY_API_SECRET es obligatorio"),
   })
   .strict();
 
@@ -54,6 +57,9 @@ export function validateEnv(customEnv?: Record<string, unknown>): EnvConfig {
       "NODE_ENV",
       "ADMIN_INITIAL_EMAIL",
       "ADMIN_INITIAL_PASSWORD",
+      "CLOUDINARY_CLOUD_NAME",
+      "CLOUDINARY_API_KEY",
+      "CLOUDINARY_API_SECRET",
     ] as const;
 
     for (const key of knownKeys) {

@@ -1,9 +1,8 @@
-import { describe, it, expect, afterAll } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import sharp from "sharp";
-import path from "node:path";
-import fs from "node:fs/promises";
 import {
   processImageUpload,
+  sanitizeImageBuffer,
   validateImageMagicBytes,
   inspectImageDimensions,
   reconstructToWebp,
@@ -12,22 +11,11 @@ import {
   TARGET_MAX_WIDTH,
   TARGET_MAX_HEIGHT,
 } from "../src/services/cdr.service.js";
+import * as fileStorage from "../src/services/file-storage.service.js";
 
-describe("Servicio de Tubería CDR con Sharp y Prevención de Pixel Flood (Tarea 4.2)", () => {
-  const testUploadsDir = path.resolve(process.cwd(), "test-uploads-cdr");
-
-  afterAll(async () => {
-    // Limpieza del directorio temporal de pruebas
-    try {
-      await fs.rm(testUploadsDir, { recursive: true, force: true });
-    } catch {
-      // Ignorar errores en limpieza
-    }
-  });
-
+describe("Servicio de Tubería CDR con Sharp y Cloudinary (Fase 11)", () => {
   describe("Fase 1: Validación de Magic Bytes (file-type)", () => {
     it("acepta buffers con Magic Bytes legítimos de JPEG, PNG y WebP", async () => {
-      // Crear buffers reales en memoria con sharp
       const jpegBuffer = await sharp({
         create: { width: 100, height: 100, channels: 3, background: { r: 255, g: 0, b: 0 } },
       })
@@ -77,7 +65,6 @@ describe("Servicio de Tubería CDR con Sharp y Prevención de Pixel Flood (Tarea
     });
 
     it("bloquea y arroja ValidationError ante imágenes que superen 4096px en ancho", async () => {
-      // Generar imagen de 4097 x 50 px (excede MAX_DIMENSION_PX en ancho)
       const wideBuffer = await sharp({
         create: {
           width: MAX_DIMENSION_PX + 1,
@@ -97,7 +84,6 @@ describe("Servicio de Tubería CDR con Sharp y Prevención de Pixel Flood (Tarea
     });
 
     it("bloquea y arroja ValidationError ante imágenes que superen 4096px en alto", async () => {
-      // Generar imagen de 50 x 4097 px (excede MAX_DIMENSION_PX en alto)
       const tallBuffer = await sharp({
         create: {
           width: 50,
@@ -117,11 +103,10 @@ describe("Servicio de Tubería CDR con Sharp y Prevención de Pixel Flood (Tarea
     });
   });
 
-  describe("Fase 3: Desarme, Redimensionamiento y Reconstrucción Segura (WebP + Strip EXIF)", () => {
-    it("redimensiona imágenes mayores a 1080px a un máximo de 1080x1080 manteniendo relación de aspecto", async () => {
-      // Imagen 2000 x 1000 px
+  describe("Fase 3: Desarme, Redimensionamiento y Reconstrucción a WebP", () => {
+    it("redimensiona imágenes mayores a 1080x1080 preservando relación de aspecto (fit: inside)", async () => {
       const largeBuffer = await sharp({
-        create: { width: 2000, height: 1000, channels: 3, background: { r: 50, g: 100, b: 150 } },
+        create: { width: 2000, height: 1000, channels: 3, background: { r: 100, g: 150, b: 200 } },
       })
         .jpeg()
         .toBuffer();
@@ -132,14 +117,13 @@ describe("Servicio de Tubería CDR con Sharp y Prevención de Pixel Flood (Tarea
       const metadata = await sharp(reconstructedBuffer).metadata();
       expect(metadata.format).toBe("webp");
       expect(metadata.width).toBe(TARGET_MAX_WIDTH);
-      expect(metadata.height).toBe(540); // 2000:1000 -> 1080:540
-      expect(metadata.exif).toBeUndefined(); // EXIF despojado
+      expect(metadata.height).toBe(540);
+      expect(metadata.exif).toBeUndefined();
     });
 
-    it("no amplía imágenes menores a 1080px (withoutEnlargement: true)", async () => {
-      // Imagen pequeña de 300 x 200 px
+    it("no amplía imágenes cuyas dimensiones sean inferiores a 1080x1080 (withoutEnlargement: true)", async () => {
       const smallBuffer = await sharp({
-        create: { width: 300, height: 200, channels: 3, background: { r: 50, g: 100, b: 150 } },
+        create: { width: 300, height: 200, channels: 3, background: { r: 50, g: 50, b: 50 } },
       })
         .png()
         .toBuffer();
@@ -154,62 +138,71 @@ describe("Servicio de Tubería CDR con Sharp y Prevención de Pixel Flood (Tarea
     });
   });
 
-  describe("Fase 4: Tubería Completa (processImageUpload)", () => {
-    it("procesa una imagen válida JPEG, la guarda en disco como WebP con UUID y devuelve la ruta /uploads/<uuid>.webp", async () => {
+  describe("Fase 4: Tubería Completa (sanitizeImageBuffer y processImageUpload)", () => {
+    it("sanitizeImageBuffer devuelve un buffer WebP sanitizado sin metadatos EXIF", async () => {
       const validBuffer = await sharp({
         create: { width: 640, height: 480, channels: 3, background: { r: 200, g: 50, b: 100 } },
       })
         .jpeg()
         .toBuffer();
 
-      const publicPath = await processImageUpload(validBuffer, testUploadsDir);
+      const sanitized = await sanitizeImageBuffer(validBuffer);
+      expect(Buffer.isBuffer(sanitized)).toBe(true);
 
-      // Comprobar formato de retorno /uploads/<uuid>.webp
-      expect(publicPath).toMatch(
-        /^\/uploads\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.webp$/i,
-      );
-
-      // Comprobar que el archivo se persistió físicamente en el directorio configurado
-      const filename = path.basename(publicPath);
-      const diskFilePath = path.join(testUploadsDir, filename);
-      const fileExists = await fs
-        .access(diskFilePath)
-        .then(() => true)
-        .catch(() => false);
-
-      expect(fileExists).toBe(true);
-
-      // Verificar que el archivo en disco es un WebP sanitizado
-      const diskMetadata = await sharp(diskFilePath).metadata();
-      expect(diskMetadata.format).toBe("webp");
-      expect(diskMetadata.width).toBe(640);
-      expect(diskMetadata.height).toBe(480);
-      expect(diskMetadata.exif).toBeUndefined();
+      const meta = await sharp(sanitized).metadata();
+      expect(meta.format).toBe("webp");
+      expect(meta.width).toBe(640);
+      expect(meta.height).toBe(480);
+      expect(meta.exif).toBeUndefined();
     });
 
-    it("aborta la tubería y no escribe ningún archivo en disco si Magic Bytes son inválidos", async () => {
+    it("processImageUpload sanitiza el buffer y lo transmite a Cloudinary retornando la secure_url", async () => {
+      const fakeCloudinaryUrl =
+        "https://res.cloudinary.com/test-cloud/image/upload/v12345/products/injector.webp";
+
+      const uploadSpy = vi
+        .spyOn(fileStorage, "uploadStreamToCloudinary")
+        .mockResolvedValue(fakeCloudinaryUrl);
+
+      const validBuffer = await sharp({
+        create: { width: 640, height: 480, channels: 3, background: { r: 200, g: 50, b: 100 } },
+      })
+        .jpeg()
+        .toBuffer();
+
+      const resultUrl = await processImageUpload(validBuffer, "products");
+
+      expect(resultUrl).toBe(fakeCloudinaryUrl);
+      expect(uploadSpy).toHaveBeenCalledWith(expect.any(Buffer), "products");
+
+      uploadSpy.mockRestore();
+    });
+
+    it("aborta la tubería antes del almacenamiento si Magic Bytes son inválidos", async () => {
+      const uploadSpy = vi.spyOn(fileStorage, "uploadStreamToCloudinary");
       const maliciousBuffer = Buffer.from("<?php echo 'malware'; ?>");
 
-      await expect(processImageUpload(maliciousBuffer, testUploadsDir)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(processImageUpload(maliciousBuffer)).rejects.toThrow(ValidationError);
+      expect(uploadSpy).not.toHaveBeenCalled();
 
-      // Verificar que ningún archivo con extensión .php o similar se escribió
-      const files = await fs.readdir(testUploadsDir).catch(() => []);
-      expect(files.some((f) => f.endsWith(".php"))).toBe(false);
+      uploadSpy.mockRestore();
     });
 
-    it("aborta la tubería y no escribe en disco ante intento de Pixel Flood", async () => {
+    it("aborta la tubería antes del almacenamiento ante intento de Pixel Flood", async () => {
+      const uploadSpy = vi.spyOn(fileStorage, "uploadStreamToCloudinary");
       const bombBuffer = await sharp({
         create: { width: 5000, height: 100, channels: 3, background: { r: 0, g: 0, b: 0 } },
       })
         .png()
         .toBuffer();
 
-      await expect(processImageUpload(bombBuffer, testUploadsDir)).rejects.toThrow(ValidationError);
-      await expect(processImageUpload(bombBuffer, testUploadsDir)).rejects.toThrow(
+      await expect(processImageUpload(bombBuffer)).rejects.toThrow(ValidationError);
+      await expect(processImageUpload(bombBuffer)).rejects.toThrow(
         /Dimensiones de imagen excesivas/i,
       );
+      expect(uploadSpy).not.toHaveBeenCalled();
+
+      uploadSpy.mockRestore();
     });
   });
 });

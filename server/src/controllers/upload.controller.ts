@@ -1,11 +1,16 @@
 import type { Request, Response, NextFunction } from "express";
-import { processImageUpload } from "../services/cdr.service.js";
+import { sanitizeImageBuffer } from "../services/cdr.service.js";
+import { uploadStreamToCloudinary } from "../services/file-storage.service.js";
 import { AppError } from "../middleware/error.middleware.js";
 
 /**
- * Controlador de subida de imágenes de productos (RF-04, RF-05, Tarea 4.4).
- * Procesa el buffer en memoria recibido por Multer a través de la tubería CDR
- * y devuelve la URL pública del archivo WebP sanitizado.
+ * Controlador de subida de imágenes de productos (Fase 11 - Cloudinary).
+ *
+ * Flujo de ejecución:
+ * 1. Verifica la presencia del buffer en memoria provisto por Multer.
+ * 2. Aplica la tubería CDR en memoria con sharp (Magic Bytes, Pixel Flood, WebP, strip EXIF).
+ * 3. Transmite el buffer WebP resultante directamente a Cloudinary vía stream.
+ * 4. Responde con la secure_url absoluta HTTPS de Cloudinary.
  */
 export async function uploadProductImage(
   req: Request,
@@ -17,7 +22,11 @@ export async function uploadProductImage(
       throw new AppError("No se proporcionó ningún archivo de imagen", 400);
     }
 
-    const imageUrl = await processImageUpload(req.file.buffer);
+    // 1. Sanitización y optimización en memoria con Sharp (CDR)
+    const sanitizedWebpBuffer = await sanitizeImageBuffer(req.file.buffer);
+
+    // 2. Transmisión por stream desde el buffer a Cloudinary
+    const imageUrl = await uploadStreamToCloudinary(sanitizedWebpBuffer, "products");
 
     res.status(201).json({
       imageUrl,

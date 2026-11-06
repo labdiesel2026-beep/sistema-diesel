@@ -212,7 +212,12 @@ export function StanadyneLogo({ className = "h-8 w-auto", ...props }: BrandLogoP
     >
       <g transform="translate(6, 6)">
         <g transform="translate(2, 2)">
-          <polygon points="12,0 24,12 12,24 0,12" fill="none" stroke="currentColor" strokeWidth="2.5" />
+          <polygon
+            points="12,0 24,12 12,24 0,12"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          />
           <polygon points="12,5 19,12 12,19 5,12" fill="currentColor" />
         </g>
         <g transform="translate(36, 4)">
@@ -244,7 +249,13 @@ export function DieselKikiLogo({ className = "h-8 w-auto", ...props }: BrandLogo
       <g transform="translate(6, 7)">
         <g transform="translate(0, 3)">
           <circle cx="10" cy="10" r="9" fill="none" stroke="currentColor" strokeWidth="2" />
-          <path d="M10 4v4l3 2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          <path
+            d="M10 4v4l3 2"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
           <circle cx="10" cy="10" r="2" fill="currentColor" />
         </g>
         <g transform="translate(26, 0)">

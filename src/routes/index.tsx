@@ -50,9 +50,9 @@ export function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-white selection:text-black">
+    <div className="min-h-screen w-full overflow-x-hidden bg-zinc-950 text-zinc-100 selection:bg-white selection:text-black">
       <LandingNavbar />
-      <main>
+      <main className="w-full overflow-x-hidden">
         <HeroSection />
         <IntroSection />
         <FeaturedProductsCarousel />

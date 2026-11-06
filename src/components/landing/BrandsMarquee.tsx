@@ -19,21 +19,25 @@
  * 8. Suspensión automática al hover, al toque en pantallas táctiles y por Page Visibility API.
  */
 
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { WORKSHOP_BRANDS } from "./brands";
 import { cn } from "@/lib/utils";
 
+export interface WorkshopBrandItem {
+  readonly id: string;
+  readonly name: string;
+  readonly subtitle?: string;
+  readonly Component?: React.ComponentType<{ className?: string }>;
+}
+
 export interface BrandsMarqueeProps {
   className?: string;
-  brands?: typeof WORKSHOP_BRANDS | readonly any[];
+  brands?: readonly WorkshopBrandItem[];
 }
 
 const ITEM_ESTIMATED_WIDTH_PX = 168; // 120px max-width + 48px gap
 
-export function BrandsMarquee({
-  className = "",
-  brands = WORKSHOP_BRANDS,
-}: BrandsMarqueeProps) {
+export function BrandsMarquee({ className = "", brands = WORKSHOP_BRANDS }: BrandsMarqueeProps) {
   const [viewportWidth, setViewportWidth] = useState<number>(() => {
     return typeof window !== "undefined" ? window.innerWidth : 1920;
   });
@@ -45,12 +49,7 @@ export function BrandsMarquee({
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   });
 
-  // 1. Desmontaje condicional completo ante listas vacías (RF-01)
-  if (!brands || brands.length === 0) {
-    return null;
-  }
-
-  // 2. Detección en tiempo real de 'prefers-reduced-motion'
+  // 1. Detección en tiempo real de 'prefers-reduced-motion'
   useEffect(() => {
     if (typeof window === "undefined") return;
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -64,7 +63,7 @@ export function BrandsMarquee({
     };
   }, []);
 
-  // 3. Suscripción a resize con debounce de 250ms (RF-01)
+  // 2. Suscripción a resize con debounce de 250ms (RF-01)
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
@@ -84,7 +83,7 @@ export function BrandsMarquee({
     };
   }, []);
 
-  // 4. Suspensión por Page Visibility API (respetando memoria estricta de pausa manual)
+  // 3. Suspensión por Page Visibility API (respetando memoria estricta de pausa manual)
   useEffect(() => {
     const handleVisibilityChange = () => {
       setIsTabVisible(document.visibilityState === "visible" && !document.hidden);
@@ -96,28 +95,30 @@ export function BrandsMarquee({
     };
   }, []);
 
-  // 5. Cálculo matemático de clones para min-width > 200vw (cobertura 4K / Ultrawide)
+  // 4. Cálculo matemático de clones para min-width > 200vw (cobertura 4K / Ultrawide)
   const marqueeItems = useMemo(() => {
+    if (!brands || brands.length === 0) return [];
     const targetHalfWidth = viewportWidth;
     const oneSetWidth = brands.length * ITEM_ESTIMATED_WIDTH_PX;
     const repetitionsPerHalf = Math.max(1, Math.ceil(targetHalfWidth / oneSetWidth));
 
-    const halfItems: Array<{ brand: (typeof brands)[number]; cloneIndex: number }> = [];
+    const halfItems: Array<{ brand: WorkshopBrandItem; cloneIndex: number }> = [];
     for (let i = 0; i < repetitionsPerHalf; i++) {
       for (const brand of brands) {
         halfItems.push({ brand, cloneIndex: i });
       }
     }
 
-    // Dos mitades idénticas (A y B): el desplazamiento CSS de 0 a -50% desplaza exactamente la mitad A
+    // Duplicamos exactamente la mitad para el loop sin costuras (0% a -50%)
     return [...halfItems, ...halfItems];
   }, [brands, viewportWidth]);
 
-  // Manejo de alternancia manual de pausa (WCAG 2.2.2 Toggle)
+  // Manejador del botón accesible de alternancia
   const toggleManualPause = useCallback(() => {
     setIsManualPaused((prev) => !prev);
   }, []);
 
+  // Referencias para temporizadores de toque
   const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -128,7 +129,7 @@ export function BrandsMarquee({
     };
   }, []);
 
-  // Manejo táctil no intrusivo: pausar tras 250ms de contacto sostenido
+  // Al iniciar contacto táctil: pausar tras 250ms de contacto sostenido
   const handleTouchStart = useCallback(() => {
     if (resumeTimerRef.current) {
       clearTimeout(resumeTimerRef.current);
@@ -153,11 +154,16 @@ export function BrandsMarquee({
   // Memoria de Pausa Estricta: si el usuario pausó manualmente, prevalece sobre cualquier evento
   const isEffectivePaused = isManualPaused || isTouchPaused || !isTabVisible;
 
+  // Desmontaje condicional completo ante listas vacías después de invocar todos los hooks
+  if (!brands || brands.length === 0) {
+    return null;
+  }
+
   return (
     <section
       aria-label="Marcas y sistemas de inyección atendidos"
       className={cn(
-        "relative overflow-hidden py-24 md:py-32 bg-zinc-950 border-y border-white/10",
+        "relative overflow-hidden py-16 sm:py-24 md:py-32 bg-zinc-950 border-y border-white/10",
         className,
       )}
     >
@@ -186,11 +192,11 @@ export function BrandsMarquee({
         </button>
       )}
 
-      <div className="site-container mb-12 text-center">
+      <div className="site-container mb-8 sm:mb-12 text-center">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-500">
           Especialización Técnica Multimarca
         </p>
-        <h2 className="mt-3 font-display text-2xl md:text-3xl font-light tracking-tight text-zinc-300">
+        <h2 className="mt-3 font-display text-xl sm:text-2xl md:text-3xl font-light tracking-tight text-zinc-300">
           Marcas y Sistemas de Inyección que Atendemos
         </h2>
       </div>
@@ -210,9 +216,8 @@ export function BrandsMarquee({
           data-testid="brands-marquee-track"
         >
           {marqueeItems.map(({ brand, cloneIndex }, idx) => {
-            const BrandLogoComponent = (brand as any).Component;
-            const subtitle =
-              "subtitle" in brand ? ((brand as any).subtitle as string | undefined) : undefined;
+            const BrandLogoComponent = brand.Component;
+            const subtitle = brand.subtitle;
             const title = subtitle ? `${brand.name} (${subtitle})` : brand.name;
 
             return (

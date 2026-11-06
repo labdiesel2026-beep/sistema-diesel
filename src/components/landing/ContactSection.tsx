@@ -37,9 +37,7 @@ export function ContactSection({ className = "" }: ContactSectionProps) {
           {/* Tarjeta de información directa (5 columnas) */}
           <div className="space-y-6 lg:col-span-5">
             <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-8">
-              <h3 className="font-display text-xl font-bold text-foreground">
-                Atención Inmediata
-              </h3>
+              <h3 className="font-display text-xl font-bold text-foreground">Atención Inmediata</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 Respondemos consultas técnicas y presupuestos en el día durante nuestro horario
                 comercial.

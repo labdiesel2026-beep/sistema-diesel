@@ -81,7 +81,10 @@ export function MobileStickyBar({ className = "" }: MobileStickyBarProps) {
           element.offsetHeight;
 
         if (height && height > 0) {
-          document.documentElement.style.setProperty("--bottom-bar-height", `${Math.round(height)}px`);
+          document.documentElement.style.setProperty(
+            "--bottom-bar-height",
+            `${Math.round(height)}px`,
+          );
         }
       }
     });

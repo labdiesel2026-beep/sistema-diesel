@@ -76,32 +76,32 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
     <section
       id="garantias"
       ref={ref}
-      className={`scroll-mt-20 border-b border-white/10 bg-zinc-950 py-24 md:py-32 text-foreground ${className}`}
+      className={`scroll-mt-20 border-b border-white/10 bg-zinc-950 py-16 sm:py-24 md:py-32 text-foreground ${className}`}
       aria-labelledby="garantias-heading"
     >
       <div className="site-container">
-        <div className="border-t border-white/10 pt-16">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+        <div className="border-t border-white/10 pt-10 sm:pt-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-start">
             {/* Columna Informativa (7 columnas en desktop) */}
             <motion.div
               variants={singleVariants}
               initial={isInstant ? "visible" : "hidden"}
               whileInView="visible"
               viewport={viewportConfig}
-              className="lg:col-span-7 space-y-8"
+              className="lg:col-span-7 space-y-6 sm:space-y-8"
             >
               {/* Badge superior de garantía */}
               <div>
-                <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-600 block mb-3">
+                <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-500 block mb-3">
                   Respaldo & Posventa
                 </span>
                 <h2
                   id="garantias-heading"
-                  className="text-3xl md:text-5xl font-light tracking-tight text-white uppercase leading-tight"
+                  className="text-2xl sm:text-3xl md:text-5xl font-light tracking-tight text-white uppercase leading-tight"
                 >
                   {SITE_CONFIG.warrantyTerms.title}
                 </h2>
-                <p className="mt-4 text-base font-light leading-relaxed text-zinc-400 max-w-2xl">
+                <p className="mt-3 sm:mt-4 text-sm sm:text-base font-light leading-relaxed text-zinc-400 max-w-2xl">
                   {SITE_CONFIG.warrantyTerms.summary}
                 </p>
               </div>
@@ -129,12 +129,12 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
               </motion.div>
 
               {/* Acción de posventa WhatsApp */}
-              <div className="pt-4 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+              <div className="pt-2 sm:pt-4 flex flex-col items-start gap-3 sm:gap-4 sm:flex-row sm:items-center">
                 <Button
                   variant="outline"
                   size="lg"
                   asChild
-                  className="h-11 rounded-none border border-white/20 bg-white/[0.05] px-6 font-mono text-xs uppercase tracking-widest text-white hover:bg-white hover:text-black hover:border-white transition-all shadow-none"
+                  className="h-11 w-full sm:w-auto justify-center rounded-none border border-white/20 bg-white/[0.05] px-6 font-mono text-xs uppercase tracking-widest text-white hover:bg-white hover:text-black hover:border-white transition-all shadow-none"
                 >
                   <a href={warrantyUrl} target="_blank" rel="noopener noreferrer">
                     <FaWhatsapp className="mr-2 size-3.5 text-whatsapp" />

@@ -27,8 +27,8 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
         className={`border-t border-white/10 bg-canvas text-zinc-400 ${className}`}
         role="contentinfo"
       >
-        <div className="site-container py-24 lg:py-32">
-          <div className="grid grid-cols-1 gap-14 md:grid-cols-12 lg:gap-16">
+        <div className="site-container py-16 sm:py-20 lg:py-32 pb-28 md:pb-24 lg:pb-32">
+          <div className="grid grid-cols-1 gap-10 sm:gap-14 md:grid-cols-12 lg:gap-16">
             {/* Columna 1: Marca y propuesta institucional (5 columnas) */}
             <div className="space-y-6 md:col-span-5">
               <a
@@ -41,8 +41,8 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
                 </span>
               </a>
               <p className="max-w-sm text-sm leading-relaxed text-zinc-400">
-                Especialistas en diagnóstico, reparación y calibración de sistemas de inyección Common
-                Rail. Tecnología de precisión y respaldo técnico para su motor.
+                Especialistas en diagnóstico, reparación y calibración de sistemas de inyección
+                Common Rail. Tecnología de precisión y respaldo técnico para su motor.
               </p>
               <div className="flex items-start gap-3 pt-3 text-xs text-zinc-400">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-industrial" />

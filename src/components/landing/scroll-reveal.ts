@@ -140,11 +140,16 @@ export function useScrollReveal(sectionId?: string) {
 
               // Propagar a descendientes directos o marcados
               const childNodes = el.querySelectorAll<HTMLElement>(
-                ".scroll-reveal, [data-scroll-reveal], .scroll-reveal-item"
+                ".scroll-reveal, [data-scroll-reveal], .scroll-reveal-item",
               );
               childNodes.forEach((child) => {
                 child.classList.add("is-visible", "opacity-100", "translate-y-0", "revealed");
-                child.classList.remove("opacity-0", "translate-y-4", "translate-y-8", "translate-y-20");
+                child.classList.remove(
+                  "opacity-0",
+                  "translate-y-4",
+                  "translate-y-8",
+                  "translate-y-20",
+                );
               });
 
               if (observer) {
@@ -158,7 +163,7 @@ export function useScrollReveal(sectionId?: string) {
         {
           threshold: 0.1,
           rootMargin: "0px 0px -40px 0px",
-        }
+        },
       );
 
       observer.observe(el);

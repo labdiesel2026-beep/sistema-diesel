@@ -7,19 +7,14 @@ interface IntroSectionProps {
 }
 
 export function IntroSection({ className = "" }: IntroSectionProps) {
-  const {
-    ref,
-    isInstant,
-    singleVariants,
-    viewportConfig,
-    handleAnimationComplete,
-  } = useScrollReveal("intro");
+  const { ref, isInstant, singleVariants, viewportConfig, handleAnimationComplete } =
+    useScrollReveal("intro");
 
   return (
     <section
       ref={ref}
       aria-label="Introducción institucional"
-      className={`relative bg-zinc-950 py-32 border-b border-white/10 ${className}`}
+      className={`relative bg-zinc-950 py-16 sm:py-24 md:py-32 border-b border-white/10 ${className}`}
     >
       <div className="site-container">
         <motion.div
@@ -30,11 +25,12 @@ export function IntroSection({ className = "" }: IntroSectionProps) {
           onAnimationComplete={handleAnimationComplete}
           className="max-w-4xl mx-auto text-center"
         >
-          <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-zinc-600 block mb-6">
+          <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-zinc-500 block mb-4 sm:mb-6">
             Ingeniería & Calibración
           </span>
-          <p className="text-3xl md:text-5xl text-zinc-300 max-w-4xl mx-auto text-center font-light leading-snug">
-            Más de dos décadas de precisión absoluta en inyección diésel Common Rail, bancos de prueba computarizados y diagnósticos de vanguardia.
+          <p className="text-2xl sm:text-3xl md:text-5xl text-zinc-300 max-w-4xl mx-auto text-center font-light leading-snug">
+            Más de dos décadas de precisión absoluta en inyección diésel Common Rail, bancos de
+            prueba computarizados y diagnósticos de vanguardia.
           </p>
           <div className="mt-10 flex items-center justify-center gap-3">
             <span className="h-px w-12 bg-white/20" />

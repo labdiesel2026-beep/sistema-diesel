@@ -7,6 +7,7 @@
 
 import tallerHeroImg from "@/assets/workshop/taller-hero.webp";
 import bancoPruebasImg from "@/assets/workshop/banco-pruebas.webp";
+import banco2Img from "@/assets/workshop/Banco2.webp";
 import diagnosticoElectronicoImg from "@/assets/workshop/diagnostico-electronico.webp";
 import inyectoresDetalleImg from "@/assets/workshop/inyectores-detalle.webp";
 import fachadaLocalImg from "@/assets/workshop/fachada-local.webp";
@@ -72,6 +73,7 @@ export const SITE_CONFIG = {
   workshopImages: {
     hero: tallerHeroImg,
     bancoPruebas: bancoPruebasImg,
+    banco2: banco2Img,
     diagnosticoElectronico: diagnosticoElectronicoImg,
     inyectoresDetalle: inyectoresDetalleImg,
     fachadaLocal: fachadaLocalImg,
@@ -115,7 +117,7 @@ export const SITE_CONFIG = {
       description:
         "Ensayo dinámico y calibración milimétrica de caudal, retorno y curvas de presión bajo especificaciones estrictas de fabricante para bombas e inyectores diésel.",
       icon: "Gauge",
-      image: bancoPruebasImg,
+      image: banco2Img,
       badges: [
         "Banco de Pruebas Computarizado",
         "Calibración Milimétrica",

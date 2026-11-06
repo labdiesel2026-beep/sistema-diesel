@@ -24,7 +24,7 @@ export function LocationSection({ className = "" }: LocationSectionProps) {
     <section
       id="ubicacion"
       ref={ref}
-      className={`scroll-mt-20 border-b border-white/10 bg-zinc-950 py-24 md:py-32 text-foreground ${className}`}
+      className={`scroll-mt-20 border-b border-white/10 bg-zinc-950 py-16 sm:py-24 md:py-32 text-foreground ${className}`}
       aria-labelledby="ubicacion-heading"
     >
       <div className="site-container">
@@ -34,18 +34,18 @@ export function LocationSection({ className = "" }: LocationSectionProps) {
           initial={isInstant ? "visible" : "hidden"}
           whileInView="visible"
           viewport={viewportConfig}
-          className="mb-16 max-w-3xl"
+          className="mb-10 sm:mb-16 max-w-3xl"
         >
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-600 block mb-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-500 block mb-3">
             Ubicación & Logística
           </span>
           <h2
             id="ubicacion-heading"
-            className="text-3xl md:text-5xl font-light tracking-tight text-white uppercase leading-tight"
+            className="text-2xl sm:text-3xl md:text-5xl font-light tracking-tight text-white uppercase leading-tight"
           >
             Ubicación y Horarios de Atención
           </h2>
-          <p className="mt-4 text-base font-light text-zinc-400 leading-relaxed">
+          <p className="mt-3 sm:mt-4 text-sm sm:text-base font-light text-zinc-400 leading-relaxed">
             Estamos ubicados estratégicamente para recibir tu vehículo, maquinaria o coordinar
             envíos de repuestos e inyectores.
           </p>
@@ -58,12 +58,12 @@ export function LocationSection({ className = "" }: LocationSectionProps) {
           whileInView="visible"
           viewport={viewportConfig}
           onAnimationComplete={handleAnimationComplete}
-          className="grid grid-cols-1 items-stretch gap-12 lg:grid-cols-12 border-t border-white/10 pt-16"
+          className="grid grid-cols-1 items-stretch gap-8 sm:gap-12 lg:grid-cols-12 border-t border-white/10 pt-8 sm:pt-12 md:pt-16"
         >
           {/* Columna de datos físicos, fotografía y horarios (5 columnas) */}
           <motion.div
             variants={itemVariants}
-            className="flex flex-col justify-between border border-white/10 bg-zinc-950 p-8 lg:col-span-5"
+            className="flex flex-col justify-between border border-white/10 bg-zinc-950 p-5 sm:p-8 lg:col-span-5"
           >
             <div>
               {/* Fotografía real de la fachada */}

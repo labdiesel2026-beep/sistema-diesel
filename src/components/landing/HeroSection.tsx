@@ -79,18 +79,18 @@ export function HeroSection({ className = "" }: HeroSectionProps) {
       <div className="h-24 sm:h-28" aria-hidden="true" />
 
       {/* 2. Bloque Central: Jerarquía Vertical Estricta (RF-03) */}
-      <div className="relative z-10 mx-auto my-auto max-w-5xl px-4 py-8 flex flex-col items-center justify-center text-center">
+      <div className="relative z-10 mx-auto my-auto max-w-5xl px-4 py-8 flex flex-col items-center justify-center text-center w-full">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] font-bold uppercase tracking-tight text-white leading-none text-center drop-shadow-lg"
+          className="font-display text-4xl sm:text-6xl md:text-8xl lg:text-[7rem] font-bold uppercase tracking-tight text-white leading-none text-center drop-shadow-lg break-words"
         >
           {SITE_CONFIG.name}
         </motion.h1>
 
         {/* Paso 2: Subtítulo inmediatamente inferior con mecanografía técnica y cursor naranja */}
-        <div className="mt-4 sm:mt-6 font-mono text-xs sm:text-sm md:text-base uppercase tracking-[0.25em] text-zinc-300 text-center flex items-center justify-center min-h-[2rem]">
+        <div className="mt-4 sm:mt-6 font-mono text-xs sm:text-sm md:text-base uppercase tracking-wider sm:tracking-[0.25em] text-zinc-300 text-center flex items-center justify-center min-h-[2rem]">
           <span className="sr-only">Especialistas en inyección diésel</span>
           <span aria-hidden="true">{displayedSubtitle}</span>
           <span
@@ -107,18 +107,21 @@ export function HeroSection({ className = "" }: HeroSectionProps) {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.4 }}
-          className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4"
+          className="mt-6 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto px-2 sm:px-0"
         >
-          <CatalogCTAButton size="lg" className="rounded-none border-white/20">
+          <CatalogCTAButton
+            size="lg"
+            className="w-full sm:w-auto justify-center rounded-none border-white/20"
+          >
             Ver Catálogo de Inyectores
           </CatalogCTAButton>
 
           <Button
             variant="ghost"
             asChild
-            className="h-12 px-7 rounded-none border border-white/10 bg-zinc-950/60 backdrop-blur-md text-xs font-mono uppercase tracking-widest text-zinc-300 hover:text-white hover:bg-white/10 hover:border-white/30 transition-all shadow-none"
+            className="h-12 w-full sm:w-auto justify-center px-7 rounded-none border border-white/10 bg-zinc-950/60 backdrop-blur-md text-xs font-mono uppercase tracking-widest text-zinc-300 hover:text-white hover:bg-white/10 hover:border-white/30 transition-all shadow-none"
           >
-            <a href="#contacto" className="flex items-center gap-2">
+            <a href="#contacto" className="flex items-center justify-center gap-2">
               <FaWhatsapp className="size-4 text-channel-support" />
               <span>Contactar al Taller</span>
             </a>

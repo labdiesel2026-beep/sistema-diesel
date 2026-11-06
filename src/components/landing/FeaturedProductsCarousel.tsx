@@ -88,7 +88,7 @@ export function FeaturedProductsCarousel({
   const renderCard = (product: FeaturedProductItem, key: string) => (
     <article
       key={key}
-      className="group relative flex w-[290px] shrink-0 flex-col overflow-hidden rounded-lg border border-white/10 bg-zinc-950 transition-all duration-300 hover:border-white/30 sm:w-[320px] md:w-[340px] cursor-pointer shadow-lg"
+      className="group relative flex w-[270px] xs:w-[290px] shrink-0 flex-col overflow-hidden rounded-lg border border-white/10 bg-zinc-950 transition-all duration-300 hover:border-white/30 sm:w-[320px] md:w-[340px] cursor-pointer shadow-lg"
     >
       <Link
         to="/catalogo/$productId"
@@ -143,9 +143,7 @@ export function FeaturedProductsCarousel({
           <div className="mt-auto pt-6 flex items-center justify-between border-t border-white/10">
             <div>
               {product.showPrice && product.price !== null ? (
-                <p className="font-light text-xl text-white">
-                  {formatPrice(product.price)}
-                </p>
+                <p className="font-light text-xl text-white">{formatPrice(product.price)}</p>
               ) : (
                 <span className="font-mono text-xs uppercase tracking-widest text-zinc-500">
                   Consultar precio
@@ -166,12 +164,12 @@ export function FeaturedProductsCarousel({
     <section
       id="destacados"
       data-testid="featured-products-section"
-      className={`scroll-mt-20 bg-zinc-950 py-24 md:py-32 border-b border-white/10 overflow-hidden min-h-[460px] ${className}`}
+      className={`scroll-mt-20 bg-zinc-950 py-16 sm:py-24 md:py-32 border-b border-white/10 overflow-hidden min-h-[460px] ${className}`}
       aria-labelledby="destacados-heading"
     >
       <div className="site-container">
         {/* Encabezado con badge y título estilo Longbow */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-16">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-10 sm:mb-16">
           <div className="max-w-2xl">
             <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-600 block mb-3">
               Catálogo Seleccionado
@@ -211,20 +209,13 @@ export function FeaturedProductsCarousel({
               ease: "linear",
             }}
           >
-            {marqueeProducts.map((product, index) =>
-              renderCard(product, `${product.id}-${index}`),
-            )}
+            {marqueeProducts.map((product, index) => renderCard(product, `${product.id}-${index}`))}
           </motion.div>
         </div>
 
         {/* CTA al Catálogo Completo */}
-        <div className="mt-20 flex flex-col items-center justify-center text-center">
-          <CatalogCTAButton
-            to="/catalogo"
-            label="Ver Catálogo Completo"
-            size="lg"
-            variant="industrial"
-          />
+        <div className="mt-12 sm:mt-16 md:mt-20 flex flex-col items-center justify-center text-center">
+          <CatalogCTAButton to="/catalogo" label="Ver Catálogo Completo" size="lg" />
         </div>
       </div>
     </section>

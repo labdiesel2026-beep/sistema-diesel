@@ -18,6 +18,7 @@
 
 import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from "axios";
 import { toast } from "sonner";
+import { getAuthToken, setAuthToken } from "./api";
 
 const rawBaseUrl = (
   (import.meta.env?.["VITE_API_URL"] as string | undefined) || "http://localhost:3001"
@@ -149,6 +150,10 @@ apiClient.interceptors.request.use(
     config.withCredentials = true;
     if (config.headers) {
       config.headers.set("X-Requested-With", "XMLHttpRequest");
+      const token = getAuthToken();
+      if (token && !config.headers.has("Authorization")) {
+        config.headers.set("Authorization", `Bearer ${token}`);
+      }
     }
     return config;
   },
@@ -225,17 +230,27 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        const token = getAuthToken();
+        const refreshHeaders: Record<string, string> = {
+          "X-Requested-With": "XMLHttpRequest",
+        };
+        if (token) {
+          refreshHeaders["Authorization"] = `Bearer ${token}`;
+        }
+
         // Ejecutar refresh silencioso contra /api/auth/refresh con withCredentials: true
-        await axios.post(
+        const refreshResponse = await axios.post<{ token?: string }>(
           REFRESH_ENDPOINT,
           {},
           {
             withCredentials: true,
-            headers: {
-              "X-Requested-With": "XMLHttpRequest",
-            },
+            headers: refreshHeaders,
           },
         );
+
+        if (refreshResponse?.data?.token) {
+          setAuthToken(refreshResponse.data.token);
+        }
 
         // Refresh 200 OK: Reintentar transparentemente la original y liberar la cola
         isRefreshing = false;
@@ -271,6 +286,7 @@ apiClient.interceptors.response.use(
 
         // Falla HTTP 401/403 en Refresh: Sesión expirada definitivamente
         if (refreshStatus === 401 || refreshStatus === 403) {
+          setAuthToken(null);
           retainRequest(originalRequest);
           for (const item of failedQueue) {
             retainRequest(item.config);

@@ -22,7 +22,12 @@ export const requireAuth: RequestHandler = (
   res: Response,
   next: NextFunction,
 ): void => {
-  const token = req.cookies?.[AUTH_COOKIE_NAME];
+  let token = req.cookies?.[AUTH_COOKIE_NAME];
+
+  // Soporte dual: cookie HttpOnly (prioritaria) o cabecera Authorization: Bearer <token>
+  if (!token && req.headers.authorization?.startsWith("Bearer ")) {
+    token = req.headers.authorization.slice(7).trim();
+  }
 
   if (!token || typeof token !== "string") {
     res.status(401).json({

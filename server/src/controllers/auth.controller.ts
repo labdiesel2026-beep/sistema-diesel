@@ -19,7 +19,7 @@ import type { LoginInput } from "../schemas/auth.schemas.js";
  *   y retorna el usuario { id, email, role }.
  */
 export async function login(
-  req: Request<{}, {}, LoginInput>,
+  req: Request<Record<string, never>, Record<string, never>, LoginInput>,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
@@ -51,15 +51,19 @@ export async function login(
     });
 
     // Configurar cookie de sesión con directivas de máxima seguridad (RF-01, 4.1)
+    const sameSitePolicy = ENV.COOKIE_SAME_SITE;
+    const isSecure = ENV.NODE_ENV === "production" || sameSitePolicy === "none";
+
     res.cookie(AUTH_COOKIE_NAME, token, {
       httpOnly: true,
-      secure: ENV.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: isSecure,
+      sameSite: sameSitePolicy,
       path: "/",
       maxAge: AUTH_TOKEN_EXPIRATION_SECONDS * 1000, // 28800s en ms
     });
 
     res.status(200).json({
+      token,
       user: {
         id: user.id,
         email: user.email,
@@ -79,10 +83,13 @@ export async function login(
  */
 export async function logout(_req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    const sameSitePolicy = ENV.COOKIE_SAME_SITE;
+    const isSecure = ENV.NODE_ENV === "production" || sameSitePolicy === "none";
+
     res.cookie(AUTH_COOKIE_NAME, "", {
       httpOnly: true,
-      secure: ENV.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: isSecure,
+      sameSite: sameSitePolicy,
       path: "/",
       maxAge: 0,
     });
@@ -90,6 +97,65 @@ export async function logout(_req: Request, res: Response, next: NextFunction): 
     res.status(200).json({ success: true });
   } catch (error) {
     next(error);
+  }
+}
+
+/**
+ * Renovación silenciosa de sesión (JWT Refresh).
+ * (RF-01, TASK-23)
+ *
+ * Endpoint: POST /api/auth/refresh
+ * - Verifica token existente desde cookie HttpOnly o cabecera Authorization: Bearer.
+ * - Si es válido y el usuario existe en BD, emite nuevo token y renueva la cookie.
+ * - Si expiró o es inválido, responde 401 Unauthorized.
+ */
+export async function refresh(req: Request, res: Response, _next: NextFunction): Promise<void> {
+  try {
+    let token = req.cookies?.[AUTH_COOKIE_NAME];
+    if (!token && req.headers.authorization?.startsWith("Bearer ")) {
+      token = req.headers.authorization.slice(7).trim();
+    }
+
+    if (!token) {
+      res.status(401).json({ error: "Sesión no válida o expirada" });
+      return;
+    }
+
+    const payload = authService.verifyToken(token);
+
+    const user = await prisma.adminUser.findUnique({
+      where: { id: payload.id },
+      select: { id: true, email: true, role: true },
+    });
+
+    if (!user) {
+      res.status(401).json({ error: "Usuario no encontrado o dado de baja" });
+      return;
+    }
+
+    const newToken = authService.generateToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    const sameSitePolicy = ENV.COOKIE_SAME_SITE;
+    const isSecure = ENV.NODE_ENV === "production" || sameSitePolicy === "none";
+
+    res.cookie(AUTH_COOKIE_NAME, newToken, {
+      httpOnly: true,
+      secure: isSecure,
+      sameSite: sameSitePolicy,
+      path: "/",
+      maxAge: AUTH_TOKEN_EXPIRATION_SECONDS * 1000,
+    });
+
+    res.status(200).json({
+      token: newToken,
+      user,
+    });
+  } catch {
+    res.status(401).json({ error: "Sesión no válida o expirada" });
   }
 }
 

@@ -34,6 +34,17 @@ export const API_ORIGIN: string = rawBaseUrl.endsWith("/api")
 
 export const BASE_URL: string = API_ORIGIN;
 
+// Token JWT en memoria volátil (Zero-Trust ASVS / OWASP: prohibido almacenar en localStorage/sessionStorage)
+let inMemoryToken: string | null = null;
+
+export function setAuthToken(token: string | null): void {
+  inMemoryToken = token;
+}
+
+export function getAuthToken(): string | null {
+  return inMemoryToken;
+}
+
 export interface RequestOptions extends Omit<RequestInit, "body"> {
   params?: Record<string, string | number | boolean | undefined | null>;
 }
@@ -80,6 +91,12 @@ async function request<T>(
 
   // Inyección obligatoria de cabecera Anti-CSRF para peticiones mutables y peticiones seguras
   headers.set("X-Requested-With", "XMLHttpRequest");
+
+  // Inyección de token de autorización Bearer si existe en memoria y no fue provisto manualmente
+  const token = inMemoryToken;
+  if (token && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
 
   if (!isFormData && body && !(body instanceof FormData)) {
     headers.set("Content-Type", "application/json");

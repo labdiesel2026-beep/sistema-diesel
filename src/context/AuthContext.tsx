@@ -9,7 +9,7 @@ import {
 import { Lock, Loader2, AlertCircle } from "lucide-react";
 import type { AdminUser } from "@/types/admin";
 import { loginSchema, type LoginFormData } from "@/lib/validations/admin-schemas";
-import { api, ApiError } from "@/lib/api";
+import { api, ApiError, getAuthToken, setAuthToken } from "@/lib/api";
 import { retryRetainedRequests } from "@/lib/api-client";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
@@ -135,7 +135,9 @@ export function ReauthModal({
           // Errores de reintento manejados por los consumidores individuales
         }
       } else {
-        setErrorMessage(result.error || "Credenciales incorrectas. Verifique e intente nuevamente.");
+        setErrorMessage(
+          result.error || "Credenciales incorrectas. Verifique e intente nuevamente.",
+        );
       }
     } catch (err: any) {
       setErrorMessage(err?.message || "Credenciales incorrectas");
@@ -261,6 +263,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 
     const handleAuthMessage = (data: any) => {
       if (data?.type === "SESSION_REVOKED") {
+        setAuthToken(null);
         setIsAuthenticated(false);
         setUser(null);
         setReauthModalOpen(false);
@@ -322,7 +325,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Rehidratación silenciosa de sesión al montar mediante GET a /api/auth/me
+  // Rehidratación silenciosa de sesión al montar mediante GET a /api/auth/me y refresh
   const checkSession = async (): Promise<void> => {
     try {
       const currentUser = await api.get<AdminUser>("/api/auth/me", {
@@ -331,12 +334,31 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       if (currentUser && currentUser.id) {
         setUser(currentUser);
         setIsAuthenticated(true);
+
+        // Si la cookie HttpOnly permitió rehidratar pero no tenemos token Bearer en memoria
+        // (por ejemplo, tras recargar F5), refrescar para poblar el token en memoria
+        if (!getAuthToken()) {
+          try {
+            const refreshRes = await api.post<{ token: string; user: AdminUser }>(
+              "/api/auth/refresh",
+              {},
+              { credentials: "include" },
+            );
+            if (refreshRes?.token) {
+              setAuthToken(refreshRes.token);
+            }
+          } catch {
+            // Si el refresh falla pero /me funcionó, se mantiene la sesión activa
+          }
+        }
       } else {
+        setAuthToken(null);
         setUser(null);
         setIsAuthenticated(false);
       }
     } catch {
       // Estado por defecto seguro ante 401 (Unauthorized) o fallo de red
+      setAuthToken(null);
       setUser(null);
       setIsAuthenticated(false);
     } finally {
@@ -383,7 +405,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 
     // 3. Entorno real (development / production): llamada a POST /api/auth/login
     try {
-      const response = await api.post<{ user: AdminUser }>(
+      const response = await api.post<{ user: AdminUser; token?: string }>(
         "/api/auth/login",
         {
           email,
@@ -395,6 +417,9 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       );
 
       if (response && response.user) {
+        if (response.token) {
+          setAuthToken(response.token);
+        }
         setIsAuthenticated(true);
         setUser(response.user);
         return { success: true };
@@ -419,6 +444,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = (): void => {
+    setAuthToken(null);
     setIsAuthenticated(false);
     setUser(null);
     setReauthModalOpen(false);
@@ -429,9 +455,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       timestamp: Date.now(),
     });
 
-    void api
-      .post("/api/auth/logout", undefined, { credentials: "include" })
-      .catch(() => {});
+    void api.post("/api/auth/logout", undefined, { credentials: "include" }).catch(() => {});
   };
 
   return (

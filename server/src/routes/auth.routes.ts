@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { login, logout, me } from "../controllers/auth.controller.js";
+import { login, logout, me, refresh } from "../controllers/auth.controller.js";
 import { authRateLimiter } from "../middleware/rate-limit.middleware.js";
 import { csrfProtection } from "../middleware/csrf.middleware.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
@@ -18,6 +18,9 @@ router.post("/login", authRateLimiter, csrfProtection, validate(loginSchema), lo
 
 // Cerrar sesión (Logout con Anti-CSRF y destrucción de cookie)
 router.post("/logout", csrfProtection, logout);
+
+// Refresco silencioso de sesión (Anti-CSRF y rotación de JWT)
+router.post("/refresh", csrfProtection, refresh);
 
 // Sesión silenciosa / Perfil actual (Rehidratación protegida por cookie HttpOnly)
 router.get("/me", requireAuth, me);

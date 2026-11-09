@@ -31,6 +31,7 @@ export const envSchema = z
     CLOUDINARY_CLOUD_NAME: z.string().min(1, "CLOUDINARY_CLOUD_NAME es obligatorio"),
     CLOUDINARY_API_KEY: z.string().min(1, "CLOUDINARY_API_KEY es obligatorio"),
     CLOUDINARY_API_SECRET: z.string().min(1, "CLOUDINARY_API_SECRET es obligatorio"),
+    COOKIE_SAME_SITE: z.enum(["strict", "lax", "none"]).default("strict"),
   })
   .strict();
 
@@ -60,6 +61,7 @@ export function validateEnv(customEnv?: Record<string, unknown>): EnvConfig {
       "CLOUDINARY_CLOUD_NAME",
       "CLOUDINARY_API_KEY",
       "CLOUDINARY_API_SECRET",
+      "COOKIE_SAME_SITE",
     ] as const;
 
     for (const key of knownKeys) {

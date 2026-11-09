@@ -21,9 +21,18 @@ export class ApiError extends Error {
   }
 }
 
-const BASE_URL = (
-  (import.meta.env["VITE_API_URL"] as string | undefined) || "http://localhost:3001"
-).replace(/\/+$/, "");
+const rawBaseUrl = (
+  (import.meta.env?.["VITE_API_URL"] as string | undefined) || "http://localhost:3001"
+)
+  .trim()
+  .replace(/\/+$/, "");
+
+// Base del servidor sin /api final para endpoints generales y subidas
+export const API_ORIGIN: string = rawBaseUrl.endsWith("/api")
+  ? rawBaseUrl.slice(0, -4)
+  : rawBaseUrl;
+
+export const BASE_URL: string = API_ORIGIN;
 
 export interface RequestOptions extends Omit<RequestInit, "body"> {
   params?: Record<string, string | number | boolean | undefined | null>;
@@ -40,9 +49,16 @@ async function request<T>(
   if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
     url = endpoint;
   } else {
-    const base = BASE_URL.endsWith("/api") ? BASE_URL.slice(0, -4) : BASE_URL;
-    const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-    url = `${base}${cleanEndpoint}`;
+    let cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+    // Si la ruta no inicia con /api ni con rutas raíz de servidor (/uploads, /health), prefijar /api
+    if (
+      !cleanEndpoint.startsWith("/api") &&
+      !cleanEndpoint.startsWith("/uploads") &&
+      !cleanEndpoint.startsWith("/health")
+    ) {
+      cleanEndpoint = `/api${cleanEndpoint}`;
+    }
+    url = `${API_ORIGIN}${cleanEndpoint}`;
   }
 
   if (params) {
@@ -163,7 +179,7 @@ export function resolveImageUrl(imagePath?: string | null): string {
     return imagePath;
   }
   const cleanPath = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
-  return `${BASE_URL}${cleanPath}`;
+  return `${API_ORIGIN}${cleanPath}`;
 }
 
 export default api;

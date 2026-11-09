@@ -27,6 +27,16 @@ describe("Validación de Variables de Entorno (Crash Early) — Tarea 1.1", () =
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
+  it("debe eliminar cualquier barra final '/' de VITE_API_URL para evitar URLs duplicadas", () => {
+    const config = validateEnv({
+      VITE_API_URL: "https://api.laboratoriodiesel.com///",
+      VITE_CONTACT_WHATSAPP: "5492657659108",
+      PROD: false,
+    });
+
+    expect(config.VITE_API_URL).toBe("https://api.laboratoriodiesel.com");
+  });
+
   it("debe aplicar fallback seguro y emitir console.warn en entorno de desarrollo si faltan variables", () => {
     const config = validateEnv({
       PROD: false,

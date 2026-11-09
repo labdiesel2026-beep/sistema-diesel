@@ -41,6 +41,15 @@ describe("Validación Estricta de Variables de Entorno (env.ts)", () => {
     expect(result.success).toBe(false);
   });
 
+  it("asigna el puerto 3000 por defecto si no se especifica PORT", () => {
+    const { PORT, ...withoutPort } = validBaseConfig;
+    const result = envSchema.safeParse(withoutPort);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.PORT).toBe(3000);
+    }
+  });
+
   it("rechaza campos no autorizados por ser .strict()", () => {
     const withExtra = {
       ...validBaseConfig,

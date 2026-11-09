@@ -123,37 +123,44 @@ const SEED_PRODUCTS = [
 async function main() {
   console.log("🌱 Iniciando aprovisionamiento inicial (Seed)...");
 
-  // 1. Lectura obligatoria de credenciales desde .env (CA-11.1)
-  const adminEmail = ENV.ADMIN_INITIAL_EMAIL;
-  const rawPassword = ENV.ADMIN_INITIAL_PASSWORD;
+  // 1. Lectura segura de credenciales desde variables de entorno (CA-11.1)
+  const adminEmail = (ENV.ADMIN_INITIAL_EMAIL || process.env.ADMIN_INITIAL_EMAIL)?.trim();
+  const rawPassword = ENV.ADMIN_INITIAL_PASSWORD || process.env.ADMIN_INITIAL_PASSWORD;
 
-  if (!adminEmail || !rawPassword) {
-    throw new Error(
-      "❌ [Seed Error] Variables obligatorias ADMIN_INITIAL_EMAIL y ADMIN_INITIAL_PASSWORD no definidas en el archivo .env raíz (CA-11.1)",
+  if (adminEmail && rawPassword) {
+    // 2. Hasheo exclusivo con Argon2id y Upsert idempotente de AdminUser (CA-11.2)
+    console.log(`🔐 Hasheando credenciales de admin (${adminEmail}) con Argon2id...`);
+    const passwordHash = await argon2.hash(rawPassword, {
+      type: argon2.argon2id,
+      memoryCost: 65536, // 64 MB
+      timeCost: 3,
+      parallelism: 1,
+    });
+
+    const admin = await prisma.adminUser.upsert({
+      where: { email: adminEmail },
+      update: { passwordHash, role: "admin" },
+      create: {
+        email: adminEmail,
+        passwordHash,
+        role: "admin",
+      },
+    });
+    console.log(
+      `✅ AdminUser listo: ${admin.email} (Hash: ${admin.passwordHash.substring(0, 20)}...)`,
     );
+  } else {
+    const existingAdminCount = await prisma.adminUser.count();
+    if (existingAdminCount > 0) {
+      console.log(
+        "ℹ️  [Seed Info] Variables ADMIN_INITIAL_EMAIL / ADMIN_INITIAL_PASSWORD no provistas, pero ya existe un administrador en la BD.",
+      );
+    } else {
+      throw new Error(
+        "❌ [Seed Error] Variables obligatorias ADMIN_INITIAL_EMAIL y ADMIN_INITIAL_PASSWORD no definidas en el entorno y no existe administrador en la BD.",
+      );
+    }
   }
-
-  // 2. Hasheo exclusivo con Argon2id y Upsert de AdminUser (CA-11.2)
-  console.log(`🔐 Hasheando credenciales de admin (${adminEmail}) con Argon2id...`);
-  const passwordHash = await argon2.hash(rawPassword, {
-    type: argon2.argon2id,
-    memoryCost: 65536, // 64 MB
-    timeCost: 3,
-    parallelism: 1,
-  });
-
-  const admin = await prisma.adminUser.upsert({
-    where: { email: adminEmail },
-    update: { passwordHash, role: "admin" },
-    create: {
-      email: adminEmail,
-      passwordHash,
-      role: "admin",
-    },
-  });
-  console.log(
-    `✅ AdminUser listo: ${admin.email} (Hash: ${admin.passwordHash.substring(0, 20)}...)`,
-  );
 
   // 3. Aprovisionamiento idempotente de Marcas (RF-09, CA-11.3)
   console.log("🏷️  Aprovisionando marcas...");

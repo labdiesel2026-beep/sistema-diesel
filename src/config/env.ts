@@ -9,7 +9,8 @@ export const envSchema = z
     VITE_API_URL: z
       .string({ required_error: "VITE_API_URL no puede ser vacía" })
       .trim()
-      .min(1, "VITE_API_URL no puede ser vacía"),
+      .min(1, "VITE_API_URL no puede ser vacía")
+      .transform((val) => val.replace(/\/+$/, "")),
     VITE_CONTACT_WHATSAPP: z
       .string({ required_error: "VITE_CONTACT_WHATSAPP inválido" })
       .trim()
@@ -62,7 +63,7 @@ export function validateEnv(customEnv?: Record<string, unknown>): EnvConfig {
     return {
       VITE_API_URL:
         typeof apiUrl === "string" && apiUrl.trim() !== ""
-          ? apiUrl.trim()
+          ? apiUrl.trim().replace(/\/+$/, "")
           : "http://localhost:3000/api",
       VITE_CONTACT_WHATSAPP:
         typeof whatsapp === "string" && whatsapp.trim() !== "" ? whatsapp.trim() : "5492657659108",

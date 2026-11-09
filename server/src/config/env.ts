@@ -21,7 +21,7 @@ if (fs.existsSync(localEnvPath)) {
  */
 export const envSchema = z
   .object({
-    PORT: z.coerce.number().int().positive().default(3001),
+    PORT: z.coerce.number().int().positive().default(3000),
     DATABASE_URL: z.string().min(1, "DATABASE_URL es obligatoria"),
     JWT_SECRET: z.string().min(32, "JWT_SECRET debe tener al menos 32 caracteres"),
     CORS_ORIGIN: z.string().min(1, "CORS_ORIGIN es obligatorio"),

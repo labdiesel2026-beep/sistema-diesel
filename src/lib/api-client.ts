@@ -19,12 +19,18 @@
 import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from "axios";
 import { toast } from "sonner";
 
-export const BASE_URL: string = (
+const rawBaseUrl = (
   (import.meta.env?.["VITE_API_URL"] as string | undefined) || "http://localhost:3001"
-).replace(/\/+$/, "");
+)
+  .trim()
+  .replace(/\/+$/, "");
 
-const apiOrigin: string = BASE_URL.endsWith("/api") ? BASE_URL.slice(0, -4) : BASE_URL;
-export const REFRESH_ENDPOINT: string = `${apiOrigin}/api/auth/refresh`;
+export const API_ORIGIN: string = rawBaseUrl.endsWith("/api")
+  ? rawBaseUrl.slice(0, -4)
+  : rawBaseUrl;
+
+export const BASE_URL: string = API_ORIGIN;
+export const REFRESH_ENDPOINT: string = `${API_ORIGIN}/api/auth/refresh`;
 
 export interface CustomRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -33,14 +39,14 @@ export interface CustomRequestConfig extends InternalAxiosRequestConfig {
 export interface RetainedRequest {
   url?: string | undefined;
   method?: string | undefined;
-  data?: any;
-  headers?: any;
+  data?: unknown;
+  headers?: unknown;
   config: InternalAxiosRequestConfig;
 }
 
 interface QueueItem {
-  resolve: (value?: any) => void;
-  reject: (reason?: any) => void;
+  resolve: (value?: unknown) => void;
+  reject: (reason?: unknown) => void;
   config: InternalAxiosRequestConfig;
 }
 
@@ -82,10 +88,10 @@ export function retainRequest(config: InternalAxiosRequestConfig): void {
 /**
  * Re-ejecuta todas las solicitudes retenidas tras login exitoso en el modal
  */
-export async function retryRetainedRequests(): Promise<any[]> {
+export async function retryRetainedRequests(): Promise<unknown[]> {
   const requests = [...retainedRequests];
   clearRetainedRequests();
-  const results = [];
+  const results: unknown[] = [];
   for (const req of requests) {
     const retryConfig: CustomRequestConfig = {
       ...req.config,
@@ -99,7 +105,7 @@ export async function retryRetainedRequests(): Promise<any[]> {
 /**
  * Procesa la cola de peticiones en espera tras completar o fallar el refresh
  */
-const processQueue = (error: any = null) => {
+const processQueue = (error: unknown = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -130,7 +136,9 @@ export function isNetworkError(error: unknown): boolean {
   if (err.isNetworkError) return true;
   if (typeof navigator !== "undefined" && !navigator.onLine) return true;
   if (err.code === "ERR_INTERNET_DISCONNECTED" || err.code === "ERR_NETWORK") return true;
-  if (typeof err.message === "string" && err.message.toLowerCase().includes("network error")) return true;
+  if (typeof err.message === "string" && err.message.toLowerCase().includes("network error")) {
+    return true;
+  }
   if (!err.response && Boolean(err.request || err.code)) return true;
   return false;
 }
@@ -233,15 +241,19 @@ apiClient.interceptors.response.use(
         isRefreshing = false;
         processQueue(null);
         return apiClient.request(originalRequest);
-      } catch (refreshError: any) {
+      } catch (refreshError) {
         isRefreshing = false;
-        const refreshStatus = refreshError.response?.status;
+        const refreshStatus = axios.isAxiosError(refreshError)
+          ? refreshError.response?.status
+          : undefined;
 
         // Falla de red durante refresh: mantener sesión y notificar
         if (isNetworkError(refreshError)) {
           try {
             toast.error("Error de conexión de red. Verifique su conexión e intente nuevamente.");
-          } catch {}
+          } catch {
+            // Silenciar error si toast no está disponible
+          }
           processQueue(refreshError);
           return Promise.reject(refreshError);
         }
@@ -250,7 +262,9 @@ apiClient.interceptors.response.use(
         if (refreshStatus === 500) {
           try {
             toast.error("Error de comunicación temporal. Reintente.");
-          } catch {}
+          } catch {
+            // Silenciar error si toast no está disponible
+          }
           processQueue(refreshError);
           return Promise.reject(refreshError);
         }

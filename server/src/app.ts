@@ -22,25 +22,34 @@ app.use(
   }),
 );
 
-// CORS restrictivo exclusivo a CORS_ORIGIN con soporte de credenciales (RF-01, 4.3)
+// Lista blanca estricta de orígenes autorizados (soporta múltiples dominios y normaliza barras finales)
+const configuredOrigins = (ENV.CORS_ORIGIN || "")
+  .split(",")
+  .map((url) => url.trim().replace(/\/+$/, ""))
+  .filter(Boolean);
+
+const defaultDevOrigins = ["http://localhost:3000", "http://localhost:5173"];
+const allowedOrigins = Array.from(new Set([...configuredOrigins, ...defaultDevOrigins]));
+
+// CORS defensivo exclusivo a CORS_ORIGIN con soporte de credenciales y preflight sin bloqueo (RF-01, 4.3)
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Peticiones sin origen (ej. curl, postman, herramientas internas) o CORS_ORIGIN / dev ports
-      if (
-        !origin ||
-        origin === ENV.CORS_ORIGIN ||
-        origin === "http://localhost:3000" ||
-        origin === "http://localhost:5173"
-      ) {
-        callback(null, true);
-      } else {
-        callback(new Error(`Bloqueado por política CORS: origen ${origin} no permitido`));
+      // Peticiones sin origen (ej. curl, postman, herramientas internas, SSR)
+      if (!origin) {
+        return callback(null, true);
       }
+      const cleanOrigin = origin.trim().replace(/\/+$/, "");
+      if (allowedOrigins.includes(cleanOrigin)) {
+        return callback(null, true);
+      }
+      // Rechazar origen no autorizado sin arrojar excepción para no romper preflight OPTIONS con 500
+      return callback(null, false);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    optionsSuccessStatus: 200,
   }),
 );
 
@@ -68,7 +77,7 @@ app.get("/", (_req, res) => {
   res.status(200).json({
     name: "Laboratorio Diésel API",
     status: "online",
-    port: ENV.PORT,
+    port: Number(process.env.PORT) || ENV.PORT || 3000,
   });
 });
 

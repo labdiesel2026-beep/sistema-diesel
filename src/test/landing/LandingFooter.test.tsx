@@ -107,5 +107,17 @@ describe("Pie de Página Institucional (LandingFooter.tsx)", () => {
 
     expect(htmlContent).not.toMatch(/blue-/);
   });
-});
 
+  it("renderiza el botón 'Volver arriba' con estilo de botón físico industrial interactivo", () => {
+    render(<LandingFooter />);
+
+    const backToTopLink = screen.getByRole("link", { name: /Volver arriba de la página/i });
+    expect(backToTopLink).toBeInTheDocument();
+    expect(backToTopLink.className).toContain("inline-flex items-center justify-center");
+    expect(backToTopLink.className).toContain("border-white/20");
+    expect(backToTopLink.className).toContain("bg-white/[0.03]");
+    expect(backToTopLink.className).toContain("hover:bg-white/10");
+    expect(backToTopLink.className).toContain("text-zinc-300");
+    expect(backToTopLink.className).toContain("rounded-md");
+  });
+});

@@ -48,10 +48,11 @@ describe("Componente PoliciesBanner (PoliciesBanner.tsx)", () => {
       name: /Aviso de políticas comerciales y de garantía/i,
     });
     expect(banner).toBeInTheDocument();
-    expect(banner.className).toContain("z-30");
-    expect(banner.className).toContain("sm:left-6");
-    expect(banner.className).toContain("sm:bottom-6");
-    expect(banner.className).toContain("sm:max-w-md");
+    expect(banner.className).toContain("z-50");
+    expect(banner.className).toContain("bottom-24");
+    expect(banner.className).toContain("md:left-6");
+    expect(banner.className).toContain("md:bottom-6");
+    expect(banner.className).toContain("md:max-w-md");
   });
 
   it("renderiza el título, resumen y los dos botones de acción (RF-04.3)", () => {

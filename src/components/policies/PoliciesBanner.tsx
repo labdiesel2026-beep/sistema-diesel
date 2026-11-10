@@ -45,7 +45,7 @@ export function PoliciesBanner({ onOpenModal, className = "" }: PoliciesBannerPr
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 30, scale: 0.96, transition: { duration: 0.3 } }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className={`fixed bottom-3 inset-x-3 z-30 sm:bottom-6 sm:left-6 sm:right-auto sm:max-w-md w-auto rounded-none border border-white/10 bg-zinc-950/95 p-5 shadow-2xl backdrop-blur-md text-zinc-100 ${className}`}
+          className={`fixed bottom-24 inset-x-3 z-50 md:bottom-6 md:left-6 md:right-auto md:max-w-md w-auto rounded-none border border-white/10 bg-zinc-950/95 p-5 shadow-2xl backdrop-blur-md text-zinc-100 ${className}`}
         >
           <div className="flex items-start gap-3.5">
             {/* Ícono de garantía institucional */}

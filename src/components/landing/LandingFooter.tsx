@@ -3,6 +3,8 @@ import { Link } from "@tanstack/react-router";
 import { MapPin, ArrowUp, ShieldCheck } from "lucide-react";
 import { SITE_CONFIG } from "@/config/site-config";
 import { PoliciesModal } from "@/components/policies/PoliciesModal";
+import { PrivacyPolicyModal } from "@/components/policies/PrivacyPolicyModal";
+import { LegalNoticeModal } from "@/components/policies/LegalNoticeModal";
 
 interface LandingFooterProps {
   className?: string;
@@ -12,6 +14,8 @@ interface LandingFooterProps {
 export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFooterProps) {
   const currentYear = new Date().getFullYear();
   const [internalModalOpen, setInternalModalOpen] = useState(false);
+  const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
+  const [legalModalOpen, setLegalModalOpen] = useState(false);
 
   const handleOpenPolicies = () => {
     if (onOpenPoliciesModal) {
@@ -121,6 +125,28 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
               >
                 {SITE_CONFIG.commercialPolicies.footerLinkText}
               </button>
+              <span className="hidden sm:inline" aria-hidden="true">
+                ·
+              </span>
+              <button
+                type="button"
+                onClick={() => setPrivacyModalOpen(true)}
+                className="text-zinc-400 hover:text-white underline decoration-zinc-700 hover:decoration-zinc-400 transition-colors cursor-pointer"
+                data-testid="footer-privacy-btn"
+              >
+                Política de Privacidad
+              </button>
+              <span className="hidden sm:inline" aria-hidden="true">
+                ·
+              </span>
+              <button
+                type="button"
+                onClick={() => setLegalModalOpen(true)}
+                className="text-zinc-400 hover:text-white underline decoration-zinc-700 hover:decoration-zinc-400 transition-colors cursor-pointer"
+                data-testid="footer-legal-btn"
+              >
+                Aviso Legal y Términos
+              </button>
             </div>
 
             {/* Mención explícita institucional GEPI SOFTWARE (RF-06) */}
@@ -138,7 +164,7 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
 
             <a
               href="#inicio"
-              className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.25em] uppercase text-zinc-500 transition-colors hover:text-white"
+              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 border border-white/20 bg-white/[0.03] hover:bg-white/10 hover:border-white/40 text-zinc-300 text-xs font-semibold uppercase tracking-wider transition-all rounded-md cursor-pointer"
               aria-label="Volver arriba de la página"
             >
               <span>Volver arriba</span>
@@ -152,6 +178,10 @@ export function LandingFooter({ className = "", onOpenPoliciesModal }: LandingFo
       {!onOpenPoliciesModal && (
         <PoliciesModal open={internalModalOpen} onOpenChange={setInternalModalOpen} />
       )}
+
+      {/* Modales accesibles de Privacidad y Aviso Legal */}
+      <PrivacyPolicyModal open={privacyModalOpen} onOpenChange={setPrivacyModalOpen} />
+      <LegalNoticeModal open={legalModalOpen} onOpenChange={setLegalModalOpen} />
     </>
   );
 }

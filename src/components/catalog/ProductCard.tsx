@@ -47,7 +47,19 @@ export function ProductCard({
       data-testid={`product-card-${product.id}`}
     >
       {/* Contenedor Multimedia Cuadrado 1:1 Estandarizado */}
-      <div className="relative aspect-square w-full bg-white flex items-center justify-center p-2 rounded-t-lg overflow-hidden border-b border-white/10">
+      <div
+        className="relative aspect-square w-full bg-white flex items-center justify-center p-2 rounded-t-lg overflow-hidden border-b border-white/10 cursor-pointer"
+        onClick={() => onViewDetail?.(product.id)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onViewDetail?.(product.id);
+          }
+        }}
+        aria-label={`Ver detalles técnicos de ${product.name}`}
+      >
         <ProductImageWithFallback
           src={product.imageUrl}
           alt={product.name}
@@ -117,7 +129,7 @@ export function ProductCard({
         {/* Título de Producto (acotado a 2 líneas con line-clamp-2) */}
         <h3
           className="line-clamp-2 font-display text-base font-semibold leading-snug text-foreground transition-colors group-hover:text-white cursor-pointer"
-          onClick={() => onViewDetail && onViewDetail(product.id)}
+          onClick={() => onViewDetail?.(product.id)}
           title={`Ver detalles de ${product.name}`}
         >
           {product.name}
@@ -151,7 +163,10 @@ export function ProductCard({
             <Button
               variant="industrial"
               className="h-10 w-full gap-2 text-xs font-semibold"
-              onClick={() => add(product)}
+              onClick={(e) => {
+                e.stopPropagation();
+                add(product);
+              }}
               aria-label={
                 cartQuantity > 0
                   ? `En el carrito (${cartQuantity}). Agregar una unidad más de ${product.name}`
@@ -175,12 +190,18 @@ export function ProductCard({
             <Button
               variant="whatsapp"
               className="h-10 w-full gap-2 text-xs font-semibold tracking-wide uppercase shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-950/25"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
               asChild
             >
               <a
                 href={directWhatsAppUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
                 aria-label={`Consultar por ${product.name} en WhatsApp`}
               >
                 <FaWhatsapp className="size-4 shrink-0" />

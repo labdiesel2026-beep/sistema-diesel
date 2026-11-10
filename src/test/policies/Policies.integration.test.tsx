@@ -24,11 +24,8 @@ vi.mock("@tanstack/react-router", () => ({
       {children}
     </a>
   ),
-  useRouterState: ({
-    select,
-  }: {
-    select: (state: { location: { pathname: string } }) => string;
-  }) => select({ location: { pathname: "/" } }),
+  useRouterState: ({ select }: { select: (state: { location: { pathname: string } }) => string }) =>
+    select({ location: { pathname: "/" } }),
 }));
 
 // Mock de AnimatePresence para desmontaje sincrónico en jsdom
@@ -77,12 +74,12 @@ describe("Suite de Integración: Políticas Comerciales y Banner (Policies.integ
       vi.advanceTimersByTime(1000);
     });
 
-    // El banner se proyecta en z-30
+    // El banner se proyecta en z-50
     const banner = screen.getByRole("region", {
       name: /Aviso de políticas comerciales y de garantía/i,
     });
     expect(banner).toBeInTheDocument();
-    expect(banner.className).toContain("z-30");
+    expect(banner.className).toContain("z-50");
 
     // Localizar botón de aceptación en el banner
     const acceptBtn = screen.getByRole("button", { name: /Aceptar y Continuar/i });
@@ -203,9 +200,7 @@ describe("Suite de Integración: Políticas Comerciales y Banner (Policies.integ
       footerPolicyButtons[0]!.click();
     });
 
-    expect(
-      screen.getByText(/Políticas comerciales aceptadas previamente/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Políticas comerciales aceptadas previamente/i)).toBeInTheDocument();
 
     const closeBtn = screen.getByRole("button", { name: /Cerrar políticas/i });
     expect(closeBtn).toBeInTheDocument();

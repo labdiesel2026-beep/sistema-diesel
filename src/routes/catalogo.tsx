@@ -21,6 +21,7 @@ import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/catalog/ProductCard";
+import { ProductDetailModal } from "@/components/catalog/ProductDetailModal";
 import { ProductGridSkeleton } from "@/components/catalog/ProductGridSkeleton";
 import { CatalogFilters } from "@/components/catalog/CatalogFilters";
 import { MobileFilterTrigger } from "@/components/catalog/FilterDrawer";
@@ -69,6 +70,9 @@ export function CatalogPage({
   const { count: cartCount } = useCatalogCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [selectedProductForModal, setSelectedProductForModal] = useState<CatalogProduct | null>(
+    null,
+  );
 
   // Estados de datos obtenidos de la API REST
   const [products, setProducts] = useState<CatalogProduct[]>(mockProducts || []);
@@ -390,6 +394,7 @@ export function CatalogPage({
                         key={product.id}
                         product={product}
                         brandName={brandsMap.get(product.brandId) || ""}
+                        onViewDetail={() => setSelectedProductForModal(product)}
                       />
                     ))}
                   </div>
@@ -398,6 +403,23 @@ export function CatalogPage({
             </div>
           )}
         </div>
+
+        {/* Modal de Detalles Técnicos de Producto (Dialog shadcn) */}
+        <ProductDetailModal
+          product={selectedProductForModal}
+          brandName={
+            selectedProductForModal ? brandsMap.get(selectedProductForModal.brandId) || "" : ""
+          }
+          categoryName={
+            selectedProductForModal && selectedProductForModal.categoryIds.length > 0
+              ? categories.find((c) => c.id === selectedProductForModal.categoryIds[0])?.name || ""
+              : ""
+          }
+          open={Boolean(selectedProductForModal)}
+          onOpenChange={(open) => {
+            if (!open) setSelectedProductForModal(null);
+          }}
+        />
 
         {/* Botón Flotante FILTROS TÉCNICOS en Móvil (z-35) */}
         <MobileFilterTrigger

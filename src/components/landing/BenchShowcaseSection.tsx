@@ -1,10 +1,9 @@
 import { motion } from "framer-motion";
 import { useScrollReveal } from "@/components/landing/scroll-reveal";
-import { useViewportVideo } from "@/hooks/useViewportVideo";
 import bancoPruebasImg from "@/assets/workshop/banco-pruebas.webp";
 import inyectoresDetalleImg from "@/assets/workshop/inyectores-detalle.webp";
 import banco2Img from "@/assets/workshop/Banco2.webp";
-import segundoBancoVideo from "@/assets/workshop/2doBanco.mp4";
+import bancoEnVivoVideo from "@/assets/workshop/banco-en-vivo.mp4";
 
 interface BenchShowcaseSectionProps {
   className?: string;
@@ -20,11 +19,6 @@ export function BenchShowcaseSection({ className = "" }: BenchShowcaseSectionPro
     viewportConfig,
     handleAnimationComplete,
   } = useScrollReveal("equipamiento");
-
-  const { videoRef, videoFallback, setVideoFallback } = useViewportVideo({
-    threshold: 0,
-    rootMargin: "200px 0px 200px 0px",
-  });
 
   return (
     <section
@@ -197,31 +191,27 @@ export function BenchShowcaseSection({ className = "" }: BenchShowcaseSectionPro
               </motion.div>
             </div>
 
-            {/* Columna Multimedia: Reproductor de video 2doBanco.mp4 con poster Banco2.webp */}
+            {/* Columna Multimedia: Reproductor de video banco-en-vivo.mp4 con poster Banco2.webp */}
             <div className="lg:col-span-7 lg:order-2 order-1 relative overflow-hidden border border-white/10 group aspect-video sm:aspect-[4/3] md:h-[550px] w-full bg-black transform-gpu will-change-transform [contain:layout_paint]">
-              {videoFallback ? (
-                <img
-                  src={banco2Img}
-                  alt="Segundo banco computarizado de alta presión en el taller"
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  loading="lazy"
-                />
-              ) : (
-                <video
-                  ref={videoRef}
-                  src={segundoBancoVideo}
-                  poster={banco2Img}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  suppressHydrationWarning
-                  onError={() => setVideoFallback(true)}
-                  className="w-full h-full object-cover transform-gpu will-change-transform [contain:layout_paint]"
-                  aria-label="Video del segundo banco de pruebas computarizado en funcionamiento"
-                />
-              )}
+              <video
+                ref={(el) => {
+                  if (el) {
+                    el.muted = true;
+                    el.defaultMuted = true;
+                    el.playsInline = true;
+                    el.play().catch(() => {});
+                  }
+                }}
+                src={bancoEnVivoVideo}
+                poster={banco2Img}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                className="w-full h-full object-cover transform-gpu will-change-transform [contain:layout_paint]"
+                aria-label="Video del banco de pruebas computarizado en funcionamiento"
+              />
 
               {/* Badge técnico contextual */}
               <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex items-center gap-2 border border-white/10 bg-zinc-950/85 px-2.5 py-1 sm:px-3 sm:py-1.5 font-mono text-[10px] tracking-widest uppercase text-white/80">

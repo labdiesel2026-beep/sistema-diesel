@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { SITE_CONFIG } from "@/config/site-config";
 import { buildWhatsAppUrl } from "@/lib/whatsapp-utils";
 import { useScrollReveal } from "@/components/landing/scroll-reveal";
-import { useViewportVideo } from "@/hooks/useViewportVideo";
-import videoSrc from "@/assets/workshop/banco-en-vivo.mp4";
+import segundoBancoVideo from "@/assets/workshop/2doBanco.mp4";
 import posterImg from "@/assets/workshop/inyectores-detalle.webp";
 
 interface WarrantySectionProps {
@@ -15,14 +14,6 @@ interface WarrantySectionProps {
 
 export function WarrantySection({ className = "" }: WarrantySectionProps) {
   const warrantyUrl = buildWhatsAppUrl(SITE_CONFIG.phone, SITE_CONFIG.whatsappMessages.warranty);
-  const {
-    videoRef,
-    videoFallback: shouldFallback,
-    setVideoFallback: setShouldFallback,
-  } = useViewportVideo({
-    threshold: 0,
-    rootMargin: "200px 0px 200px 0px",
-  });
 
   const {
     ref,
@@ -119,39 +110,30 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
               className="lg:col-span-5"
             >
               <div className="relative aspect-video w-full overflow-hidden border border-white/10 bg-black transform-gpu will-change-transform [contain:layout_paint]">
-                {shouldFallback ? (
-                  <img
-                    src={posterImg}
-                    alt="Banco de ensayo y calibración de precisión Common Rail"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <video
-                    ref={videoRef}
-                    src={videoSrc}
-                    poster={posterImg}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    suppressHydrationWarning
-                    onError={() => setShouldFallback(true)}
-                    className="h-full w-full object-cover transform-gpu will-change-transform [contain:layout_paint]"
-                    aria-label="Ensayo y prueba de inyectores diésel en banco computarizado"
-                  />
-                )}
+                <video
+                  ref={(el) => {
+                    if (el) {
+                      el.muted = true;
+                      el.defaultMuted = true;
+                      el.playsInline = true;
+                      el.play().catch(() => {});
+                    }
+                  }}
+                  src={segundoBancoVideo}
+                  poster={posterImg}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  className="h-full w-full object-cover transform-gpu will-change-transform [contain:layout_paint]"
+                  aria-label="Ensayo y prueba de inyectores diésel en banco computarizado"
+                />
 
                 {/* Badge técnico contextual */}
                 <div className="absolute top-4 left-4 z-10 flex items-center gap-2 border border-white/10 bg-zinc-950/80 px-3 py-1 font-mono text-[10px] tracking-widest uppercase text-white/80">
-                  <span
-                    className={`size-1.5 ${
-                      shouldFallback ? "bg-zinc-500" : "bg-emerald-400 animate-pulse"
-                    }`}
-                  />
-                  <span>
-                    {shouldFallback ? "Banco de Precisión Common Rail" : "Ensayo en Tiempo Real"}
-                  </span>
+                  <span className="size-1.5 bg-emerald-400 animate-pulse" />
+                  <span>Ensayo en Tiempo Real</span>
                 </div>
               </div>
             </motion.div>

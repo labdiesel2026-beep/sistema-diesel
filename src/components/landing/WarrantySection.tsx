@@ -20,7 +20,8 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
     videoFallback: shouldFallback,
     setVideoFallback: setShouldFallback,
   } = useViewportVideo({
-    threshold: 0.15,
+    threshold: 0,
+    rootMargin: "200px 0px 200px 0px",
   });
 
   const {
@@ -117,7 +118,7 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
               onAnimationComplete={handleAnimationComplete}
               className="lg:col-span-5"
             >
-              <div className="relative aspect-video w-full overflow-hidden border border-white/10 bg-black">
+              <div className="relative aspect-video w-full overflow-hidden border border-white/10 bg-black transform-gpu will-change-transform [contain:layout_paint]">
                 {shouldFallback ? (
                   <img
                     src={posterImg}
@@ -129,13 +130,14 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
                     ref={videoRef}
                     src={videoSrc}
                     poster={posterImg}
+                    autoPlay
                     muted
                     loop
                     playsInline
                     preload="metadata"
                     suppressHydrationWarning
                     onError={() => setShouldFallback(true)}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transform-gpu will-change-transform [contain:layout_paint]"
                     aria-label="Ensayo y prueba de inyectores diésel en banco computarizado"
                   />
                 )}

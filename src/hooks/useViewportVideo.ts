@@ -28,10 +28,10 @@ export interface UseViewportVideoResult {
  * - Limpieza segura de observadores y pausas en desmontaje.
  */
 export function useViewportVideo(options: UseViewportVideoOptions = {}): UseViewportVideoResult {
-  const { threshold = 0.15, rootMargin = "50px 0px 50px 0px" } = options;
+  const { threshold = 0, rootMargin = "200px 0px 200px 0px" } = options;
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [videoFallback, setVideoFallback] = useState<boolean>(false);
-  const [isVisible, setIsVisible] = useState<boolean>(false);
+  const [isVisible, setIsVisible] = useState<boolean>(true);
 
   useEffect(() => {
     // 1. Detección de conectividad lenta o ahorro de datos
@@ -60,8 +60,8 @@ export function useViewportVideo(options: UseViewportVideoOptions = {}): UseView
     const videoEl = videoRef.current;
     if (!videoEl) return;
 
-    // 2. IntersectionObserver para play / pause reactivo
-    let isIntersectingRef = false;
+    // 2. Control de reproducción seguro
+    let isIntersectingRef = true;
 
     const handlePlaySafe = () => {
       if (!videoEl) return;
@@ -87,28 +87,10 @@ export function useViewportVideo(options: UseViewportVideoOptions = {}): UseView
       }
     };
 
-    // Verificación preventiva de compatibilidad con reproducción automática
-    const probeAutoplay = () => {
-      try {
-        const playPromise = videoEl.play();
-        if (playPromise !== undefined && typeof playPromise.catch === "function") {
-          playPromise
-            .then(() => {
-              if (!isIntersectingRef) {
-                handlePauseSafe();
-              }
-            })
-            .catch(() => {
-              setVideoFallback(true);
-            });
-        }
-      } catch {
-        setVideoFallback(true);
-      }
-    };
+    // Iniciar reproducción activa por defecto al montar
+    handlePlaySafe();
 
-    probeAutoplay();
-
+    // 3. IntersectionObserver configurado a 200px de margen (threshold: 0)
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -118,7 +100,7 @@ export function useViewportVideo(options: UseViewportVideoOptions = {}): UseView
 
             if (entry.isIntersecting && !document.hidden) {
               handlePlaySafe();
-            } else {
+            } else if (!entry.isIntersecting) {
               handlePauseSafe();
             }
           }

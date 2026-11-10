@@ -22,7 +22,8 @@ export function BenchShowcaseSection({ className = "" }: BenchShowcaseSectionPro
   } = useScrollReveal("equipamiento");
 
   const { videoRef, videoFallback, setVideoFallback } = useViewportVideo({
-    threshold: 0.15,
+    threshold: 0,
+    rootMargin: "200px 0px 200px 0px",
   });
 
   return (
@@ -197,7 +198,7 @@ export function BenchShowcaseSection({ className = "" }: BenchShowcaseSectionPro
             </div>
 
             {/* Columna Multimedia: Reproductor de video 2doBanco.mp4 con poster Banco2.webp */}
-            <div className="lg:col-span-7 lg:order-2 order-1 relative overflow-hidden border border-white/10 group aspect-video sm:aspect-[4/3] md:h-[550px] w-full bg-black">
+            <div className="lg:col-span-7 lg:order-2 order-1 relative overflow-hidden border border-white/10 group aspect-video sm:aspect-[4/3] md:h-[550px] w-full bg-black transform-gpu will-change-transform [contain:layout_paint]">
               {videoFallback ? (
                 <img
                   src={banco2Img}
@@ -210,13 +211,14 @@ export function BenchShowcaseSection({ className = "" }: BenchShowcaseSectionPro
                   ref={videoRef}
                   src={segundoBancoVideo}
                   poster={banco2Img}
+                  autoPlay
                   muted
                   loop
                   playsInline
                   preload="metadata"
                   suppressHydrationWarning
                   onError={() => setVideoFallback(true)}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transform-gpu will-change-transform [contain:layout_paint]"
                   aria-label="Video del segundo banco de pruebas computarizado en funcionamiento"
                 />
               )}

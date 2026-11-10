@@ -16,3 +16,10 @@
   - Crear hook reusable `src/hooks/useViewportVideo.ts` con `IntersectionObserver` (`.play()` en viewport, `.pause()` al salir, control de promesas y fallback).
   - Integrar `useViewportVideo` en `src/components/landing/BenchShowcaseSection.tsx` y `src/components/landing/WarrantySection.tsx`, con `preload="metadata"`, `muted`, `playsInline` y desacoplado de animaciones pesadas.
   - Validar con tests unitarios en `BrandsMarquee.test.tsx` y build completo de la aplicación.
+
+- [x] **TASK-04: Restauración de Reproducción Activa de Videos y Aislamiento GPU**
+  - Ajustar `useViewportVideo.ts`: `threshold: 0`, `rootMargin: '200px'`, inicio activo de reproducción sin pausas prematuras.
+  - Colocar `autoPlay`, `loop`, `muted`, `playsInline` en `<video>` en `BenchShowcaseSection.tsx` y `WarrantySection.tsx`.
+  - Aplicar aislamiento de capa GPU: `transform-gpu will-change-transform [contain:layout_paint]` en los `<video>` y sus contenedores, eliminando sombras pesadas o `backdrop-blur`.
+  - Validar meta tag Google Search Console en `src/routes/__root.tsx`.
+  - Ejecutar tests unitarios y build de producción.

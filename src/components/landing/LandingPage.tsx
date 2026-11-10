@@ -12,6 +12,7 @@ import { MobileStickyBar } from "@/components/landing/MobileStickyBar";
 import { ServicesSection } from "@/components/landing/ServicesSection";
 import { WarrantySection } from "@/components/landing/WarrantySection";
 import { useHashNavigation } from "@/components/landing/use-hash-navigation";
+import { prefetchCatalogData } from "@/hooks/useCatalogData";
 
 export function LandingPage() {
   useHashNavigation();
@@ -21,6 +22,12 @@ export function LandingPage() {
     if (typeof window !== "undefined" && !window.location.hash) {
       window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     }
+
+    // Precarga pasiva del catálogo en segundo plano para navegación instantánea
+    const timer = setTimeout(() => {
+      prefetchCatalogData().catch(() => {});
+    }, 1200);
+    return () => clearTimeout(timer);
   }, []);
 
   return (

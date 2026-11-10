@@ -10,7 +10,7 @@ export interface AuthTokenPayload {
 }
 
 export const AUTH_COOKIE_NAME = "session";
-export const AUTH_TOKEN_EXPIRATION_SECONDS = 8 * 60 * 60; // 8 horas = 28800s
+export const AUTH_TOKEN_EXPIRATION_SECONDS = 12 * 60 * 60; // 12 horas = 43200s
 
 /**
  * Servicio Criptográfico de Autenticación (Argon2id + JWT).
@@ -42,7 +42,7 @@ export class AuthService {
   }
 
   /**
-   * Genera un token JWT firmado criptográficamente con validez de 8 horas.
+   * Genera un token JWT firmado criptográficamente con validez de 12 horas.
    */
   generateToken(payload: AuthTokenPayload): string {
     return jwt.sign(
@@ -53,7 +53,7 @@ export class AuthService {
       },
       ENV.JWT_SECRET,
       {
-        expiresIn: AUTH_TOKEN_EXPIRATION_SECONDS,
+        expiresIn: (ENV.JWT_ACCESS_EXPIRATION as any) || AUTH_TOKEN_EXPIRATION_SECONDS,
         algorithm: "HS256",
       },
     );

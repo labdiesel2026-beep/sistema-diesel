@@ -25,11 +25,31 @@ export const cartItemCacheSchema = z
     lastKnown: z
       .object({
         name: z.string().trim().min(1, "El nombre del producto no puede estar vacío"),
-        oem: z.string().trim().nullable(),
+        oem: z.string().trim().nullable().optional(),
+        imageUrl: z.string().nullable().optional(),
+        brandName: z.string().nullable().optional(),
+        condition: z.string().nullable().optional(),
+        price: z.number().nullable().optional(),
+        showPrice: z.boolean().nullable().optional(),
+        visible: z.boolean().nullable().optional(),
       })
-      .strict(),
+      .passthrough(),
+    productSnapshot: z
+      .object({
+        id: z.string().optional(),
+        name: z.string().optional(),
+        oemCode: z.string().nullable().optional(),
+        price: z.number().nullable().optional(),
+        imageUrl: z.string().nullable().optional(),
+        brandName: z.string().nullable().optional(),
+        condition: z.string().nullable().optional(),
+        isVisible: z.boolean().nullable().optional(),
+        showPrice: z.boolean().nullable().optional(),
+      })
+      .passthrough()
+      .optional(),
   })
-  .strict();
+  .passthrough();
 
 /**
  * Esquema Zod estricto para el contenedor versionado de la caché del carrito.

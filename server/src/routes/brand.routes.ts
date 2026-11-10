@@ -13,16 +13,21 @@ import { brandFormSchema, uuidParamSchema } from "../schemas/brand.schemas.js";
 
 const router = Router();
 
+const publicCache = (_req: any, res: any, next: any) => {
+  res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
+  next();
+};
+
 /**
  * Rutas CRUD para Marcas (/api/brands)
  * (RF-09, D-04)
  */
 
 // Listar marcas (Público)
-router.get("/", getBrands);
+router.get("/", publicCache, getBrands);
 
 // Obtener marca por ID (Público)
-router.get("/:id", validate({ params: uuidParamSchema }), getBrandById);
+router.get("/:id", publicCache, validate({ params: uuidParamSchema }), getBrandById);
 
 // Crear marca (Autenticado, Anti-CSRF, Zod .strict())
 router.post("/", requireAuth, csrfProtection, validate(brandFormSchema), createBrand);

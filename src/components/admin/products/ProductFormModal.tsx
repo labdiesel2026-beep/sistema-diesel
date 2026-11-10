@@ -554,20 +554,41 @@ export function ProductFormModal({
                 fieldErrors.categoryIds ? "border-destructive" : "border-input"
               }`}
             >
-              {categories.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-2">
-                  No hay categorías registradas en el sistema.
-                </p>
-              ) : (
-                categories.map((cat) => {
-                  const isChild = cat.parentId !== null;
-                  const isChecked = categoryIds.includes(cat.id);
+              {(() => {
+                if (categories.length === 0) {
+                  return (
+                    <p className="text-xs text-muted-foreground text-center py-2">
+                      No hay categorías registradas en el sistema.
+                    </p>
+                  );
+                }
 
+                // Separar raíces e hijas con ordenamiento alfabético estricto
+                const rootCategories = categories
+                  .filter((c) => !c.parentId)
+                  .sort((a, b) => a.name.localeCompare(b.name));
+
+                const childrenByParent = new Map<string, typeof categories>();
+                for (const cat of categories) {
+                  if (cat.parentId) {
+                    const list = childrenByParent.get(cat.parentId) || [];
+                    list.push(cat);
+                    childrenByParent.set(cat.parentId, list);
+                  }
+                }
+
+                const rootIds = new Set(rootCategories.map((r) => r.id));
+                const orphanCategories = categories
+                  .filter((c) => c.parentId && !rootIds.has(c.parentId))
+                  .sort((a, b) => a.name.localeCompare(b.name));
+
+                const renderCategoryItem = (cat: (typeof categories)[0], isChild: boolean) => {
+                  const isChecked = categoryIds.includes(cat.id);
                   return (
                     <label
                       key={cat.id}
                       className={`flex items-center gap-2.5 rounded-md px-2 py-1 text-sm cursor-pointer transition-colors hover:bg-muted/60 ${
-                        isChild ? "ml-5 border-l-2 border-industrial/40 pl-3" : "font-medium"
+                        isChild ? "ml-6 pl-3 border-l-2 border-[#ea580c]/40" : "font-medium"
                       } ${isChecked ? "bg-industrial/10 text-industrial font-medium" : "text-foreground"}`}
                     >
                       <input
@@ -581,8 +602,27 @@ export function ProductFormModal({
                       <span className="text-xs sm:text-sm">{cat.name}</span>
                     </label>
                   );
-                })
-              )}
+                };
+
+                return (
+                  <div className="space-y-1.5">
+                    {rootCategories.map((root) => {
+                      const children = (childrenByParent.get(root.id) || []).sort((a, b) =>
+                        a.name.localeCompare(b.name),
+                      );
+
+                      return (
+                        <div key={root.id} className="space-y-1">
+                          {renderCategoryItem(root, false)}
+                          {children.map((child) => renderCategoryItem(child, true))}
+                        </div>
+                      );
+                    })}
+
+                    {orphanCategories.map((orphan) => renderCategoryItem(orphan, true))}
+                  </div>
+                );
+              })()}
             </div>
             {fieldErrors.categoryIds && (
               <p

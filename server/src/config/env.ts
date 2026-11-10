@@ -32,6 +32,7 @@ export const envSchema = z
     CLOUDINARY_API_KEY: z.string().min(1, "CLOUDINARY_API_KEY es obligatorio"),
     CLOUDINARY_API_SECRET: z.string().min(1, "CLOUDINARY_API_SECRET es obligatorio"),
     COOKIE_SAME_SITE: z.enum(["strict", "lax", "none"]).default("strict"),
+    JWT_ACCESS_EXPIRATION: z.string().default("12h"),
   })
   .strict();
 
@@ -62,6 +63,7 @@ export function validateEnv(customEnv?: Record<string, unknown>): EnvConfig {
       "CLOUDINARY_API_KEY",
       "CLOUDINARY_API_SECRET",
       "COOKIE_SAME_SITE",
+      "JWT_ACCESS_EXPIRATION",
     ] as const;
 
     for (const key of knownKeys) {

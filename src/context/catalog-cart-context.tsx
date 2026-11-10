@@ -18,6 +18,14 @@ export interface CatalogCartProductParam {
   id: string;
   name: string;
   oem?: string | null;
+  oemCode?: string | null;
+  price?: number | null;
+  imageUrl?: string | null;
+  brandName?: string | null;
+  condition?: string | null;
+  showPrice?: boolean | null;
+  visible?: boolean | null;
+  isVisible?: boolean | null;
 }
 
 export interface CatalogCartContextValue {
@@ -75,12 +83,31 @@ export function CatalogCartProvider({ children, initialItems, storage }: Catalog
         );
       }
 
+      const rawOem = product.oem ?? product.oemCode;
+      const isVisibleVal = product.visible ?? product.isVisible ?? true;
       const newItem: CartItemCache = {
         productId: product.id,
         quantity: safeAddQuantity,
         lastKnown: {
           name: product.name.trim(),
-          oem: product.oem ? product.oem.trim() : null,
+          oem: rawOem ? rawOem.trim() : null,
+          imageUrl: product.imageUrl || null,
+          brandName: product.brandName || null,
+          condition: product.condition || "Nuevo",
+          price: product.price ?? null,
+          showPrice: product.showPrice ?? true,
+          visible: isVisibleVal,
+        },
+        productSnapshot: {
+          id: product.id,
+          name: product.name.trim(),
+          oemCode: rawOem ? rawOem.trim() : null,
+          price: product.price ?? null,
+          imageUrl: product.imageUrl || null,
+          brandName: product.brandName || null,
+          condition: product.condition || "Nuevo",
+          isVisible: isVisibleVal,
+          showPrice: product.showPrice ?? true,
         },
       };
 

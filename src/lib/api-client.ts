@@ -33,6 +33,15 @@ export const API_ORIGIN: string = rawBaseUrl.endsWith("/api")
 export const BASE_URL: string = API_ORIGIN;
 export const REFRESH_ENDPOINT: string = `${API_ORIGIN}/api/auth/refresh`;
 
+/**
+ * Emite evento global de desautorización para abrir el modal de re-autenticación
+ */
+export function dispatchUnauthorized(): void {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("SHOW_REAUTH_MODAL"));
+  }
+}
+
 export interface CustomRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
@@ -120,13 +129,30 @@ const processQueue = (error: unknown = null) => {
 /**
  * Instancia canónica de Axios con credenciales forzadas y Anti-CSRF
  */
-export const apiClient: AxiosInstance = axios.create({
+export const apiClient: AxiosInstance & {
+  upload?: <T = any>(url: string, formData: FormData, config?: any) => Promise<T>;
+} = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
   headers: {
     "X-Requested-With": "XMLHttpRequest",
   },
 });
+
+(apiClient as any).upload = async function <T = any>(
+  url: string,
+  formData: FormData,
+  config?: any,
+): Promise<T> {
+  const response = await apiClient.post<T>(url, formData, {
+    ...config,
+    headers: {
+      ...(config?.headers || {}),
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
 
 /**
  * Verifica si un error corresponde a una falla de red local o desconexión física (Caso Límite 11)

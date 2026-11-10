@@ -106,7 +106,8 @@ export const productFormSchema = z
     brandId: z
       .string({ required_error: "Debe seleccionar una marca" })
       .uuid("Identificador de marca inválido"),
-    vehicleCompatibility: z.string().trim().optional().default(""),
+    vehicleCompatibility: z.string().trim().max(500).optional().default(""),
+    compatibility: z.string().trim().max(500).optional(),
     condition: z.enum(PRODUCT_CONDITIONS, {
       errorMap: () => ({ message: "Condición debe ser 'Nuevo', 'Reacondicionado' o 'Usado'" }),
     }),
@@ -116,10 +117,14 @@ export const productFormSchema = z
       .nullable(),
     showPrice: z.boolean().default(true),
     visible: z.boolean().default(true),
-    oem: z.string().trim().optional().default(""),
+    oem: z.string().trim().max(100).optional().default(""),
+    oemCode: z.string().trim().max(100).optional(),
     isFeatured: z.boolean().default(false),
   })
   .strict();
+
+export const createProductSchema = productFormSchema;
+export const updateProductSchema = productFormSchema.partial();
 
 export type ProductFormData = z.infer<typeof productFormSchema>;
 

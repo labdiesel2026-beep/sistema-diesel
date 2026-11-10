@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import type { AdminProduct } from "@/types/admin";
 import { useAdmin } from "@/context/admin-context";
 import { ApiError } from "@/lib/api";
+import { resolveImageUrl } from "@/lib/formatters";
 import { ProductThumbnail } from "@/components/admin/products/ProductThumbnail";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -349,7 +350,7 @@ export function ProductList({
                     {/* Miniatura */}
                     <TableCell className="px-4 py-3">
                       <ProductThumbnail
-                        src={product.imageUrl}
+                        src={resolveImageUrl(product.imageUrl, { width: 160 })}
                         alt={product.name}
                         className="size-12 border border-admin-border rounded-md"
                       />
@@ -377,7 +378,7 @@ export function ProductList({
                             className="inline-flex items-center rounded border border-admin-border bg-slate-100/90 px-2 py-0.5 font-mono text-xs font-semibold tracking-tight text-admin-text-main shadow-2xs"
                             data-testid={`product-oem-${product.id}`}
                           >
-                            OEM: {product.oem}
+                            {product.oem?.trim() ? `OEM: ${product.oem.trim()}` : "OEM S/N"}
                           </span>
                         </div>
                       </div>

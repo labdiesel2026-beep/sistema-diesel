@@ -24,7 +24,8 @@ export const productFormSchema = z
       .array(z.string().uuid("Identificador de categoría inválido"))
       .min(1, "Debe seleccionar al menos una categoría"),
     brandId: z.string().uuid("Debe seleccionar una marca válida"),
-    vehicleCompatibility: z.string().trim().optional().default(""),
+    vehicleCompatibility: z.string().trim().max(500).optional().default(""),
+    compatibility: z.string().trim().max(500).optional(),
     condition: z.enum(PRODUCT_CONDITIONS, {
       error: "Condición debe ser 'Nuevo', 'Reacondicionado' o 'Usado'",
     }),
@@ -34,10 +35,14 @@ export const productFormSchema = z
       .nullable(),
     showPrice: z.boolean().default(true),
     visible: z.boolean().default(true),
-    oem: z.string().trim().optional().default(""),
+    oem: z.string().trim().max(100).optional().default(""),
+    oemCode: z.string().trim().max(100).optional(),
     isFeatured: z.boolean().default(false),
   })
   .strict();
+
+export const createProductSchema = productFormSchema;
+export const updateProductSchema = productFormSchema.partial();
 
 /**
  * Esquema Zod estricto para alternar visibilidad de un producto.

@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   featuredPatchSchema,
   productFormSchema,
+  createProductSchema,
+  updateProductSchema,
   visibilityPatchSchema,
 } from "../src/schemas/product.schemas.js";
 
@@ -81,6 +83,27 @@ describe("Validación de Esquemas Zod de Productos (Tarea 8.1)", () => {
         maliciousKey: 123,
       });
       expect(result.success).toBe(false);
+    });
+
+    it("acepta oem y vehicleCompatibility vacíos o ausentes asignando string vacío por defecto", () => {
+      const result = createProductSchema.safeParse({
+        ...validBase,
+        oem: "",
+        vehicleCompatibility: "",
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.oem).toBe("");
+        expect(result.data.vehicleCompatibility).toBe("");
+      }
+    });
+
+    it("updateProductSchema admite campos parciales con oem y vehicleCompatibility vacíos", () => {
+      const result = updateProductSchema.safeParse({
+        oem: "",
+        vehicleCompatibility: "",
+      });
+      expect(result.success).toBe(true);
     });
   });
 });

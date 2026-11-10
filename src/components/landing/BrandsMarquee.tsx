@@ -203,15 +203,19 @@ export function BrandsMarquee({ className = "", brands = WORKSHOP_BRANDS }: Bran
 
       {/* Contenedor con gradientes difuminados laterales (mask-image) */}
       <div
-        className="relative w-full overflow-hidden touch-pan-y [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] [touch-action:pan-y]"
+        className="relative w-full overflow-hidden touch-pan-y will-change-transform transform-gpu [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] [touch-action:pan-y]"
+        style={{ transform: "translate3d(0, 0, 0)" }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
         data-testid="brands-marquee-container"
       >
         <div
-          className="flex w-max items-center gap-12 py-4 group hover:[animation-play-state:paused] animate-marquee motion-reduce:[animation:none]"
-          style={isEffectivePaused ? { animationPlayState: "paused" } : undefined}
+          className="flex w-max items-center gap-12 py-4 group hover:[animation-play-state:paused] animate-marquee motion-reduce:[animation:none] will-change-transform transform-gpu"
+          style={{
+            transform: "translate3d(0, 0, 0)",
+            ...(isEffectivePaused ? { animationPlayState: "paused" } : {}),
+          }}
           data-paused={isEffectivePaused ? "true" : "false"}
           data-testid="brands-marquee-track"
         >
@@ -225,13 +229,13 @@ export function BrandsMarquee({ className = "", brands = WORKSHOP_BRANDS }: Bran
                 key={`${brand.id}-${cloneIndex}-${idx}`}
                 aria-hidden="true"
                 tabIndex={-1}
-                className="flex h-10 max-h-10 w-[120px] max-w-[120px] items-center justify-center shrink-0 cursor-default select-none transition-all duration-300 ease-out"
+                className="flex h-12 w-[140px] max-w-[140px] items-center justify-center shrink-0 cursor-default select-none transition-all duration-300 ease-out bg-[#161B26] border border-slate-800/80 rounded-lg px-3 py-1.5 shadow-sm"
                 title={title}
                 data-testid={`brand-item-${brand.id}`}
               >
                 {BrandLogoComponent ? (
                   <BrandLogoComponent
-                    className="h-auto max-h-10 w-auto max-w-[120px] object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity duration-200"
+                    className="h-auto max-h-8 w-auto max-w-[110px] object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity duration-200"
                     aria-hidden="true"
                   />
                 ) : (

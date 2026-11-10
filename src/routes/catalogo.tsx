@@ -15,7 +15,7 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { Search, ShoppingCart, X } from "lucide-react";
+import { Search, ShoppingCart, X, ArrowUp, ArrowDown } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LandingFooter } from "@/components/landing/LandingFooter";
@@ -29,6 +29,7 @@ import { CartDrawer } from "@/components/catalog/CartDrawer";
 import { CatalogErrorBoundary, CatalogErrorView } from "@/components/catalog/CatalogErrorBoundary";
 import { useCatalogCart } from "@/context/catalog-cart-context";
 import { catalogService } from "@/services/catalog-service";
+import { prefetchCatalogData } from "@/hooks/useCatalogData";
 import { filterCatalogProducts } from "@/lib/catalog-filter";
 import { generateNoResultsWhatsAppUrl } from "@/lib/catalog-whatsapp";
 import {
@@ -74,12 +75,18 @@ export function CatalogPage({
     null,
   );
 
+  const INITIAL_VISIBLE_COUNT = 9;
+
   // Estados de datos obtenidos de la API REST
   const [products, setProducts] = useState<CatalogProduct[]>(mockProducts || []);
   const [brands, setBrands] = useState<CatalogBrand[]>(mockBrands || []);
   const [categories, setCategories] = useState<CatalogCategory[]>(mockCategories || []);
   const [isLoading, setIsLoading] = useState(!mockProducts);
   const [fetchError, setFetchError] = useState<Error | null>(null);
+
+  // Paginación progresiva y botón volver arriba
+  const [visibleCount, setVisibleCount] = useState<number>(INITIAL_VISIBLE_COUNT);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   // Búsqueda y facetas locales sincronizadas
   const [searchQuery, setSearchQuery] = useState(searchParams?.q || "");
@@ -90,6 +97,24 @@ export function CatalogPage({
     normalizeFilterParam(searchParams?.category),
   );
 
+  // Reiniciar contador de productos visibles cuando cambian los filtros
+  useEffect(() => {
+    setVisibleCount(INITIAL_VISIBLE_COUNT);
+  }, [searchQuery, selectedBrandIds, selectedCategoryIds]);
+
+  // Listener para botón flotante suave "Volver arriba" (> 600px)
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 600);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   // Sincronizar cambios entrantes de searchParams
   useEffect(() => {
     if (searchParams) {
@@ -99,19 +124,14 @@ export function CatalogPage({
     }
   }, [searchParams]);
 
-  // Carga asíncrona de datos desde el servicio HTTP centralizado
+  // Carga asíncrona de datos con soporte de caché rápido
   const loadData = useCallback(async () => {
-    setIsLoading(true);
     setFetchError(null);
     try {
-      const [fetchedProducts, fetchedBrands, fetchedCategories] = await Promise.all([
-        catalogService.getVisibleProducts(),
-        catalogService.getBrands(),
-        catalogService.getCategories(),
-      ]);
-      setProducts(fetchedProducts);
-      setBrands(fetchedBrands);
-      setCategories(fetchedCategories);
+      const cached = await prefetchCatalogData();
+      setProducts(cached.products);
+      setBrands(cached.brands);
+      setCategories(cached.categories);
     } catch (err) {
       setFetchError(err instanceof Error ? err : new Error(String(err)));
     } finally {
@@ -387,19 +407,49 @@ export function CatalogPage({
                     </div>
                   </div>
                 ) : (
-                  /* Grilla de Productos Coincidentes */
-                  <div
-                    className="grid items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6"
-                    data-testid="catalog-product-grid"
-                  >
-                    {filteredProducts.map((product) => (
-                      <ProductCard
-                        key={product.id}
-                        product={product}
-                        brandName={brandsMap.get(product.brandId) || ""}
-                        onViewDetail={() => setSelectedProductForModal(product)}
-                      />
-                    ))}
+                  /* Grilla de Productos Coincidentes con Carga Progresiva */
+                  <div className="space-y-8">
+                    <div
+                      className="grid items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6"
+                      data-testid="catalog-product-grid"
+                    >
+                      {filteredProducts.slice(0, visibleCount).map((product) => (
+                        <ProductCard
+                          key={product.id}
+                          product={product}
+                          brandName={brandsMap.get(product.brandId) || ""}
+                          onViewDetail={() => setSelectedProductForModal(product)}
+                        />
+                      ))}
+                    </div>
+
+                    {visibleCount < filteredProducts.length && (
+                      <div className="mt-8 flex flex-col items-center justify-center gap-3 py-6 border-t border-white/10">
+                        <p className="font-mono text-xs text-muted-foreground uppercase tracking-wider">
+                          Mostrando {Math.min(visibleCount, filteredProducts.length)} de{" "}
+                          {filteredProducts.length} repuestos
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          onClick={() =>
+                            setVisibleCount((prev) => prev + INITIAL_VISIBLE_COUNT)
+                          }
+                          className="gap-2 border-white/20 bg-white/5 hover:bg-white/10 text-white font-semibold px-6 py-2.5 rounded-lg transition-all cursor-pointer"
+                          data-testid="load-more-button"
+                        >
+                          <span>
+                            Cargar más repuestos (+
+                            {Math.min(
+                              INITIAL_VISIBLE_COUNT,
+                              filteredProducts.length - visibleCount,
+                            )}
+                            )
+                          </span>
+                          <ArrowDown className="size-4" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -454,6 +504,19 @@ export function CatalogPage({
             <span className="font-semibold text-sm hidden sm:inline">Tu Carrito</span>
           </Button>
         </div>
+
+        {/* Botón flotante suave "Volver arriba" al bajar más de 600px */}
+        {showScrollTop && (
+          <button
+            type="button"
+            onClick={handleScrollToTop}
+            aria-label="Volver arriba en el catálogo"
+            data-testid="scroll-to-top-button"
+            className="fixed bottom-24 right-7 z-40 flex size-11 items-center justify-center rounded-full border border-white/20 bg-zinc-900/90 text-white shadow-xl backdrop-blur-md transition-all duration-300 hover:bg-industrial hover:scale-105 active:scale-95 cursor-pointer focus:outline-none focus:ring-2 focus:ring-industrial"
+          >
+            <ArrowUp className="size-5" />
+          </button>
+        )}
 
         {/* Drawer Lateral del Carrito con Revalidación Activa (RF-08, RF-10) */}
         <CartDrawer open={isCartOpen} onOpenChange={setIsCartOpen} />

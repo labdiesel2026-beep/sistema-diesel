@@ -13,16 +13,21 @@ import { categoryFormSchema, uuidParamSchema } from "../schemas/category.schemas
 
 const router = Router();
 
+const publicCache = (_req: any, res: any, next: any) => {
+  res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
+  next();
+};
+
 /**
  * Rutas CRUD para Categorías y Subcategorías (/api/categories)
  * (RF-08, D-04)
  */
 
 // Listar categorías con jerarquía (Público)
-router.get("/", getCategories);
+router.get("/", publicCache, getCategories);
 
 // Obtener categoría por ID (Público)
-router.get("/:id", validate({ params: uuidParamSchema }), getCategoryById);
+router.get("/:id", publicCache, validate({ params: uuidParamSchema }), getCategoryById);
 
 // Crear categoría (Autenticado, Anti-CSRF, Zod .strict(), validación de 1 nivel)
 router.post("/", requireAuth, csrfProtection, validate(categoryFormSchema), createCategory);

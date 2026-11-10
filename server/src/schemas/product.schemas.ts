@@ -24,8 +24,8 @@ export const productFormSchema = z
       .array(z.string().uuid("Identificador de categoría inválido"))
       .min(1, "Debe seleccionar al menos una categoría"),
     brandId: z.string().uuid("Debe seleccionar una marca válida"),
-    vehicleCompatibility: z.string().trim().max(500).optional().default(""),
-    compatibility: z.string().trim().max(500).optional(),
+    vehicleCompatibility: z.string().trim().max(500).nullable().optional().default(""),
+    compatibility: z.string().trim().max(500).nullable().optional(),
     condition: z.enum(PRODUCT_CONDITIONS, {
       error: "Condición debe ser 'Nuevo', 'Reacondicionado' o 'Usado'",
     }),
@@ -35,8 +35,8 @@ export const productFormSchema = z
       .nullable(),
     showPrice: z.boolean().default(true),
     visible: z.boolean().default(true),
-    oem: z.string().trim().max(100).optional().default(""),
-    oemCode: z.string().trim().max(100).optional(),
+    oem: z.string().trim().max(100).nullable().optional().default(""),
+    oemCode: z.string().trim().max(100).nullable().optional(),
     isFeatured: z.boolean().default(false),
   })
   .strict();

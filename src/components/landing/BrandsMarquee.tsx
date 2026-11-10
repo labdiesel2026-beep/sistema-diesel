@@ -229,7 +229,7 @@ export function BrandsMarquee({ className = "", brands = WORKSHOP_BRANDS }: Bran
                 key={`${brand.id}-${cloneIndex}-${idx}`}
                 aria-hidden="true"
                 tabIndex={-1}
-                className="flex h-12 w-[140px] max-w-[140px] items-center justify-center shrink-0 cursor-default select-none transition-all duration-300 ease-out bg-[#161B26] border border-slate-800/80 rounded-lg px-3 py-1.5 shadow-sm"
+                className="flex h-12 w-[140px] max-w-[140px] items-center justify-center shrink-0 cursor-default select-none transition-all duration-300 ease-out bg-transparent border-none shadow-none px-3 py-1.5"
                 title={title}
                 data-testid={`brand-item-${brand.id}`}
               >

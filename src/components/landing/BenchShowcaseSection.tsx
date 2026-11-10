@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useScrollReveal } from "@/components/landing/scroll-reveal";
+import { useViewportVideo } from "@/hooks/useViewportVideo";
 import bancoPruebasImg from "@/assets/workshop/banco-pruebas.webp";
 import inyectoresDetalleImg from "@/assets/workshop/inyectores-detalle.webp";
 import banco2Img from "@/assets/workshop/Banco2.webp";
@@ -21,48 +21,9 @@ export function BenchShowcaseSection({ className = "" }: BenchShowcaseSectionPro
     handleAnimationComplete,
   } = useScrollReveal("equipamiento");
 
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoFallback, setVideoFallback] = useState(false);
-
-  useEffect(() => {
-    // Detección de conectividad reducida o modo ahorro de datos
-    if (typeof navigator !== "undefined") {
-      const nav = navigator as unknown as {
-        connection?: { saveData?: boolean; effectiveType?: string };
-      };
-      if (
-        nav.connection?.saveData === true ||
-        nav.connection?.effectiveType === "2g" ||
-        nav.connection?.effectiveType === "slow-2g"
-      ) {
-        setVideoFallback(true);
-        return;
-      }
-    }
-
-    if (
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-data: reduce)")?.matches
-    ) {
-      setVideoFallback(true);
-      return;
-    }
-
-    // Asegurar reproducción con manejo de rechazo silencioso en navegadores móviles
-    const video = videoRef.current;
-    if (video && typeof video.play === "function") {
-      try {
-        const playPromise = video.play();
-        if (playPromise !== undefined && typeof playPromise.catch === "function") {
-          playPromise.catch(() => {
-            // Si el navegador bloquea autoplay, preservamos poster sin romper layout
-          });
-        }
-      } catch {
-        // Ignorar
-      }
-    }
-  }, []);
+  const { videoRef, videoFallback, setVideoFallback } = useViewportVideo({
+    threshold: 0.15,
+  });
 
   return (
     <section
@@ -249,7 +210,6 @@ export function BenchShowcaseSection({ className = "" }: BenchShowcaseSectionPro
                   ref={videoRef}
                   src={segundoBancoVideo}
                   poster={banco2Img}
-                  autoPlay
                   muted
                   loop
                   playsInline

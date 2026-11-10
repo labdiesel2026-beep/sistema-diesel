@@ -42,22 +42,30 @@ export function expandCategoryIds(
     }
   }
 
-  for (const catId of selectedCategoryIds) {
-    expanded.add(catId);
+  // Expansión recursiva mediante BFS para cubrir cualquier profundidad de árbol jerárquico
+  const queue = [...selectedCategoryIds];
+  while (queue.length > 0) {
+    const currentId = queue.shift()!;
+    if (expanded.has(currentId)) continue;
+    expanded.add(currentId);
 
-    // 1. Agregar hijas desde el array children si existe
-    const cat = categoryMap.get(catId);
+    // 1. Hijas desde el array children si existe
+    const cat = categoryMap.get(currentId);
     if (cat?.children && Array.isArray(cat.children)) {
       for (const child of cat.children) {
-        expanded.add(child.id);
+        if (!expanded.has(child.id)) {
+          queue.push(child.id);
+        }
       }
     }
 
-    // 2. Agregar hijas desde la relación parentId
-    const relationalChildren = childrenByParent.get(catId);
+    // 2. Hijas desde la relación parentId
+    const relationalChildren = childrenByParent.get(currentId);
     if (relationalChildren) {
       for (const childId of relationalChildren) {
-        expanded.add(childId);
+        if (!expanded.has(childId)) {
+          queue.push(childId);
+        }
       }
     }
   }

@@ -246,7 +246,24 @@ export function ProductFormModal({
 
   const toggleCategory = (catId: string) => {
     setCategoryIds((prev) => {
-      const next = prev.includes(catId) ? prev.filter((id) => id !== catId) : [...prev, catId];
+      const isSelected = prev.includes(catId);
+      let next: string[];
+
+      if (isSelected) {
+        // Desmarcar: Si se desmarca un padre, desmarcar también sus subcategorías hijas
+        const childIds = categories.filter((c) => c.parentId === catId).map((c) => c.id);
+        const toRemove = new Set([catId, ...childIds]);
+        next = prev.filter((id) => !toRemove.has(id));
+      } else {
+        // Marcar: Si es subcategoría con parentId, auto-marcar también la categoría padre
+        const toAdd = [catId];
+        let currentCat = categories.find((c) => c.id === catId);
+        while (currentCat?.parentId) {
+          toAdd.push(currentCat.parentId);
+          currentCat = categories.find((c) => c.id === currentCat?.parentId);
+        }
+        next = Array.from(new Set([...prev, ...toAdd]));
+      }
 
       if (fieldErrors.categoryIds) {
         if (next.length > 0) {
@@ -456,10 +473,25 @@ export function ProductFormModal({
                 type="text"
                 placeholder="Ej. 0445110369, 23670-0L050"
                 value={oem}
-                onChange={(e) => setOem(e.target.value)}
+                onChange={(e) => {
+                  setOem(e.target.value);
+                  if (fieldErrors.oem) validateField("oem");
+                }}
+                onBlur={handleBlur}
                 disabled={isSubmitting}
+                className={fieldErrors.oem ? "border-destructive focus-visible:ring-destructive" : ""}
+                aria-invalid={Boolean(fieldErrors.oem)}
                 data-testid="product-oem-input"
               />
+              {fieldErrors.oem && (
+                <p
+                  role="alert"
+                  data-testid="product-oem-field-error"
+                  className="text-xs text-destructive font-medium"
+                >
+                  {fieldErrors.oem}
+                </p>
+              )}
             </div>
 
             {/* Fabricante / Marca (UUID) */}
@@ -530,10 +562,29 @@ export function ProductFormModal({
                 type="text"
                 placeholder="Ej. Toyota Hilux 2.8 D-4D (2016+)"
                 value={vehicleCompatibility}
-                onChange={(e) => setVehicleCompatibility(e.target.value)}
+                onChange={(e) => {
+                  setVehicleCompatibility(e.target.value);
+                  if (fieldErrors.vehicleCompatibility) validateField("vehicleCompatibility");
+                }}
+                onBlur={handleBlur}
                 disabled={isSubmitting}
+                className={
+                  fieldErrors.vehicleCompatibility
+                    ? "border-destructive focus-visible:ring-destructive"
+                    : ""
+                }
+                aria-invalid={Boolean(fieldErrors.vehicleCompatibility)}
                 data-testid="product-vehicle-input"
               />
+              {fieldErrors.vehicleCompatibility && (
+                <p
+                  role="alert"
+                  data-testid="product-vehicle-field-error"
+                  className="text-xs text-destructive font-medium"
+                >
+                  {fieldErrors.vehicleCompatibility}
+                </p>
+              )}
             </div>
           </div>
 

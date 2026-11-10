@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ShieldCheck, CheckCircle2 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { SITE_CONFIG } from "@/config/site-config";
 import { buildWhatsAppUrl } from "@/lib/whatsapp-utils";
 import { useScrollReveal } from "@/components/landing/scroll-reveal";
+import { useViewportVideo } from "@/hooks/useViewportVideo";
 import videoSrc from "@/assets/workshop/banco-en-vivo.mp4";
 import posterImg from "@/assets/workshop/inyectores-detalle.webp";
 
@@ -15,8 +15,13 @@ interface WarrantySectionProps {
 
 export function WarrantySection({ className = "" }: WarrantySectionProps) {
   const warrantyUrl = buildWhatsAppUrl(SITE_CONFIG.phone, SITE_CONFIG.whatsappMessages.warranty);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [shouldFallback, setShouldFallback] = useState(false);
+  const {
+    videoRef,
+    videoFallback: shouldFallback,
+    setVideoFallback: setShouldFallback,
+  } = useViewportVideo({
+    threshold: 0.15,
+  });
 
   const {
     ref,
@@ -27,50 +32,6 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
     viewportConfig,
     handleAnimationComplete,
   } = useScrollReveal("garantias");
-
-  useEffect(() => {
-    // Detección de directiva de ahorro de datos o conexiones móviles lentas (RF-01.2, RNF-02)
-    if (typeof navigator !== "undefined") {
-      const nav = navigator as unknown as {
-        connection?: {
-          saveData?: boolean;
-          effectiveType?: string;
-        };
-      };
-
-      if (
-        nav.connection?.saveData === true ||
-        nav.connection?.effectiveType === "2g" ||
-        nav.connection?.effectiveType === "slow-2g"
-      ) {
-        setShouldFallback(true);
-        return;
-      }
-    }
-
-    if (
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-data: reduce)")?.matches
-    ) {
-      setShouldFallback(true);
-      return;
-    }
-
-    // Si autoplay es rechazado por políticas del navegador o modo de ahorro de energía
-    const video = videoRef.current;
-    if (video && typeof video.play === "function") {
-      try {
-        const playPromise = video.play();
-        if (playPromise !== undefined && typeof playPromise.catch === "function") {
-          playPromise.catch(() => {
-            setShouldFallback(true);
-          });
-        }
-      } catch {
-        setShouldFallback(true);
-      }
-    }
-  }, []);
 
   return (
     <section
@@ -169,7 +130,6 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
                     src={videoSrc}
                     poster={posterImg}
                     muted
-                    autoPlay
                     loop
                     playsInline
                     preload="metadata"

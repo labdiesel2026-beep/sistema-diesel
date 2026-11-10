@@ -98,10 +98,23 @@ describe("Validación de Esquemas Zod de Productos (Tarea 8.1)", () => {
       }
     });
 
-    it("updateProductSchema admite campos parciales con oem y vehicleCompatibility vacíos", () => {
+    it("acepta oem y vehicleCompatibility como null explícito", () => {
+      const result = createProductSchema.safeParse({
+        ...validBase,
+        oem: null,
+        vehicleCompatibility: null,
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.oem).toBe(null);
+        expect(result.data.vehicleCompatibility).toBe(null);
+      }
+    });
+
+    it("updateProductSchema admite campos parciales con oem y vehicleCompatibility nulos y vacíos", () => {
       const result = updateProductSchema.safeParse({
-        oem: "",
-        vehicleCompatibility: "",
+        oem: null,
+        vehicleCompatibility: null,
       });
       expect(result.success).toBe(true);
     });

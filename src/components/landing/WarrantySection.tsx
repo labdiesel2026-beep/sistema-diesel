@@ -3,6 +3,7 @@ import { ShieldCheck, CheckCircle2 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { SITE_CONFIG } from "@/config/site-config";
+import { useSiteSettings } from "@/context/site-settings-context";
 import { buildWhatsAppUrl } from "@/lib/whatsapp-utils";
 import { useScrollReveal } from "@/components/landing/scroll-reveal";
 import segundoBancoVideo from "@/assets/workshop/2doBanco.mp4";
@@ -13,7 +14,8 @@ interface WarrantySectionProps {
 }
 
 export function WarrantySection({ className = "" }: WarrantySectionProps) {
-  const warrantyUrl = buildWhatsAppUrl(SITE_CONFIG.phone, SITE_CONFIG.whatsappMessages.warranty);
+  const { whatsappNumber } = useSiteSettings();
+  const warrantyUrl = buildWhatsAppUrl(whatsappNumber, SITE_CONFIG.whatsappMessages.warranty);
 
   const {
     ref,

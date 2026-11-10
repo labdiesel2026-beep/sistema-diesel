@@ -6,7 +6,7 @@ import {
   AUTH_TOKEN_EXPIRATION_SECONDS,
 } from "../services/auth.service.js";
 import { ENV } from "../config/env.js";
-import type { LoginInput } from "../schemas/auth.schemas.js";
+import type { LoginInput, ChangePasswordInput } from "../schemas/auth.schemas.js";
 
 /**
  * Controlador de Inicio de Sesión de Administradores.
@@ -190,6 +190,61 @@ export async function me(req: Request, res: Response, next: NextFunction): Promi
     }
 
     res.status(200).json(user);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Actualiza la contraseña del administrador autenticado.
+ * (RF-01, ASVS V5)
+ *
+ * Endpoint: PUT/POST /api/auth/change-password
+ * - Protegido por requireAuth y csrfProtection.
+ * - Verifica contraseña actual mediante Argon2id.
+ * - Hashea y actualiza la nueva contraseña si es válida.
+ */
+export async function changePassword(
+  req: Request<Record<string, never>, Record<string, never>, ChangePasswordInput>,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({ error: "Sesión no válida o expirada" });
+      return;
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    const user = await prisma.adminUser.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      res.status(401).json({ error: "Usuario no encontrado o dado de baja" });
+      return;
+    }
+
+    const isValid = await authService.verifyPassword(user.passwordHash, currentPassword);
+    if (!isValid) {
+      res.status(400).json({ error: "La contraseña actual es incorrecta" });
+      return;
+    }
+
+    const newPasswordHash = await authService.hashPassword(newPassword);
+
+    await prisma.adminUser.update({
+      where: { id: userId },
+      data: { passwordHash: newPasswordHash },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Contraseña actualizada exitosamente",
+    });
   } catch (error) {
     next(error);
   }

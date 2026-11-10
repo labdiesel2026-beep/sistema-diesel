@@ -7,7 +7,7 @@
  */
 
 import { SITE_CONFIG } from "@/config/site-config";
-import { buildWhatsAppUrl } from "@/lib/whatsapp-utils";
+import { buildWhatsAppUrl, getDynamicWhatsAppNumber } from "@/lib/whatsapp-utils";
 import type { EnrichedCartItem } from "@/types/catalog";
 
 /**
@@ -33,7 +33,7 @@ export interface DirectProductParam {
 export function generateDirectProductWhatsAppUrl(
   product: DirectProductParam,
   brandName = "",
-  customPhone = SITE_CONFIG.phone,
+  customPhone = getDynamicWhatsAppNumber(),
 ): string {
   const priceDisplay =
     product.showPrice && product.price !== null ? formatPrice(product.price) : "A cotizar";
@@ -65,7 +65,7 @@ export interface GenerateCartWhatsAppOptions {
  */
 export function generateCartWhatsAppUrl(
   enrichedItems: EnrichedCartItem[],
-  customPhone = SITE_CONFIG.phone,
+  customPhone = getDynamicWhatsAppNumber(),
   options?: GenerateCartWhatsAppOptions,
 ): string {
   if (!enrichedItems.length) {
@@ -147,7 +147,7 @@ export function generateNoResultsWhatsAppUrl(
   searchQuery = "",
   activeBrandNames: string[] = [],
   activeCategoryNames: string[] = [],
-  customPhone = SITE_CONFIG.phone,
+  customPhone = getDynamicWhatsAppNumber(),
 ): string {
   const lines: string[] = [
     "Hola, me contacto desde la web de Laboratorio Diésel.",

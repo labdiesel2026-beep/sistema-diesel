@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { CatalogCartProvider } from "@/context/catalog-cart-context";
+import { SiteSettingsProvider } from "@/context/site-settings-context";
 import { PublicPoliciesContainer } from "@/components/policies/PublicPoliciesContainer";
 import { PublicLayoutWrapper } from "@/components/layout/PublicLayoutWrapper";
 
@@ -226,17 +227,19 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      {isAdmin ? (
-        <Outlet />
-      ) : (
-        <CatalogCartProvider>
-          <PublicLayoutWrapper>
-            <Outlet />
-            <PublicPoliciesContainer />
-          </PublicLayoutWrapper>
-        </CatalogCartProvider>
-      )}
+      <SiteSettingsProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        {isAdmin ? (
+          <Outlet />
+        ) : (
+          <CatalogCartProvider>
+            <PublicLayoutWrapper>
+              <Outlet />
+              <PublicPoliciesContainer />
+            </PublicLayoutWrapper>
+          </CatalogCartProvider>
+        )}
+      </SiteSettingsProvider>
     </QueryClientProvider>
   );
 }

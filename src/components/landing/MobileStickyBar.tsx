@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useLocation } from "@tanstack/react-router";
 import { FaWhatsapp } from "react-icons/fa";
 import { SITE_CONFIG } from "@/config/site-config";
+import { useSiteSettings } from "@/context/site-settings-context";
 import { buildWhatsAppUrl } from "@/lib/whatsapp-utils";
 import { CatalogCTAButton } from "@/components/ui/CatalogCTAButton";
 import { cn } from "@/lib/utils";
@@ -100,12 +101,14 @@ export function MobileStickyBar({ className = "" }: MobileStickyBarProps) {
   }, [isLandingPage, isLandscape]);
 
   // Si no está en '/', o está en modo landscape < 450px, no se renderiza en el DOM
+  const { whatsappNumber } = useSiteSettings();
+
   if (!isLandingPage || isLandscape) {
     return null;
   }
 
   const generalWhatsappUrl = buildWhatsAppUrl(
-    SITE_CONFIG.phone,
+    whatsappNumber,
     SITE_CONFIG.whatsappMessages.general,
   );
 

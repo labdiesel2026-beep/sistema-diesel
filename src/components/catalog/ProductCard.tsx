@@ -18,6 +18,7 @@ import { FaWhatsapp } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { ProductImageWithFallback } from "@/components/catalog/ProductImageWithFallback";
 import { useCatalogCart } from "@/context/catalog-cart-context";
+import { useSiteSettings } from "@/context/site-settings-context";
 import { formatPrice, generateDirectProductWhatsAppUrl } from "@/lib/catalog-whatsapp";
 import { parseOemCodes } from "@/lib/catalog-search";
 import { resolveImageUrl } from "@/lib/formatters";
@@ -37,9 +38,10 @@ export function ProductCard({
   className = "",
 }: ProductCardProps) {
   const { add, getItemQuantity } = useCatalogCart();
+  const { whatsappNumber } = useSiteSettings();
   const cartQuantity = getItemQuantity(product.id);
 
-  const directWhatsAppUrl = generateDirectProductWhatsAppUrl(product, brandName);
+  const directWhatsAppUrl = generateDirectProductWhatsAppUrl(product, brandName, whatsappNumber);
   const oemData = useMemo(() => parseOemCodes(product.oem), [product.oem]);
 
   return (

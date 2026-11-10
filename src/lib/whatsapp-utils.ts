@@ -4,6 +4,44 @@
  * (RF-04, RF-06, RF-07, CL-04, CL-07)
  */
 
+let dynamicWhatsAppNumber = "5492657659108";
+
+export const WHATSAPP_SETTINGS_CACHE_KEY = "labdiesel_settings_whatsapp";
+
+/**
+ * Obtiene el número dinámico actual de WhatsApp con soporte de caché en localStorage.
+ */
+export function getDynamicWhatsAppNumber(): string {
+  if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
+    try {
+      const cached = window.localStorage.getItem(WHATSAPP_SETTINGS_CACHE_KEY);
+      if (cached && cached.trim()) {
+        return cached.trim();
+      }
+    } catch {
+      // Ignorar fallo de localStorage
+    }
+  }
+  return dynamicWhatsAppNumber;
+}
+
+/**
+ * Actualiza en tiempo de ejecución el número de WhatsApp en memoria y caché.
+ */
+export function setDynamicWhatsAppNumber(phone: string): void {
+  const clean = (phone ?? "").replace(/\D/g, "");
+  if (clean.length >= 8) {
+    dynamicWhatsAppNumber = clean;
+    if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
+      try {
+        window.localStorage.setItem(WHATSAPP_SETTINGS_CACHE_KEY, clean);
+      } catch {
+        // Ignorar fallo de localStorage
+      }
+    }
+  }
+}
+
 /**
  * Normaliza un número telefónico eliminando cualquier carácter que no sea numérico
  * (espacios, guiones, paréntesis, signo +, etc.).

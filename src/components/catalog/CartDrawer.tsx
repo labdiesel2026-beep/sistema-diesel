@@ -35,6 +35,7 @@ import { useCatalogCart } from "@/context/catalog-cart-context";
 import { revalidateCartItems } from "@/lib/cart-revalidation";
 import { resolveImageUrl } from "@/lib/formatters";
 import { formatPrice, generateCartWhatsAppUrl } from "@/lib/catalog-whatsapp";
+import { useSiteSettings } from "@/context/site-settings-context";
 import type { EnrichedCartItem } from "@/types/catalog";
 
 export interface CartTotalsSummary {
@@ -160,12 +161,13 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
         });
 
   // Cálculos de subtotal estricto y desglose dinámico (RF-09, CL-03)
+  const { whatsappNumber } = useSiteSettings();
   const cartSummary = useMemo(() => calculateCartTotals(displayedItems), [displayedItems]);
   const hasReconfirmation = displayedItems.some((item) => item.requiresReconfirmation);
 
   const whatsappCheckoutUrl =
     displayedItems.length > 0
-      ? generateCartWhatsAppUrl(displayedItems, undefined, { tagCotizar: true })
+      ? generateCartWhatsAppUrl(displayedItems, whatsappNumber, { tagCotizar: true })
       : "";
 
   return (

@@ -28,6 +28,7 @@ import { MobileFilterTrigger } from "@/components/catalog/FilterDrawer";
 import { CartDrawer } from "@/components/catalog/CartDrawer";
 import { CatalogErrorBoundary, CatalogErrorView } from "@/components/catalog/CatalogErrorBoundary";
 import { useCatalogCart } from "@/context/catalog-cart-context";
+import { useSiteSettings } from "@/context/site-settings-context";
 import { catalogService } from "@/services/catalog-service";
 import { prefetchCatalogData } from "@/hooks/useCatalogData";
 import { filterCatalogProducts } from "@/lib/catalog-filter";
@@ -221,9 +222,11 @@ export function CatalogPage({
     return selectedCategoryIds.map((id) => catMap.get(id) || id);
   }, [selectedCategoryIds, categories]);
 
+  const { whatsappNumber } = useSiteSettings();
+
   const noResultsWhatsAppUrl = useMemo(
-    () => generateNoResultsWhatsAppUrl(searchQuery, activeBrandNames, activeCategoryNames),
-    [searchQuery, activeBrandNames, activeCategoryNames],
+    () => generateNoResultsWhatsAppUrl(searchQuery, activeBrandNames, activeCategoryNames, whatsappNumber),
+    [searchQuery, activeBrandNames, activeCategoryNames, whatsappNumber],
   );
 
   const activeFiltersCount = selectedBrandIds.length + selectedCategoryIds.length;

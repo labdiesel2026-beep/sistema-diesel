@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { SITE_CONFIG } from "@/config/site-config";
+import { useSiteSettings } from "@/context/site-settings-context";
 import { buildWhatsAppUrl } from "@/lib/whatsapp-utils";
 import { usePoliciesConsent } from "@/components/policies/use-policies-consent";
 
@@ -14,10 +15,11 @@ export function FloatingWhatsApp({
   className = "",
   targetSectionIds = ["garantias", "ubicacion"],
 }: FloatingWhatsAppProps) {
+  const { whatsappNumber } = useSiteSettings();
   const [isOverlapping, setIsOverlapping] = useState(false);
   const { shouldShowBanner } = usePoliciesConsent();
 
-  const generalUrl = buildWhatsAppUrl(SITE_CONFIG.phone, SITE_CONFIG.whatsappMessages.general);
+  const generalUrl = buildWhatsAppUrl(whatsappNumber, SITE_CONFIG.whatsappMessages.general);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("IntersectionObserver" in window)) {

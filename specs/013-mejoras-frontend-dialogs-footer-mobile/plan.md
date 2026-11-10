@@ -65,3 +65,20 @@ src/
 - Verificación de renderizado de elementos clave: badges de stock, precios, códigos OEM, textos de políticas y clases CSS.
 - Verificación de la compilación de producción con `npm run build`.
 
+---
+
+## 4. Plan de Refinamiento y Blindaje
+
+1. **Footer:**
+   - Remover botón de garantías de la barra inferior de `LandingFooter.tsx` conservando únicamente "Política de Privacidad" y "Aviso Legal y Términos".
+   - Restaurar las clases tipográficas originales del enlace `#inicio` ("Volver arriba").
+2. **API & Catálogo:**
+   - Crear `src/services/api.ts` exportando `api` desde `src/lib/api.ts`.
+   - Verificar `rawBaseUrl` con fallback `http://localhost:3001` y endpoints `/api/products`, `/api/brands`, `/api/categories`, `/api/products/featured`.
+   - Proteger `catalogo.tsx` contra disparos múltiples o bucles infinitos ante errores de conexión.
+3. **Code-Splitting:**
+   - Extraer `LandingPage` a `src/components/landing/LandingPage.tsx` y dejar `src/routes/index.tsx` exportando únicamente `Route`.
+4. **Hydration Warning:**
+   - Añadir `suppressHydrationWarning` en `<html>` de `__root.tsx` y en `<video>` de `BenchShowcaseSection.tsx` y `WarrantySection.tsx`.
+
+

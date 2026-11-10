@@ -59,3 +59,26 @@ El cliente ha solicitado cuatro mejoras específicas en la interfaz de usuario f
 - **RNF-02: Compatibilidad de Rendimiento y Accesibilidad:** Todos los modales deben cumplir con WAI-ARIA (roles `dialog`, `title`, `description`, foco administrado automáticamente por Radix UI).
 - **RNF-03: Cohesión de Diseño Oscuro:** No utilizar clases cromáticas claras ni estilos externos que violen la paleta mineral carbón `bg-zinc-950`, `bg-[#111111]`, `text-zinc-400`, `text-white` y acento `text-industrial`.
 
+---
+
+## 4. Requerimientos de Refinamiento Adicional
+
+### RF-05: Limpieza de Enlaces del Footer y Reversión de "Volver Arriba"
+- En la barra inferior de `LandingFooter.tsx`:
+  - Remover el botón/enlace a "Políticas de Garantía y Cotización" y su separador `·`, dejando únicamente "Política de Privacidad" y "Aviso Legal y Términos" (que abren modales `Dialog`).
+  - Revertir el estilo del enlace "Volver arriba" exactamente a su diseño original sin recuadro ni borde de botón:
+    `inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.25em] uppercase text-zinc-500 transition-colors hover:text-white`.
+
+### RF-06: Blindaje del Cliente API y Prevención de Bucle Infinito en Catálogo
+- Asegurar que todas las peticiones a `/api/products`, `/api/brands`, `/api/categories` y `/api/products/featured` utilicen `import.meta.env.VITE_API_URL` con fallback estricto a `http://localhost:3001` en local.
+- Crear alias `src/services/api.ts` que re-exporte `src/lib/api.ts` para uniformidad de consumo.
+- Proteger el ciclo de vida de `loadData` en `src/routes/catalogo.tsx` con una referencia de control de carga para garantizar que ante fallo de conexión del backend no se produzcan peticiones en bucle infinito.
+
+### RF-07: Resolución de Advertencia de Code-Splitting en `src/routes/index.tsx`
+- En `src/routes/index.tsx`, exportar exclusivamente `Route`. Mover la función de componente `LandingPage` a `src/components/landing/LandingPage.tsx` para que TanStack Router no emita advertencias de falta de code-splitting y el componente sea reutilizable y testable limpiamente.
+
+### RF-08: Supresión de Hydration Mismatches en `<html>` y `<video>`
+- Agregar `suppressHydrationWarning` a la etiqueta `<html lang="es">` en `src/routes/__root.tsx`.
+- Agregar `suppressHydrationWarning` a las etiquetas `<video>` en `BenchShowcaseSection.tsx` y `WarrantySection.tsx`.
+
+

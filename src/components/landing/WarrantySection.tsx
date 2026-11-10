@@ -173,6 +173,7 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
                     loop
                     playsInline
                     preload="metadata"
+                    suppressHydrationWarning
                     onError={() => setShouldFallback(true)}
                     className="h-full w-full object-cover"
                     aria-label="Ensayo y prueba de inyectores diésel en banco computarizado"

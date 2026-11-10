@@ -30,3 +30,34 @@
   - Ejecutar suite completa de pruebas unitarias e integración (`vitest`).
   - Ejecutar compilación de producción con Vite (`npm run build`).
   - Confirmar ausencia de regresiones visuales o funcionales.
+
+---
+
+### Fase de Refinamiento Puntual
+
+- [x] **T-06: Refinamiento del Footer (Limpiar enlaces barra inferior y revertir Volver Arriba)**
+  - En `src/components/landing/LandingFooter.tsx`, remover el botón de políticas comerciales de la barra inferior junto a su separador `·`, dejando únicamente "Política de Privacidad" y "Aviso Legal y Términos".
+  - Revertir las clases del botón "Volver arriba" exactamente a su diseño original sin recuadro: `inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.25em] uppercase text-zinc-500 transition-colors hover:text-white`.
+  - Actualizar pruebas en `src/test/landing/LandingFooter.test.tsx` y validar con vitest.
+
+- [x] **T-07: Blindaje del Cliente API y Manejo de Errores en Catálogo**
+  - Asegurar la exportación de `api` en `src/services/api.ts` (alias a `src/lib/api.ts`).
+  - Verificar que todas las llamadas a `/api/products`, `/api/brands`, `/api/categories` y `/api/products/featured` usen `VITE_API_URL` con fallback a `http://localhost:3001`.
+  - Asegurar que `src/routes/catalogo.tsx` maneje el estado de error de forma limpia (`CatalogErrorView`) sin entrar en bucles de peticiones.
+  - Validar con vitest.
+
+- [x] **T-08: Corrección de Advertencia de Code-Splitting en `src/routes/index.tsx`**
+  - Extraer `LandingPage` a `src/components/landing/LandingPage.tsx`.
+  - En `src/routes/index.tsx`, importar `LandingPage` y exportar únicamente `Route`.
+  - Actualizar import en `src/test/landing/index-route.test.tsx`.
+  - Validar con vitest.
+
+- [x] **T-09: Silenciar Hydration Mismatch en `<html>` y `<video>`**
+  - Agregar `suppressHydrationWarning` en `<html lang="es">` en `src/routes/__root.tsx`.
+  - Agregar `suppressHydrationWarning` en `<video>` en `BenchShowcaseSection.tsx` y `WarrantySection.tsx`.
+  - Validar build y pruebas.
+
+- [x] **T-10: Verificación Final Integral y Compilación**
+  - Ejecutar suite completa con Vitest.
+  - Ejecutar `npm run build` confirmando 0 advertencias de code-splitting.
+

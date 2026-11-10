@@ -14,7 +14,7 @@
  */
 
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Search, ShoppingCart, X } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
@@ -119,8 +119,11 @@ export function CatalogPage({
     }
   }, []);
 
+  const hasLoadedRef = useRef(false);
+
   useEffect(() => {
-    if (!mockProducts) {
+    if (!mockProducts && !hasLoadedRef.current) {
+      hasLoadedRef.current = true;
       loadData();
     }
   }, [loadData, mockProducts]);

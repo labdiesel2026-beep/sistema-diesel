@@ -254,6 +254,7 @@ export function BenchShowcaseSection({ className = "" }: BenchShowcaseSectionPro
                   loop
                   playsInline
                   preload="metadata"
+                  suppressHydrationWarning
                   onError={() => setVideoFallback(true)}
                   className="w-full h-full object-cover"
                   aria-label="Video del segundo banco de pruebas computarizado en funcionamiento"

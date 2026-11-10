@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { LandingPage } from "@/routes/index";
+import { LandingPage } from "@/components/landing/LandingPage";
 
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (options: unknown) => options,

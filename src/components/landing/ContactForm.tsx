@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MessageCircle, Send, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SITE_CONFIG } from "@/config/site-config";
+import { useSiteSettings } from "@/context/site-settings-context";
 import { buildWhatsAppUrl, formatContactMessage } from "@/lib/whatsapp-utils";
 import { validateContactForm } from "./contact-validation";
 import { INITIAL_CONTACT_FORM_DATA, type ContactFormData, type ContactFormErrors } from "./types";
@@ -11,6 +11,7 @@ interface ContactFormProps {
 }
 
 export function ContactForm({ className = "" }: ContactFormProps) {
+  const { whatsappNumber } = useSiteSettings();
   const [formData, setFormData] = useState<ContactFormData>(INITIAL_CONTACT_FORM_DATA);
   const [errors, setErrors] = useState<ContactFormErrors>({});
 
@@ -36,7 +37,7 @@ export function ContactForm({ className = "" }: ContactFormProps) {
 
     // Componer el mensaje de WhatsApp estructurado con los datos limpios
     const formattedMessage = formatContactMessage(validation.cleanedValues);
-    const whatsappUrl = buildWhatsAppUrl(SITE_CONFIG.phone, formattedMessage);
+    const whatsappUrl = buildWhatsAppUrl(whatsappNumber, formattedMessage);
 
     // Abrir WhatsApp en nueva pestaña/app
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");

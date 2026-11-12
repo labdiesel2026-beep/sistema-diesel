@@ -25,7 +25,8 @@ export function getOptimizedThumbnailUrl(src: string): string {
   const afterUpload = trimmed.slice(markerIndex + uploadMarker.length);
   if (
     afterUpload.startsWith(`${CLOUDINARY_THUMBNAIL_TRANSFORM}/`) ||
-    afterUpload.startsWith("c_fill,")
+    afterUpload.startsWith("c_fill,") ||
+    afterUpload.startsWith("f_auto,")
   ) {
     return trimmed;
   }

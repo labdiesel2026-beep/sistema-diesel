@@ -36,8 +36,15 @@ export const productFormSchema = z
       .string()
       .trim()
       .max(500, "La compatibilidad vehicular no puede superar los 500 caracteres")
+      .nullable()
       .optional()
       .default(""),
+    compatibility: z
+      .string()
+      .trim()
+      .max(500, "La compatibilidad vehicular no puede superar los 500 caracteres")
+      .nullable()
+      .optional(),
     condition: z.enum(PRODUCT_CONDITIONS, {
       error: "Condición debe ser 'Nuevo', 'Reacondicionado' o 'Usado'",
     }),
@@ -52,11 +59,21 @@ export const productFormSchema = z
       .string()
       .trim()
       .max(100, "El código OEM no puede superar los 100 caracteres")
+      .nullable()
       .optional()
       .default(""),
+    oemCode: z
+      .string()
+      .trim()
+      .max(100, "El código OEM no puede superar los 100 caracteres")
+      .nullable()
+      .optional(),
     isFeatured: z.boolean().default(false),
   })
   .strict();
+
+export const createProductSchema = productFormSchema;
+export const updateProductSchema = productFormSchema.partial();
 
 /**
  * Esquema Zod estricto para alternar visibilidad de un producto.

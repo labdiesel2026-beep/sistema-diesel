@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { login, logout, me, refresh } from "../controllers/auth.controller.js";
+import { changePassword, login, logout, me, refresh } from "../controllers/auth.controller.js";
 import { authRateLimiter } from "../middleware/rate-limit.middleware.js";
 import { csrfProtection } from "../middleware/csrf.middleware.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
-import { loginSchema } from "../schemas/auth.schemas.js";
+import { changePasswordSchema, loginSchema } from "../schemas/auth.schemas.js";
 
 const router = Router();
 
@@ -24,5 +24,21 @@ router.post("/refresh", csrfProtection, refresh);
 
 // Sesión silenciosa / Perfil actual (Rehidratación protegida por cookie HttpOnly)
 router.get("/me", requireAuth, me);
+
+// Cambio de contraseña protegido por autenticación, anti-CSRF y validación Zod
+router.put(
+  "/change-password",
+  requireAuth,
+  csrfProtection,
+  validate(changePasswordSchema),
+  changePassword,
+);
+router.post(
+  "/change-password",
+  requireAuth,
+  csrfProtection,
+  validate(changePasswordSchema),
+  changePassword,
+);
 
 export default router;

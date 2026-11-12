@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   featuredPatchSchema,
   productFormSchema,
+  createProductSchema,
+  updateProductSchema,
   visibilityPatchSchema,
   MAX_PRODUCT_PRICE,
 } from "../src/schemas/product.schemas.js";
@@ -126,6 +128,40 @@ describe("Validación de Esquemas Zod de Productos (Tarea 8.1)", () => {
         price: MAX_PRODUCT_PRICE + 1,
       });
       expect(overflowRes.success).toBe(false);
+    });
+
+    it("acepta oem y vehicleCompatibility vacíos o ausentes asignando string vacío por defecto", () => {
+      const result = createProductSchema.safeParse({
+        ...validBase,
+        oem: "",
+        vehicleCompatibility: "",
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.oem).toBe("");
+        expect(result.data.vehicleCompatibility).toBe("");
+      }
+    });
+
+    it("acepta oem y vehicleCompatibility como null explícito", () => {
+      const result = createProductSchema.safeParse({
+        ...validBase,
+        oem: null,
+        vehicleCompatibility: null,
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.oem).toBe(null);
+        expect(result.data.vehicleCompatibility).toBe(null);
+      }
+    });
+
+    it("updateProductSchema admite campos parciales con oem y vehicleCompatibility nulos y vacíos", () => {
+      const result = updateProductSchema.safeParse({
+        oem: null,
+        vehicleCompatibility: null,
+      });
+      expect(result.success).toBe(true);
     });
   });
 });

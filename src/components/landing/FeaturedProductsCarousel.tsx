@@ -121,7 +121,7 @@ export function FeaturedProductsCarousel({
         <div className="flex flex-1 flex-col p-6">
           {/* Código OEM */}
           <span className="mb-3 font-mono text-xs uppercase tracking-widest text-zinc-500">
-            OEM {product.oem}
+            {product.oem?.trim() ? `OEM ${product.oem.trim()}` : "OEM S/N"}
           </span>
 
           {/* Título de Producto */}
@@ -133,9 +133,9 @@ export function FeaturedProductsCarousel({
           </h3>
 
           {/* Compatibilidad Vehicular */}
-          {product.vehicleCompatibility && (
+          {product.vehicleCompatibility?.trim() && (
             <p className="mt-2 line-clamp-2 text-xs font-light text-zinc-400">
-              {product.vehicleCompatibility}
+              {product.vehicleCompatibility.trim()}
             </p>
           )}
 

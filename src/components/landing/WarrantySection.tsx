@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ShieldCheck, CheckCircle2 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { SITE_CONFIG } from "@/config/site-config";
+import { useSiteSettings } from "@/context/site-settings-context";
 import { buildWhatsAppUrl } from "@/lib/whatsapp-utils";
 import { useScrollReveal } from "@/components/landing/scroll-reveal";
-import videoSrc from "@/assets/workshop/banco-en-vivo.mp4";
+import segundoBancoVideo from "@/assets/workshop/2doBanco.mp4";
 import posterImg from "@/assets/workshop/inyectores-detalle.webp";
 
 interface WarrantySectionProps {
@@ -14,9 +14,8 @@ interface WarrantySectionProps {
 }
 
 export function WarrantySection({ className = "" }: WarrantySectionProps) {
-  const warrantyUrl = buildWhatsAppUrl(SITE_CONFIG.phone, SITE_CONFIG.whatsappMessages.warranty);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [shouldFallback, setShouldFallback] = useState(false);
+  const { whatsappNumber } = useSiteSettings();
+  const warrantyUrl = buildWhatsAppUrl(whatsappNumber, SITE_CONFIG.whatsappMessages.warranty);
 
   const {
     ref,
@@ -27,50 +26,6 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
     viewportConfig,
     handleAnimationComplete,
   } = useScrollReveal("garantias");
-
-  useEffect(() => {
-    // Detección de directiva de ahorro de datos o conexiones móviles lentas (RF-01.2, RNF-02)
-    if (typeof navigator !== "undefined") {
-      const nav = navigator as unknown as {
-        connection?: {
-          saveData?: boolean;
-          effectiveType?: string;
-        };
-      };
-
-      if (
-        nav.connection?.saveData === true ||
-        nav.connection?.effectiveType === "2g" ||
-        nav.connection?.effectiveType === "slow-2g"
-      ) {
-        setShouldFallback(true);
-        return;
-      }
-    }
-
-    if (
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-data: reduce)")?.matches
-    ) {
-      setShouldFallback(true);
-      return;
-    }
-
-    // Si autoplay es rechazado por políticas del navegador o modo de ahorro de energía
-    const video = videoRef.current;
-    if (video && typeof video.play === "function") {
-      try {
-        const playPromise = video.play();
-        if (playPromise !== undefined && typeof playPromise.catch === "function") {
-          playPromise.catch(() => {
-            setShouldFallback(true);
-          });
-        }
-      } catch {
-        setShouldFallback(true);
-      }
-    }
-  }, []);
 
   return (
     <section
@@ -156,40 +111,31 @@ export function WarrantySection({ className = "" }: WarrantySectionProps) {
               onAnimationComplete={handleAnimationComplete}
               className="lg:col-span-5"
             >
-              <div className="relative aspect-video w-full overflow-hidden border border-white/10 bg-black">
-                {shouldFallback ? (
-                  <img
-                    src={posterImg}
-                    alt="Banco de ensayo y calibración de precisión Common Rail"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <video
-                    ref={videoRef}
-                    src={videoSrc}
-                    poster={posterImg}
-                    muted
-                    autoPlay
-                    loop
-                    playsInline
-                    preload="metadata"
-                    suppressHydrationWarning
-                    onError={() => setShouldFallback(true)}
-                    className="h-full w-full object-cover"
-                    aria-label="Ensayo y prueba de inyectores diésel en banco computarizado"
-                  />
-                )}
+              <div className="relative aspect-video w-full overflow-hidden border border-white/10 bg-black transform-gpu will-change-transform [contain:layout_paint]">
+                <video
+                  ref={(el) => {
+                    if (el) {
+                      el.muted = true;
+                      el.defaultMuted = true;
+                      el.playsInline = true;
+                      el.play().catch(() => {});
+                    }
+                  }}
+                  src={segundoBancoVideo}
+                  poster={posterImg}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  className="h-full w-full object-cover transform-gpu will-change-transform [contain:layout_paint]"
+                  aria-label="Ensayo y prueba de inyectores diésel en banco computarizado"
+                />
 
                 {/* Badge técnico contextual */}
                 <div className="absolute top-4 left-4 z-10 flex items-center gap-2 border border-white/10 bg-zinc-950/80 px-3 py-1 font-mono text-[10px] tracking-widest uppercase text-white/80">
-                  <span
-                    className={`size-1.5 ${
-                      shouldFallback ? "bg-zinc-500" : "bg-emerald-400 animate-pulse"
-                    }`}
-                  />
-                  <span>
-                    {shouldFallback ? "Banco de Precisión Common Rail" : "Ensayo en Tiempo Real"}
-                  </span>
+                  <span className="size-1.5 bg-emerald-400 animate-pulse" />
+                  <span>Ensayo en Tiempo Real</span>
                 </div>
               </div>
             </motion.div>

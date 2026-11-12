@@ -32,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import { ProductImageWithFallback } from "@/components/catalog/ProductImageWithFallback";
 import { CartDrawer } from "@/components/catalog/CartDrawer";
 import { useCatalogCart } from "@/context/catalog-cart-context";
+import { useSiteSettings } from "@/context/site-settings-context";
 import { catalogService } from "@/services/catalog-service";
 import { formatPrice, generateDirectProductWhatsAppUrl } from "@/lib/catalog-whatsapp";
 import { parseOemCodes } from "@/lib/catalog-search";
@@ -116,9 +117,10 @@ export function ProductDetailPage({
   }, [productId, mockProduct, loadProductData]);
 
   const brandName = brand?.name || "";
+  const { whatsappNumber } = useSiteSettings();
   const directWhatsAppUrl = useMemo(
-    () => (product ? generateDirectProductWhatsAppUrl(product, brandName) : ""),
-    [product, brandName],
+    () => (product ? generateDirectProductWhatsAppUrl(product, brandName, whatsappNumber) : ""),
+    [product, brandName, whatsappNumber],
   );
 
   const oemData = useMemo(() => parseOemCodes(product?.oem), [product?.oem]);

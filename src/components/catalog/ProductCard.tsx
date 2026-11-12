@@ -18,8 +18,10 @@ import { FaWhatsapp } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { ProductImageWithFallback } from "@/components/catalog/ProductImageWithFallback";
 import { useCatalogCart } from "@/context/catalog-cart-context";
+import { useSiteSettings } from "@/context/site-settings-context";
 import { formatPrice, generateDirectProductWhatsAppUrl } from "@/lib/catalog-whatsapp";
 import { parseOemCodes } from "@/lib/catalog-search";
+import { resolveImageUrl } from "@/lib/formatters";
 import type { CatalogProduct } from "@/types/catalog";
 
 export interface ProductCardProps {
@@ -36,9 +38,10 @@ export function ProductCard({
   className = "",
 }: ProductCardProps) {
   const { add, getItemQuantity } = useCatalogCart();
+  const { whatsappNumber } = useSiteSettings();
   const cartQuantity = getItemQuantity(product.id);
 
-  const directWhatsAppUrl = generateDirectProductWhatsAppUrl(product, brandName);
+  const directWhatsAppUrl = generateDirectProductWhatsAppUrl(product, brandName, whatsappNumber);
   const oemData = useMemo(() => parseOemCodes(product.oem), [product.oem]);
 
   return (
@@ -61,7 +64,7 @@ export function ProductCard({
         aria-label={`Ver detalles técnicos de ${product.name}`}
       >
         <ProductImageWithFallback
-          src={product.imageUrl}
+          src={resolveImageUrl(product.imageUrl, { width: 600 })}
           alt={product.name}
           className="max-w-full max-h-full object-contain object-center rounded-md transition-transform duration-500 ease-out group-hover:scale-105"
           fallbackClassName="flex size-full flex-col items-center justify-center bg-zinc-900 rounded-md p-2 text-center"

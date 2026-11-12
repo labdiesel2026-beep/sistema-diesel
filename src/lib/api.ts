@@ -34,6 +34,15 @@ export const API_ORIGIN: string = rawBaseUrl.endsWith("/api")
 
 export const BASE_URL: string = API_ORIGIN;
 
+/**
+ * Emite evento global de desautorización para abrir el modal de re-autenticación
+ */
+export function dispatchUnauthorized(): void {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("SHOW_REAUTH_MODAL"));
+  }
+}
+
 // Token JWT en memoria volátil (Zero-Trust ASVS / OWASP: prohibido almacenar en localStorage/sessionStorage)
 let inMemoryToken: string | null = null;
 
@@ -143,6 +152,48 @@ async function request<T>(
   }
 
   if (!response.ok) {
+    // Manejo de expiración de sesión (401) con silent refresh
+    if (response.status === 401) {
+      const isAuthEndpoint =
+        url.includes("/api/auth/login") ||
+        url.includes("/api/auth/refresh");
+
+      if (!isAuthEndpoint && !(customOptions as any)?._retry) {
+        try {
+          const refreshHeaders = new Headers();
+          refreshHeaders.set("X-Requested-With", "XMLHttpRequest");
+          if (inMemoryToken) {
+            refreshHeaders.set("Authorization", `Bearer ${inMemoryToken}`);
+          }
+
+          const refreshRes = await fetch(`${API_ORIGIN}/api/auth/refresh`, {
+            method: "POST",
+            headers: refreshHeaders,
+            credentials: "include",
+          });
+
+          if (refreshRes.ok) {
+            const refreshData = await refreshRes.json();
+            if (refreshData?.token) {
+              setAuthToken(refreshData.token);
+            }
+            return request<T>(endpoint, {
+              ...options,
+              headers: customHeaders,
+              ...customOptions,
+              _retry: true,
+            } as any);
+          }
+        } catch {
+          // Fallo de silent refresh
+        }
+
+        dispatchUnauthorized();
+      } else {
+        dispatchUnauthorized();
+      }
+    }
+
     const errorMessage =
       (responseData &&
         typeof responseData === "object" &&
@@ -186,17 +237,6 @@ export const api = {
   },
 };
 
-export function resolveImageUrl(imagePath?: string | null): string {
-  if (!imagePath) return "";
-  if (
-    imagePath.startsWith("data:") ||
-    imagePath.startsWith("http://") ||
-    imagePath.startsWith("https://")
-  ) {
-    return imagePath;
-  }
-  const cleanPath = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
-  return `${API_ORIGIN}${cleanPath}`;
-}
+export { resolveImageUrl, formatARS, type ImageOptimizationOptions } from "./formatters";
 
 export default api;

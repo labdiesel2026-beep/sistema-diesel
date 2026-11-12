@@ -5,6 +5,7 @@ import brandRoutes from "./brand.routes.js";
 import categoryRoutes from "./category.routes.js";
 import productRoutes from "./product.routes.js";
 import metricsRoutes from "./metrics.routes.js";
+import settingsRoutes from "./settings.routes.js";
 
 const apiRouter = Router();
 
@@ -14,6 +15,7 @@ apiRouter.use("/uploads", uploadRoutes);
 apiRouter.use("/brands", brandRoutes);
 apiRouter.use("/categories", categoryRoutes);
 apiRouter.use("/products", productRoutes);
+apiRouter.use("/settings", settingsRoutes);
 apiRouter.use("/admin", metricsRoutes);
 apiRouter.use("/admin/metrics", metricsRoutes);
 

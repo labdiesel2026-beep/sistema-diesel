@@ -33,7 +33,9 @@ import {
 import { ProductImageWithFallback } from "@/components/catalog/ProductImageWithFallback";
 import { useCatalogCart } from "@/context/catalog-cart-context";
 import { revalidateCartItems } from "@/lib/cart-revalidation";
+import { resolveImageUrl } from "@/lib/formatters";
 import { formatPrice, generateCartWhatsAppUrl } from "@/lib/catalog-whatsapp";
+import { useSiteSettings } from "@/context/site-settings-context";
 import type { EnrichedCartItem } from "@/types/catalog";
 
 export interface CartTotalsSummary {
@@ -131,28 +133,41 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
             return live ? { ...enriched, quantity: live.quantity } : enriched;
           })
           .filter((enriched) => items.some((i) => i.productId === enriched.productId))
-      : items.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          name: item.lastKnown.name,
-          oem: item.lastKnown.oem,
-          imageUrl: "",
-          brandName: "",
-          condition: "Nuevo",
-          price: null,
-          showPrice: false,
-          visible: true,
-          requiresReconfirmation: false,
-          isDeletedOrUnavailable: false,
-        }));
+      : items.map((item) => {
+          const snap = item.productSnapshot;
+          const lk = item.lastKnown;
+          const priceVal = snap?.price !== undefined ? snap.price : (lk.price ?? null);
+          const showPriceVal =
+            snap?.showPrice !== undefined
+              ? snap.showPrice
+              : lk.showPrice !== undefined
+                ? lk.showPrice
+                : priceVal !== null;
+
+          return {
+            productId: item.productId,
+            quantity: item.quantity,
+            name: snap?.name || lk.name,
+            oem: snap?.oemCode ?? lk.oem ?? null,
+            imageUrl: snap?.imageUrl || lk.imageUrl || "",
+            brandName: snap?.brandName || lk.brandName || "",
+            condition: (snap?.condition || lk.condition || "Nuevo") as any,
+            price: priceVal,
+            showPrice: Boolean(showPriceVal),
+            visible: snap?.isVisible !== undefined ? snap.isVisible : (lk.visible ?? true),
+            requiresReconfirmation: false,
+            isDeletedOrUnavailable: false,
+          };
+        });
 
   // Cálculos de subtotal estricto y desglose dinámico (RF-09, CL-03)
+  const { whatsappNumber } = useSiteSettings();
   const cartSummary = useMemo(() => calculateCartTotals(displayedItems), [displayedItems]);
   const hasReconfirmation = displayedItems.some((item) => item.requiresReconfirmation);
 
   const whatsappCheckoutUrl =
     displayedItems.length > 0
-      ? generateCartWhatsAppUrl(displayedItems, undefined, { tagCotizar: true })
+      ? generateCartWhatsAppUrl(displayedItems, whatsappNumber, { tagCotizar: true })
       : "";
 
   return (
@@ -164,11 +179,11 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
       >
         {/* Cabecera del Carrito */}
         <SheetHeader className="border-b border-white/10 px-6 py-5 text-left bg-canvas">
-          <div className="flex items-center justify-between pr-10">
-            <SheetTitle className="flex items-center gap-2.5 font-display text-xl text-white">
-              <ShoppingCart className="size-5 text-industrial" />
-              <span>Tu Carrito de Consultas</span>
-              <span className="rounded-full bg-industrial/20 px-2 py-0.5 font-mono text-xs font-bold text-industrial">
+          <div className="flex items-center justify-between gap-2 pr-8">
+            <SheetTitle className="flex items-center gap-2.5 font-display text-lg sm:text-xl text-white min-w-0">
+              <ShoppingCart className="size-5 text-industrial shrink-0" />
+              <span className="truncate">Tu Carrito de Consultas</span>
+              <span className="rounded-full bg-industrial/20 px-2 py-0.5 font-mono text-xs font-bold text-industrial shrink-0">
                 {count}
               </span>
             </SheetTitle>
@@ -178,7 +193,7 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                 variant="ghost"
                 size="sm"
                 onClick={clear}
-                className="h-8 gap-1.5 px-2 text-xs text-muted-foreground hover:text-destructive"
+                className="shrink-0 text-xs px-2.5 py-1.5 h-8 gap-1.5 text-muted-foreground hover:text-destructive"
                 aria-label="Vaciar carrito"
                 data-testid="clear-cart-button"
               >
@@ -187,7 +202,7 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
               </Button>
             )}
           </div>
-          <SheetDescription className="text-xs text-muted-foreground">
+          <SheetDescription className="text-xs text-muted-foreground mt-1">
             Cotización unificada directa vía WhatsApp · Sin reserva de existencias
           </SheetDescription>
         </SheetHeader>
@@ -240,7 +255,7 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                   {/* Imagen del Ítem */}
                   <div className="size-20 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-canvas">
                     <ProductImageWithFallback
-                      src={item.imageUrl}
+                      src={resolveImageUrl(item.imageUrl, { width: 160 })}
                       alt={item.name}
                       className="size-full object-cover"
                     />
@@ -279,34 +294,36 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                     )}
 
                     {/* Precio / A cotizar */}
-                    <div className="mt-2 text-sm font-bold text-foreground">
+                    <div className="mt-2">
                       {item.requiresReconfirmation ? (
-                        <span className="font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        <span className="font-mono text-xs text-amber-400 font-bold uppercase tracking-wider">
                           [A Cotizar]
                         </span>
                       ) : item.showPrice && item.price !== null && item.price > 0 ? (
-                        <span>
-                          {formatPrice(item.price * item.quantity)}
+                        <div>
+                          <span className="text-white font-extrabold text-sm sm:text-base">
+                            {formatPrice(item.price * item.quantity)}
+                          </span>
                           {item.quantity > 1 && (
-                            <span className="ml-1.5 font-mono text-xs font-normal text-muted-foreground">
-                              ({formatPrice(item.price)} c/u)
+                            <span className="block text-[11px] font-mono text-slate-400 mt-0.5">
+                              ({formatPrice(item.price)} ARS c/u)
                             </span>
                           )}
-                        </span>
+                        </div>
                       ) : (
-                        <span className="font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        <span className="font-mono text-xs text-amber-400 font-bold uppercase tracking-wider">
                           [A Cotizar]
                         </span>
                       )}
                     </div>
 
                     {/* Controles de Cantidad y Eliminación */}
-                    <div className="mt-3 flex items-center justify-between">
-                      <div className="flex items-center rounded-lg border border-border bg-card">
+                    <div className="mt-3 flex items-center justify-between gap-2 pt-2">
+                      <div className="flex items-center shrink-0 rounded-lg border border-border bg-card">
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-8 text-foreground hover:bg-muted"
+                          className="size-8 w-8 h-8 shrink-0 text-foreground hover:bg-muted"
                           disabled={item.quantity <= 1}
                           aria-label={`Reducir cantidad de ${item.name}`}
                           data-testid={`decrease-quantity-${item.productId}`}
@@ -315,7 +332,7 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                           <Minus className="size-3.5" />
                         </Button>
                         <span
-                          className="w-8 text-center font-mono text-xs font-bold text-foreground"
+                          className="w-11 text-center font-mono text-xs font-bold text-foreground select-none"
                           data-testid={`quantity-${item.productId}`}
                         >
                           {item.quantity}
@@ -323,7 +340,7 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-8 text-foreground hover:bg-muted"
+                          className="size-8 w-8 h-8 shrink-0 text-foreground hover:bg-muted"
                           aria-label={`Aumentar cantidad de ${item.name}`}
                           data-testid={`increase-quantity-${item.productId}`}
                           onClick={() => changeQuantity(item.productId, 1)}
@@ -335,7 +352,7 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        className="size-8 w-8 h-8 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         aria-label={`Eliminar ${item.name} del carrito`}
                         data-testid={`remove-item-${item.productId}`}
                         onClick={() => remove(item.productId)}

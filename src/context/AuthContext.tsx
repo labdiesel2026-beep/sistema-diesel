@@ -168,9 +168,20 @@ export function ReauthModal({
               Sesión Expirada
             </h2>
             <p className="text-xs text-gray-500">
-              Re-autentíquese para reanudar el trabajo y guardar sus cambios
+              Tu sesión expiró por inactividad. Ingresa tu contraseña para continuar sin perder los cambios del formulario
             </p>
           </div>
+        </div>
+
+        <div
+          role="status"
+          data-testid="reauth-inactivity-notice"
+          className="mb-4 flex items-start gap-2.5 rounded-lg bg-amber-50 p-3 text-xs text-amber-800 border border-amber-200"
+        >
+          <AlertCircle className="size-4 shrink-0 text-amber-600 mt-0.5" />
+          <p>
+            Tu sesión expiró por inactividad. Ingresa tu contraseña para continuar sin perder los cambios del formulario.
+          </p>
         </div>
 
         {errorMessage && (

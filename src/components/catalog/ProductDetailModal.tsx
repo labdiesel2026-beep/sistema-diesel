@@ -13,8 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProductImageWithFallback } from "@/components/catalog/ProductImageWithFallback";
 import { useCatalogCart } from "@/context/catalog-cart-context";
+import { useSiteSettings } from "@/context/site-settings-context";
 import { formatPrice } from "@/lib/catalog-whatsapp";
-import { SITE_CONFIG } from "@/config/site-config";
+import { buildWhatsAppUrl } from "@/lib/whatsapp-utils";
 import type { CatalogProduct } from "@/types/catalog";
 
 export interface ProductDetailModalProps {
@@ -33,16 +34,16 @@ export function ProductDetailModal({
   onOpenChange,
 }: ProductDetailModalProps) {
   const { add, getItemQuantity } = useCatalogCart();
+  const { whatsappNumber } = useSiteSettings();
 
   const cartQuantity = product ? getItemQuantity(product.id) : 0;
   const sku = product?.oem || (product ? `DIESEL-${product.id.slice(0, 8).toUpperCase()}` : "");
 
   const whatsappUrl = useMemo(() => {
     if (!product) return "#";
-    const phone = SITE_CONFIG.phone || "5492657659108";
     const message = `Hola, quisiera consultar sobre el repuesto: ${product.name} (SKU: ${sku})`;
-    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-  }, [product, sku]);
+    return buildWhatsAppUrl(whatsappNumber, message);
+  }, [product, sku, whatsappNumber]);
 
   if (!product) {
     return null;

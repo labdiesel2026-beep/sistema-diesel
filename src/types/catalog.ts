@@ -58,6 +58,23 @@ export interface CartItemCache {
   lastKnown: {
     name: string;
     oem: string | null;
+    imageUrl?: string | null;
+    brandName?: string | null;
+    condition?: string | null;
+    price?: number | null;
+    showPrice?: boolean | null;
+    visible?: boolean | null;
+  };
+  productSnapshot?: {
+    id?: string;
+    name?: string;
+    oemCode?: string | null;
+    price?: number | null;
+    imageUrl?: string | null;
+    brandName?: string | null;
+    condition?: string | null;
+    isVisible?: boolean | null;
+    showPrice?: boolean | null;
   };
 }
 

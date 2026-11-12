@@ -81,7 +81,7 @@ export function HeroSection({ className = "" }: HeroSectionProps) {
       {/* 2. Bloque Central: Jerarquía Vertical Estricta (RF-03) */}
       <div className="relative z-10 mx-auto my-auto max-w-5xl px-4 py-8 flex flex-col items-center justify-center text-center w-full">
         <motion.h1
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="font-display text-4xl sm:text-6xl md:text-8xl lg:text-[7rem] font-bold uppercase tracking-tight text-white leading-none text-center drop-shadow-lg break-words"

@@ -7,6 +7,7 @@ import { app } from "../src/app.js";
 import { authService } from "../src/services/auth.service.js";
 import { deleteFile, DEFAULT_UPLOADS_DIR } from "../src/services/file-storage.service.js";
 import * as fileStorage from "../src/services/file-storage.service.js";
+import * as cdrService from "../src/services/cdr.service.js";
 
 describe("Suite de Integración: Tubería Paranoica CDR y Uploads (server/tests/cdr-upload.test.ts) — Tarea 4.5 & Fase 11", () => {
   const adminPayload = {
@@ -96,6 +97,7 @@ describe("Suite de Integración: Tubería Paranoica CDR y Uploads (server/tests/
         streamedBuffer = buffer;
         return fakeCloudinaryUrl;
       });
+    const redundantSanitizeSpy = vi.spyOn(cdrService, "sanitizeImageBuffer");
 
     const validJpeg = await sharp({
       create: { width: 1920, height: 1080, channels: 3, background: { r: 24, g: 119, b: 242 } },
@@ -112,6 +114,9 @@ describe("Suite de Integración: Tubería Paranoica CDR y Uploads (server/tests/
     expect(uploadRes.body).toHaveProperty("imageUrl");
     expect(uploadRes.body.imageUrl).toBe(fakeCloudinaryUrl);
 
+    // Verificar que el controlador NO haya ejecutado una segunda pasada redundante de Sharp
+    expect(redundantSanitizeSpy).not.toHaveBeenCalled();
+
     // Inspeccionar el buffer transmitido por stream
     expect(streamedBuffer).not.toBeNull();
     const meta = await sharp(streamedBuffer!).metadata();
@@ -120,6 +125,7 @@ describe("Suite de Integración: Tubería Paranoica CDR y Uploads (server/tests/
     expect(meta.height).toBe(608);
     expect(meta.exif).toBeUndefined();
 
+    redundantSanitizeSpy.mockRestore();
     uploadSpy.mockRestore();
   });
 

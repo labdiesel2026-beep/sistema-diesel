@@ -86,37 +86,53 @@ export type BrandFormData = z.infer<typeof brandFormSchema>;
 // ==========================================
 
 export const PRODUCT_CONDITIONS = ["Nuevo", "Reacondicionado", "Usado"] as const;
+export const MAX_PRODUCT_PRICE = 2_147_483_647; // Límite INT4_MAX de PostgreSQL
 
 export const productFormSchema = z
   .object({
     name: z
       .string({ required_error: "El nombre es obligatorio" })
       .trim()
-      .min(3, "El nombre debe contener al menos 3 caracteres"),
+      .min(3, "El nombre debe contener al menos 3 caracteres")
+      .max(200, "El nombre no puede superar los 200 caracteres"),
     description: z
       .string({ required_error: "La descripción es obligatoria" })
       .trim()
-      .min(5, "La descripción debe contener al menos 5 caracteres"),
+      .min(5, "La descripción debe contener al menos 5 caracteres")
+      .max(5000, "La descripción no puede superar los 5000 caracteres"),
     imageUrl: z
       .string({ required_error: "La foto del producto es obligatoria" })
-      .min(1, "Debe seleccionar una foto para el producto"),
+      .min(1, "Debe seleccionar una foto para el producto")
+      .max(2048, "La URL de la imagen es demasiado extensa"),
     categoryIds: z
       .array(z.string().uuid("Identificador de categoría inválido"))
-      .min(1, "Debe seleccionar al menos una categoría"),
+      .min(1, "Debe seleccionar al menos una categoría")
+      .max(50, "No puede seleccionar más de 50 categorías"),
     brandId: z
       .string({ required_error: "Debe seleccionar una marca" })
       .uuid("Identificador de marca inválido"),
-    vehicleCompatibility: z.string().trim().optional().default(""),
+    vehicleCompatibility: z
+      .string()
+      .trim()
+      .max(500, "La compatibilidad vehicular no puede superar los 500 caracteres")
+      .optional()
+      .default(""),
     condition: z.enum(PRODUCT_CONDITIONS, {
       errorMap: () => ({ message: "Condición debe ser 'Nuevo', 'Reacondicionado' o 'Usado'" }),
     }),
     price: z
       .number({ invalid_type_error: "El precio debe ser un número válido" })
       .nonnegative("El precio no puede ser negativo (admite $0)")
+      .max(MAX_PRODUCT_PRICE, "El precio supera el límite máximo permitido")
       .nullable(),
     showPrice: z.boolean().default(true),
     visible: z.boolean().default(true),
-    oem: z.string().trim().optional().default(""),
+    oem: z
+      .string()
+      .trim()
+      .max(100, "El código OEM no puede superar los 100 caracteres")
+      .optional()
+      .default(""),
     isFeatured: z.boolean().default(false),
   })
   .strict();

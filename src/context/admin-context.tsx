@@ -17,6 +17,40 @@ export interface CatalogMetrics {
 }
 
 /**
+ * Calcula en O(N) las métricas del catálogo en memoria para actualización optimista instantánea,
+ * evitando disparar 6 consultas COUNT(*) a PostgreSQL en cada mutación individual (Fase 14 RF-06).
+ */
+export function computeCatalogMetrics(
+  productsList: AdminProduct[],
+  categoriesList: AdminCategory[],
+  brandsList: AdminBrand[],
+): CatalogMetrics {
+  let visibleProducts = 0;
+  let hiddenProducts = 0;
+  let featuredProducts = 0;
+
+  for (const p of productsList) {
+    if (p.visible) {
+      visibleProducts++;
+      if (p.isFeatured) {
+        featuredProducts++;
+      }
+    } else {
+      hiddenProducts++;
+    }
+  }
+
+  return {
+    totalProducts: productsList.length,
+    visibleProducts,
+    hiddenProducts,
+    featuredProducts,
+    totalCategories: categoriesList.length,
+    totalBrands: brandsList.length,
+  };
+}
+
+/**
  * Resultado estructurado para operaciones de mutación de categorías.
  * (CA-11.1, CA-11.2, CL-04, CL-05)
  */
@@ -353,8 +387,9 @@ export function AdminProvider({
           parentId: response.parentId ?? null,
         };
 
-        setCategories((prev) => [...prev, newCategory]);
-        refreshMetrics().catch(() => {});
+        const nextCategories = [...categories, newCategory];
+        setCategories(nextCategories);
+        setMetrics(computeCatalogMetrics(products, nextCategories, brands));
 
         return {
           success: true,
@@ -371,7 +406,7 @@ export function AdminProvider({
         };
       }
     },
-    [categories, refreshMetrics],
+    [categories, products, brands],
   );
 
   const updateCategory = useCallback(
@@ -485,8 +520,9 @@ export function AdminProvider({
       try {
         await api.delete<{ success: boolean; message: string }>(`/api/categories/${id}`);
 
-        setCategories((prev) => prev.filter((c) => c.id !== id));
-        refreshMetrics().catch(() => {});
+        const nextCategories = categories.filter((c) => c.id !== id);
+        setCategories(nextCategories);
+        setMetrics(computeCatalogMetrics(products, nextCategories, brands));
 
         return { success: true, blocked: false };
       } catch (err: any) {
@@ -502,7 +538,7 @@ export function AdminProvider({
         };
       }
     },
-    [canDeleteCategory, refreshMetrics],
+    [canDeleteCategory, categories, products, brands],
   );
 
   // -------------------------------------------------------------------------
@@ -586,8 +622,9 @@ export function AdminProvider({
           name: response.name,
         };
 
-        setBrands((prev) => [...prev, newBrand]);
-        refreshMetrics().catch(() => {});
+        const nextBrands = [...brands, newBrand];
+        setBrands(nextBrands);
+        setMetrics(computeCatalogMetrics(products, categories, nextBrands));
 
         return {
           success: true,
@@ -604,7 +641,7 @@ export function AdminProvider({
         };
       }
     },
-    [brands, refreshMetrics],
+    [brands, products, categories],
   );
 
   const updateBrand = useCallback(
@@ -680,8 +717,9 @@ export function AdminProvider({
       try {
         await api.delete<{ success: boolean; message: string }>(`/api/brands/${id}`);
 
-        setBrands((prev) => prev.filter((b) => b.id !== id));
-        refreshMetrics().catch(() => {});
+        const nextBrands = brands.filter((b) => b.id !== id);
+        setBrands(nextBrands);
+        setMetrics(computeCatalogMetrics(products, categories, nextBrands));
 
         return { success: true, blocked: false };
       } catch (err: any) {
@@ -697,7 +735,7 @@ export function AdminProvider({
         };
       }
     },
-    [canDeleteBrand, refreshMetrics],
+    [canDeleteBrand, brands, products, categories],
   );
 
   // -------------------------------------------------------------------------
@@ -759,8 +797,9 @@ export function AdminProvider({
           featuredAt: response.featuredAt ?? null,
         };
 
-        setProducts((prev) => [newProduct, ...prev]);
-        refreshMetrics().catch(() => {});
+        const nextProducts = [newProduct, ...products];
+        setProducts(nextProducts);
+        setMetrics(computeCatalogMetrics(nextProducts, categories, brands));
 
         return {
           success: true,
@@ -777,7 +816,7 @@ export function AdminProvider({
         };
       }
     },
-    [refreshMetrics],
+    [products, categories, brands],
   );
 
   const updateProduct = useCallback(
@@ -832,8 +871,9 @@ export function AdminProvider({
           featuredAt: response.featuredAt ?? null,
         };
 
-        setProducts((prev) => prev.map((p) => (p.id === id ? updatedProduct : p)));
-        refreshMetrics().catch(() => {});
+        const nextProducts = products.map((p) => (p.id === id ? updatedProduct : p));
+        setProducts(nextProducts);
+        setMetrics(computeCatalogMetrics(nextProducts, categories, brands));
 
         return {
           success: true,
@@ -850,7 +890,7 @@ export function AdminProvider({
         };
       }
     },
-    [products, refreshMetrics],
+    [products, categories, brands],
   );
 
   const toggleProductVisibility = useCallback(
@@ -882,8 +922,9 @@ export function AdminProvider({
               : (currentProduct.featuredAt ?? null),
         };
 
-        setProducts((prev) => prev.map((p) => (p.id === id ? updatedProduct : p)));
-        refreshMetrics().catch(() => {});
+        const nextProducts = products.map((p) => (p.id === id ? updatedProduct : p));
+        setProducts(nextProducts);
+        setMetrics(computeCatalogMetrics(nextProducts, categories, brands));
 
         return {
           success: true,
@@ -900,7 +941,7 @@ export function AdminProvider({
         };
       }
     },
-    [products, refreshMetrics],
+    [products, categories, brands],
   );
 
   const toggleVisibility = toggleProductVisibility;
@@ -939,8 +980,9 @@ export function AdminProvider({
           featuredAt: response.featuredAt ?? null,
         };
 
-        setProducts((prev) => prev.map((p) => (p.id === id ? updatedProduct : p)));
-        refreshMetrics().catch(() => {});
+        const nextProducts = products.map((p) => (p.id === id ? updatedProduct : p));
+        setProducts(nextProducts);
+        setMetrics(computeCatalogMetrics(nextProducts, categories, brands));
 
         toast.success(
           nextFeatured ? "Producto añadido a destacados" : "Producto removido de destacados",
@@ -968,7 +1010,7 @@ export function AdminProvider({
         };
       }
     },
-    [products, refreshMetrics],
+    [products, categories, brands],
   );
 
   const deleteProduct = useCallback(
@@ -984,8 +1026,9 @@ export function AdminProvider({
       try {
         await api.delete<{ success: boolean; message: string }>(`/api/products/${id}`);
 
-        setProducts((prev) => prev.filter((p) => p.id !== id));
-        refreshMetrics().catch(() => {});
+        const nextProducts = products.filter((p) => p.id !== id);
+        setProducts(nextProducts);
+        setMetrics(computeCatalogMetrics(nextProducts, categories, brands));
 
         return { success: true };
       } catch (err: any) {
@@ -999,7 +1042,7 @@ export function AdminProvider({
         };
       }
     },
-    [products, refreshMetrics],
+    [products, categories, brands],
   );
 
   /**

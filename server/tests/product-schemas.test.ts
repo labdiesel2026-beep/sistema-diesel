@@ -3,6 +3,7 @@ import {
   featuredPatchSchema,
   productFormSchema,
   visibilityPatchSchema,
+  MAX_PRODUCT_PRICE,
 } from "../src/schemas/product.schemas.js";
 
 describe("Validación de Esquemas Zod de Productos (Tarea 8.1)", () => {
@@ -81,6 +82,50 @@ describe("Validación de Esquemas Zod de Productos (Tarea 8.1)", () => {
         maliciousKey: 123,
       });
       expect(result.success).toBe(false);
+    });
+
+    it("rechaza textos que superen las cotas máximas de longitud (Fase 14 RF-03)", () => {
+      expect(
+        productFormSchema.safeParse({
+          ...validBase,
+          name: "A".repeat(201),
+        }).success,
+      ).toBe(false);
+
+      expect(
+        productFormSchema.safeParse({
+          ...validBase,
+          description: "D".repeat(5001),
+        }).success,
+      ).toBe(false);
+
+      expect(
+        productFormSchema.safeParse({
+          ...validBase,
+          oem: "0".repeat(101),
+        }).success,
+      ).toBe(false);
+
+      expect(
+        productFormSchema.safeParse({
+          ...validBase,
+          vehicleCompatibility: "V".repeat(501),
+        }).success,
+      ).toBe(false);
+    });
+
+    it("rechaza precios que superen el límite INT4_MAX de PostgreSQL (2,147,483,647)", () => {
+      const validMax = productFormSchema.safeParse({
+        ...validBase,
+        price: MAX_PRODUCT_PRICE,
+      });
+      expect(validMax.success).toBe(true);
+
+      const overflowRes = productFormSchema.safeParse({
+        ...validBase,
+        price: MAX_PRODUCT_PRICE + 1,
+      });
+      expect(overflowRes.success).toBe(false);
     });
   });
 });

@@ -16,8 +16,8 @@
  * - Manejo robusto de errores de servidor (HTTP 500) y estados vacíos preservando siempre las cabeceras fijas.
  */
 
-import { useState } from "react";
-import { Pencil, Trash2, Package, Loader2, AlertCircle } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Pencil, Trash2, Package, Loader2, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import type { AdminProduct } from "@/types/admin";
 import { useAdmin } from "@/context/admin-context";
@@ -79,61 +79,39 @@ export function formatOpaqueServerError(error: unknown): string {
   return `Error del servidor. Referencia: ${safeUuid}`;
 }
 
-export interface ProductListProps {
-  products?: AdminProduct[] | undefined;
+export const DEFAULT_ADMIN_PAGE_SIZE = 25;
+export const ADMIN_PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
+
+export interface ProductFilterCriteria {
   searchQuery?: string | undefined;
   onlyFeatured?: boolean | undefined;
   selectedCategory?: string | undefined;
   selectedBrand?: string | undefined;
   selectedStatus?: "all" | "visible" | "hidden" | undefined;
   selectedFeatured?: "all" | "featured" | "standard" | undefined;
-  onEdit?: ((product: AdminProduct) => void) | undefined;
-  onDelete?: ((product: AdminProduct) => void) | undefined;
-  onToggleVisibility?: ((product: AdminProduct) => void) | undefined;
-  onToggleFeatured?: ((product: AdminProduct) => Promise<void> | void) | undefined;
-  error?: string | null | undefined;
-  isLoading?: boolean | undefined;
-  onRetry?: (() => void) | undefined;
-  onNewProduct?: (() => void) | undefined;
 }
 
-export function ProductList({
-  products: propProducts,
-  searchQuery = "",
-  onlyFeatured = false,
-  selectedCategory = "",
-  selectedBrand = "",
-  selectedStatus = "all",
-  selectedFeatured = "all",
-  onEdit,
-  onDelete,
-  onToggleVisibility,
-  onToggleFeatured,
-  error: propError,
-  isLoading: propLoading,
-  onRetry,
-  onNewProduct,
-}: ProductListProps) {
+/**
+ * Filtra de forma determinista y en tiempo O(N) la colección de productos
+ * utilizando un resolvedor O(1) para nombres de marcas (Fase 14 RF-04).
+ */
+export function filterAdminProducts(
+  products: AdminProduct[],
+  criteria: ProductFilterCriteria,
+  resolveBrandName: (brandId: string) => string,
+): AdminProduct[] {
   const {
-    products: contextProducts,
-    getBrandById,
-    toggleVisibility,
-    toggleFeaturedProduct,
-    error: contextError,
-    isLoading: contextLoading,
-  } = useAdmin();
+    searchQuery = "",
+    onlyFeatured = false,
+    selectedCategory = "",
+    selectedBrand = "",
+    selectedStatus = "all",
+    selectedFeatured = "all",
+  } = criteria;
 
-  const [loadingFeaturedId, setLoadingFeaturedId] = useState<string | null>(null);
-
-  // Estados efectivos: admiten inyección por props o consumo desde el contexto de administración
-  const baseProducts = propProducts ?? contextProducts;
-  const rawError = propError !== undefined ? propError : contextError;
-  const effectiveError = rawError ? formatOpaqueServerError(rawError) : null;
-  const effectiveLoading = propLoading !== undefined ? propLoading : contextLoading;
-
-  // Filtrado con búsqueda literal insensible a mayúsculas y filtros multifaceta (RF-04, CA-04.3, CL-11)
   const cleanQuery = searchQuery.trim().toLowerCase();
-  const filteredProducts = baseProducts.filter((product) => {
+
+  return products.filter((product) => {
     // 1. Filtro Destacados
     if (onlyFeatured || selectedFeatured === "featured") {
       if (!product.isFeatured) return false;
@@ -165,8 +143,7 @@ export function ProductList({
     // 5. Búsqueda de Texto
     if (!cleanQuery) return true;
 
-    const brand = getBrandById(product.brandId);
-    const brandName = brand ? brand.name.toLowerCase() : "";
+    const brandName = resolveBrandName(product.brandId).toLowerCase();
     return (
       (product.name || "").toLowerCase().includes(cleanQuery) ||
       (product.oem || "").toLowerCase().includes(cleanQuery) ||
@@ -175,6 +152,145 @@ export function ProductList({
       brandName.includes(cleanQuery)
     );
   });
+}
+
+export interface ProductListProps {
+  products?: AdminProduct[] | undefined;
+  preFilteredProducts?: AdminProduct[] | undefined;
+  initialPageSize?: number | undefined;
+  searchQuery?: string | undefined;
+  onlyFeatured?: boolean | undefined;
+  selectedCategory?: string | undefined;
+  selectedBrand?: string | undefined;
+  selectedStatus?: "all" | "visible" | "hidden" | undefined;
+  selectedFeatured?: "all" | "featured" | "standard" | undefined;
+  onEdit?: ((product: AdminProduct) => void) | undefined;
+  onDelete?: ((product: AdminProduct) => void) | undefined;
+  onToggleVisibility?: ((product: AdminProduct) => void) | undefined;
+  onToggleFeatured?: ((product: AdminProduct) => Promise<void> | void) | undefined;
+  error?: string | null | undefined;
+  isLoading?: boolean | undefined;
+  onRetry?: (() => void) | undefined;
+  onNewProduct?: (() => void) | undefined;
+}
+
+export function ProductList({
+  products: propProducts,
+  preFilteredProducts,
+  initialPageSize = DEFAULT_ADMIN_PAGE_SIZE,
+  searchQuery = "",
+  onlyFeatured = false,
+  selectedCategory = "",
+  selectedBrand = "",
+  selectedStatus = "all",
+  selectedFeatured = "all",
+  onEdit,
+  onDelete,
+  onToggleVisibility,
+  onToggleFeatured,
+  error: propError,
+  isLoading: propLoading,
+  onRetry,
+  onNewProduct,
+}: ProductListProps) {
+  const {
+    products: contextProducts,
+    brands: contextBrands,
+    getBrandById,
+    toggleVisibility,
+    toggleFeaturedProduct,
+    error: contextError,
+    isLoading: contextLoading,
+  } = useAdmin();
+
+  const [loadingFeaturedId, setLoadingFeaturedId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(initialPageSize);
+
+  // Estados efectivos: admiten inyección por props o consumo desde el contexto de administración
+  const baseProducts = propProducts ?? contextProducts;
+  const rawError = propError !== undefined ? propError : contextError;
+  const effectiveError = rawError ? formatOpaqueServerError(rawError) : null;
+  const effectiveLoading = propLoading !== undefined ? propLoading : contextLoading;
+
+  // Mapa indexado O(1) para resolución instantánea de nombres de marcas (Fase 14 RF-04)
+  const brandNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (Array.isArray(contextBrands)) {
+      for (const b of contextBrands) {
+        map.set(b.id, b.name);
+      }
+    }
+    return map;
+  }, [contextBrands]);
+
+  const resolveBrandName = useMemo(
+    () => (brandId: string): string => {
+      const fromMap = brandNameMap.get(brandId);
+      if (fromMap !== undefined) return fromMap;
+      return getBrandById(brandId)?.name ?? "";
+    },
+    [brandNameMap, getBrandById],
+  );
+
+  // Filtrado memoizado: evita doble filtrado cuando preFilteredProducts es provisto por la ruta padre
+  const filteredProducts = useMemo(() => {
+    if (preFilteredProducts !== undefined) {
+      return preFilteredProducts;
+    }
+    return filterAdminProducts(
+      baseProducts,
+      {
+        searchQuery,
+        onlyFeatured,
+        selectedCategory,
+        selectedBrand,
+        selectedStatus,
+        selectedFeatured,
+      },
+      resolveBrandName,
+    );
+  }, [
+    preFilteredProducts,
+    baseProducts,
+    searchQuery,
+    onlyFeatured,
+    selectedCategory,
+    selectedBrand,
+    selectedStatus,
+    selectedFeatured,
+    resolveBrandName,
+  ]);
+
+  // Reinicio automático a la página 1 ante cambios de búsqueda, filtros o tamaño de página
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    searchQuery,
+    onlyFeatured,
+    selectedCategory,
+    selectedBrand,
+    selectedStatus,
+    selectedFeatured,
+    pageSize,
+  ]);
+
+  // Cálculos de paginación segura acotando el DOM
+  const totalItems = filteredProducts.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const startIndex = (safeCurrentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  const paginatedProducts = useMemo(
+    () => filteredProducts.slice(startIndex, endIndex),
+    [filteredProducts, startIndex, endIndex],
+  );
+
+  const pageSizeChoices = useMemo(() => {
+    const base = new Set<number>(ADMIN_PAGE_SIZE_OPTIONS);
+    base.add(pageSize);
+    return Array.from(base).sort((a, b) => a - b);
+  }, [pageSize]);
 
   const handleToggle = async (product: AdminProduct) => {
     if (onToggleVisibility) {
@@ -332,10 +448,10 @@ export function ProductList({
                 </TableCell>
               </TableRow>
             ) : (
-              /* Caso 4: Listado de Productos */
-              filteredProducts.map((product) => {
-                const brand = getBrandById(product.brandId);
-                const brandName = brand?.name ?? "Sin marca";
+              /* Caso 4: Listado Paginado de Productos (Fase 14 RF-04) */
+              paginatedProducts.map((product) => {
+                const resolvedBrand = resolveBrandName(product.brandId);
+                const brandName = resolvedBrand || "Sin marca";
                 const isHidden = !product.visible;
 
                 return (
@@ -518,6 +634,83 @@ export function ProductList({
           </TableBody>
         </Table>
       </div>
+
+      {/* Barra de Paginación Clásica (Fase 14 RF-04) */}
+      {!effectiveError && !(effectiveLoading && baseProducts.length === 0) && totalItems > 0 && (
+        <div
+          data-testid="product-table-pagination"
+          className="flex flex-col gap-3 border-t border-admin-border bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div className="flex flex-wrap items-center gap-3 text-xs text-admin-text-sub">
+            <span data-testid="pagination-range-indicator">
+              Mostrando <strong className="font-semibold text-admin-text-main">{startIndex + 1}</strong>–
+              <strong className="font-semibold text-admin-text-main">{endIndex}</strong> de{" "}
+              <strong className="font-semibold text-admin-text-main">{totalItems}</strong>{" "}
+              {totalItems === 1 ? "repuesto" : "repuestos"}
+            </span>
+
+            <div className="flex items-center gap-1.5">
+              <label htmlFor="admin-table-page-size" className="text-xs text-admin-text-sub">
+                Filas:
+              </label>
+              <select
+                id="admin-table-page-size"
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                data-testid="pagination-page-size-select"
+                aria-label="Filas por página"
+                className="h-8 rounded-md border border-admin-border bg-white px-2 py-1 text-xs font-medium text-admin-text-main shadow-2xs focus:border-industrial focus:outline-none cursor-pointer"
+              >
+                {pageSizeChoices.map((sizeOpt) => (
+                  <option key={sizeOpt} value={sizeOpt}>
+                    {sizeOpt}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-2 sm:justify-end">
+            <span
+              data-testid="pagination-page-indicator"
+              className="text-xs font-medium text-admin-text-sub mr-1"
+            >
+              Página <strong className="text-admin-text-main">{safeCurrentPage}</strong> de{" "}
+              <strong className="text-admin-text-main">{totalPages}</strong>
+            </span>
+
+            <div className="flex items-center gap-1.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={safeCurrentPage <= 1}
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                data-testid="pagination-prev-btn"
+                aria-label="Página anterior"
+                className="h-8 gap-1 px-2.5 text-xs font-medium border-admin-border bg-white text-admin-text-main hover:bg-slate-100 disabled:opacity-50 cursor-pointer"
+              >
+                <ChevronLeft className="size-3.5" />
+                <span>Anterior</span>
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={safeCurrentPage >= totalPages}
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                data-testid="pagination-next-btn"
+                aria-label="Página siguiente"
+                className="h-8 gap-1 px-2.5 text-xs font-medium border-admin-border bg-white text-admin-text-main hover:bg-slate-100 disabled:opacity-50 cursor-pointer"
+              >
+                <span>Siguiente</span>
+                <ChevronRight className="size-3.5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

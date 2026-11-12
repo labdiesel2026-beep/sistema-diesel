@@ -75,6 +75,7 @@ model Product {
   @@index([visible])
   @@index([visible, isFeatured])
   @@index([featuredAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
   @@map("products")
 }
 

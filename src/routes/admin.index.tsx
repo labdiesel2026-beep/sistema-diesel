@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { pageHead } from "@/components/diesel-site";
 import type { AdminProduct } from "@/types/admin";
 import { useAdmin } from "@/context/admin-context";
 import { ProductToolbar } from "@/components/admin/products/ProductToolbar";
-import { ProductList } from "@/components/admin/products/ProductList";
+import { ProductList, filterAdminProducts } from "@/components/admin/products/ProductList";
 import { ProductFormModal } from "@/components/admin/products/ProductFormModal";
 import { DeleteConfirmModal } from "@/components/admin/products/DeleteConfirmModal";
 
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/admin/")({
  * (RF-05, RF-06, RF-07)
  */
 function AdminProductsPage() {
-  const { products, getBrandById } = useAdmin();
+  const { products, brands, getBrandById } = useAdmin();
   const [searchQuery, setSearchQuery] = useState("");
   const [onlyFeatured, setOnlyFeatured] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -51,39 +51,51 @@ function AdminProductsPage() {
     setDeleteOpen(true);
   };
 
-  // Conteo de repuestos destacados en memoria
-  const featuredCount = products.filter((p) => p.isFeatured).length;
-
-  // Conteo reactivo de repuestos filtrados según término de búsqueda y filtros combinados (RF-04, CA-04.3)
-  const clean = searchQuery.trim().toLowerCase();
-  const filteredCount = products.filter((p) => {
-    if (onlyFeatured || selectedFeatured === "featured") {
-      if (!p.isFeatured) return false;
-    } else if (selectedFeatured === "standard") {
-      if (p.isFeatured) return false;
+  // Mapa indexado O(1) para resolución rápida de nombres de marcas (Fase 14 RF-04)
+  const brandNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (Array.isArray(brands)) {
+      for (const b of brands) {
+        map.set(b.id, b.name);
+      }
     }
+    return map;
+  }, [brands]);
 
-    if (selectedStatus === "visible" && !p.visible) return false;
-    if (selectedStatus === "hidden" && p.visible) return false;
-    if (selectedBrand && p.brandId !== selectedBrand) return false;
-    if (
-      selectedCategory &&
-      (!p.categoryIds || !p.categoryIds.includes(selectedCategory))
-    ) {
-      return false;
-    }
+  // Conteo memoizado de repuestos destacados en memoria
+  const featuredCount = useMemo(
+    () => products.filter((p) => p.isFeatured).length,
+    [products],
+  );
 
-    if (!clean) return true;
-    const brand = getBrandById(p.brandId);
-    const brandName = brand ? brand.name.toLowerCase() : "";
-    return (
-      p.name.toLowerCase().includes(clean) ||
-      p.oem.toLowerCase().includes(clean) ||
-      p.description.toLowerCase().includes(clean) ||
-      p.vehicleCompatibility.toLowerCase().includes(clean) ||
-      brandName.includes(clean)
-    );
-  }).length;
+  // Filtrado memoizado único compartido entre el contador de Toolbar y la tabla ProductList
+  const filteredProducts = useMemo(
+    () =>
+      filterAdminProducts(
+        products,
+        {
+          searchQuery,
+          onlyFeatured,
+          selectedCategory,
+          selectedBrand,
+          selectedStatus,
+          selectedFeatured,
+        },
+        (brandId) => brandNameMap.get(brandId) ?? getBrandById(brandId)?.name ?? "",
+      ),
+    [
+      products,
+      searchQuery,
+      onlyFeatured,
+      selectedCategory,
+      selectedBrand,
+      selectedStatus,
+      selectedFeatured,
+      brandNameMap,
+      getBrandById,
+    ],
+  );
+  const filteredCount = filteredProducts.length;
 
   return (
     <div className="space-y-6">
@@ -131,6 +143,7 @@ function AdminProductsPage() {
 
       {/* Grilla interactiva de repuestos con resolución relacional de marcas y switches de visibilidad */}
       <ProductList
+        preFilteredProducts={filteredProducts}
         searchQuery={searchQuery}
         onlyFeatured={onlyFeatured}
         selectedCategory={selectedCategory}

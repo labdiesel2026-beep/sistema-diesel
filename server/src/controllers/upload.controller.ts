@@ -22,8 +22,13 @@ export async function uploadProductImage(
       throw new AppError("No se proporcionó ningún archivo de imagen", 400);
     }
 
-    // 1. Sanitización y optimización en memoria con Sharp (CDR)
-    const sanitizedWebpBuffer = await sanitizeImageBuffer(req.file.buffer);
+    // 1. Si el middleware uploadSingleImage ya sanitizó el buffer en memoria (isSanitized),
+    // evitamos una segunda recodificación redundante con Sharp (Fase 14 RF-02).
+    // Si se invoca fuera del middleware, aplicamos sanitizeImageBuffer como fallback Zero Trust.
+    const fileWithFlag = req.file as Express.Multer.File & { isSanitized?: boolean };
+    const sanitizedWebpBuffer = fileWithFlag.isSanitized
+      ? req.file.buffer
+      : await sanitizeImageBuffer(req.file.buffer);
 
     // 2. Transmisión por stream desde el buffer a Cloudinary
     const imageUrl = await uploadStreamToCloudinary(sanitizedWebpBuffer, "products");

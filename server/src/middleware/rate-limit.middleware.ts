@@ -20,16 +20,18 @@ export const authRateLimiter = rateLimit({
   },
 });
 
+export const UPLOAD_RATE_LIMIT_MAX = 60;
+
 /**
  * Limitador dedicado para la tubería de carga de imágenes (/api/uploads/*).
- * (RF-04, 4.4, D-11)
+ * (RF-04, 4.4, D-11, Fase 14 RF-01)
  *
- * Máximo 10 cargas por ventana de 15 minutos por dirección IP.
- * Mitiga ataques de saturación de disco o Pixel Flood.
+ * Máximo 60 cargas por ventana de 15 minutos por dirección IP.
+ * Permite carga administrativa fluida de inventario mitigando ataques de saturación o Pixel Flood.
  */
 export const uploadRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  limit: 10,
+  limit: UPLOAD_RATE_LIMIT_MAX,
   standardHeaders: true,
   legacyHeaders: false,
   statusCode: 429,

@@ -56,12 +56,19 @@ export async function processSharpPipeline(fileBuffer: Buffer): Promise<{
   const filename = `${fileUuid}.webp`;
 
   let quality = 80;
-  let pipeline = sharp(fileBuffer)
-    .rotate()
-    .resize({ width: TARGET_MAX_WIDTH, withoutEnlargement: true })
-    .toColorspace("srgb");
+  const resizeOptions = {
+    width: TARGET_MAX_WIDTH,
+    height: TARGET_MAX_WIDTH,
+    fit: "inside" as const,
+    withoutEnlargement: true,
+  };
 
-  let outputBuffer = await pipeline.webp({ quality, effort: 6 }).toBuffer();
+  let outputBuffer = await sharp(fileBuffer)
+    .rotate()
+    .resize(resizeOptions)
+    .toColorspace("srgb")
+    .webp({ quality, effort: 4 })
+    .toBuffer();
 
   const qualitySteps = [65, 50, 35, 20];
   let stepIndex = 0;
@@ -69,9 +76,9 @@ export async function processSharpPipeline(fileBuffer: Buffer): Promise<{
     quality = qualitySteps[stepIndex]!;
     outputBuffer = await sharp(fileBuffer)
       .rotate()
-      .resize({ width: TARGET_MAX_WIDTH, withoutEnlargement: true })
+      .resize(resizeOptions)
       .toColorspace("srgb")
-      .webp({ quality, effort: 6 })
+      .webp({ quality, effort: 4 })
       .toBuffer();
     stepIndex++;
   }
@@ -172,6 +179,7 @@ export const uploadSingleImage = (req: Request, res: Response, next: NextFunctio
       req.file.size = buffer.length;
       req.file.mimetype = "image/webp";
       req.file.filename = filename;
+      (req.file as Express.Multer.File & { isSanitized?: boolean }).isSanitized = true;
       next();
     } catch {
       res.status(400).json({
